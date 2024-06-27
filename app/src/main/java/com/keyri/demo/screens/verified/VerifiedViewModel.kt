@@ -1,4 +1,4 @@
-package com.keyri.demo.screens.welcome
+package com.keyri.demo.screens.verified
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class WelcomeViewModel(private val dataStore: DataStore<Preferences>) : ViewModel() {
+class VerifiedViewModel(private val dataStore: DataStore<Preferences>) : ViewModel() {
 
     fun saveBiometricAuth() {
         viewModelScope.launch(Dispatchers.IO) {

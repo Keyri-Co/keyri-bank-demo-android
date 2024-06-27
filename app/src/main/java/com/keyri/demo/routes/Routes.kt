@@ -7,4 +7,6 @@ enum class Routes {
     VerifiedScreen,
     VerifyScreen,
     MainScreen,
+    MakePaymentScreen,
+    PaymentResultScreen,
 }

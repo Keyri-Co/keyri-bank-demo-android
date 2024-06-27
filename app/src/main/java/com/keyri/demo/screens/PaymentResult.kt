@@ -1,9 +1,11 @@
-package com.keyri.demo.screens.main
+package com.keyri.demo.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -12,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -19,34 +22,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.keyri.demo.R
 import com.keyri.demo.composables.KeyriButton
 import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.textColor
-import com.keyri.demo.ui.theme.verifiedTextColor
 import com.keyri.demo.ui.theme.warningTextColor
 
 @Composable
-fun MainScreen(navController: NavController) {
-    // TODO: Pass email and risk signals
-    val email by remember { mutableStateOf("saif@keyri.com") }
-    val riskSignals by remember { mutableStateOf(listOf("VPN")) }
-
+fun PaymentResult(navController: NavController, success: Boolean) {
     Column {
+        val riskSignals by remember { mutableStateOf(listOf("No Signals")) }
+
+        val mainText =
+            if (success) "Payment processing confirmed with biometrics and passwordless credential" else "Payment denied"
+
         Text(
             modifier = Modifier
                 .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 40.dp),
+                .padding(top = 80.dp)
+                .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
-            text = buildAnnotatedString {
-                append("Authenticated as\n")
-
-                withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                    append(email)
-                }
-            },
+            text = mainText,
             style = MaterialTheme.typography.headlineSmall,
             color = textColor
+        )
+
+        Image(
+            modifier = Modifier
+                .size(180.dp)
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 40.dp),
+            painter = painterResource(id = if (success) R.drawable.icon_check else R.drawable.icon_deny),
+            contentDescription = null
         )
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
@@ -119,24 +126,21 @@ fun MainScreen(navController: NavController) {
             )
         }
 
-        KeyriButton(
-            text = "Make payment",
-            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
-            onClick = {
-                navController.navigate(Routes.MakePaymentScreen.name)
-            })
-
-        KeyriButton(Modifier.padding(top = 28.dp),
-            containerColor = MaterialTheme.colorScheme.onPrimary,
-            text = "Log out",
-            onClick = {
-                // TODO: Add impl
-                // TODO: Replace with ext
-                navController.navigate(Routes.WelcomeScreen.name) {
-                    popUpTo(Routes.MainScreen.name) {
-                        inclusive = true
-                    }
-                }
-            })
+        if (success) {
+            KeyriButton(
+                Modifier.padding(top = 28.dp),
+                text = "Done",
+                containerColor = MaterialTheme.colorScheme.onPrimary,
+                onClick = {
+                    navController.popBackStack(route = Routes.MainScreen.name, inclusive = false)
+                })
+        } else {
+            KeyriButton(Modifier.padding(top = 28.dp),
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
+                text = "Cancel",
+                onClick = {
+                    navController.popBackStack(route = Routes.MainScreen.name, inclusive = false)
+                })
+        }
     }
 }

@@ -1,29 +1,24 @@
-package com.keyri.demo.screens
+package com.keyri.demo.screens.verified
 
-import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,9 +32,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.core.app.ActivityCompat.startActivityForResult
 import androidx.core.content.ContextCompat
-import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
 import com.keyri.demo.R
 import com.keyri.demo.composables.KeyriButton
@@ -47,15 +40,29 @@ import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.textColor
 import com.keyri.demo.ui.theme.verifiedTextColor
 import com.keyri.demo.utils.getActivity
+import com.keyri.demo.utils.navigateWithPopUp
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun VerifiedScreen(
+    viewModel: VerifiedViewModel = koinViewModel(),
     navController: NavHostController,
     isVerified: Boolean,
     email: String,
-    number: String? = null
+    number: String? = null,
+    onShowSnackbar: (String) -> Unit
 ) {
     Column {
+        val context = LocalContext.current
+
+        var showBiometricPrompt by remember { mutableStateOf(false) }
+
+        val launcher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult()
+        ) {
+            showBiometricPrompt = true
+        }
+
         Text(
             modifier = Modifier
                 .fillMaxWidth()
@@ -114,16 +121,6 @@ fun VerifiedScreen(
             contentDescription = null
         )
 
-        val context = LocalContext.current
-
-        val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
-        ) {
-            // TODO: If enrolled
-        }
-
-        var showBiometricPrompt by remember { mutableStateOf(false) }
-
         if (showBiometricPrompt) {
             val fragmentActivity = context.getActivity()
                 ?: throw IllegalArgumentException("Should be FragmentActivity")
@@ -137,22 +134,30 @@ fun VerifiedScreen(
                         errString: CharSequence
                     ) {
                         super.onAuthenticationError(errorCode, errString)
-                        // TODO: Dismiss and show error
-                        Log.e("Auth error", "error")
+                        showBiometricPrompt = false
+
+                        Log.e("KeyriDemo", "Biometric authentication failed")
+                        onShowSnackbar("Biometric authentication failed")
                     }
 
                     override fun onAuthenticationSucceeded(
                         result: BiometricPrompt.AuthenticationResult
                     ) {
                         super.onAuthenticationSucceeded(result)
-                        // TODO: Add it to prefs
-                        navController.navigate(Routes.MainScreen.name)
+                        showBiometricPrompt = false
+                        viewModel.saveBiometricAuth()
+                        navController.navigateWithPopUp(
+                            "${Routes.MainScreen.name}?email={$email}",
+                            Routes.WelcomeScreen.name
+                        )
                     }
 
                     override fun onAuthenticationFailed() {
                         super.onAuthenticationFailed()
-                        Log.e("Auth failed", "error")
-                        // TODO: Show and print error
+                        showBiometricPrompt = false
+
+                        Log.e("KeyriDemo", "Biometric authentication failed")
+                        onShowSnackbar("Biometric authentication failed")
                     }
                 }
             )
@@ -160,8 +165,7 @@ fun VerifiedScreen(
             val promptInfo = BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Set up")
                 .setSubtitle("biometric authentication")
-                .setAllowedAuthenticators(BIOMETRIC_STRONG or BIOMETRIC_WEAK)
-                .setNegativeButtonText("Cancel")
+                .setAllowedAuthenticators(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
                 .build()
 
             biometricPrompt.authenticate(promptInfo)
@@ -175,30 +179,32 @@ fun VerifiedScreen(
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
         ) {
             when (BiometricManager.from(context)
-                .canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)) {
+                .canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)) {
                 BiometricManager.BIOMETRIC_SUCCESS -> {
-                    Log.d("MY_APP_TAG", "App can authenticate using biometrics.")
-
+                    Log.d("KeyriDemo", "App can authenticate using biometrics.")
                     showBiometricPrompt = true
                 }
 
-                // TODO: Display errors
-                BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE ->
-                    Log.e("MY_APP_TAG", "No biometric features available on this device.")
-
-                BiometricManager.BIOMETRIC_ERROR_HW_UNAVAILABLE ->
-                    Log.e("MY_APP_TAG", "Biometric features are currently unavailable.")
-
                 BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                    // Prompts the user to create credentials that your app accepts.
-                    val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                        putExtra(
-                            Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                            BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-                        )
-                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
+                            putExtra(
+                                Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                                BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL
+                            )
+                        }
 
-                    launcher.launch(enrollIntent)
+                        showBiometricPrompt = false
+
+                        launcher.launch(enrollIntent)
+                    }
+                }
+
+                else -> {
+                    val message = "Biometric features are currently unavailable"
+
+                    Log.e("KeyriDemo", message)
+                    onShowSnackbar(message)
                 }
             }
         }

@@ -1,5 +1,6 @@
 package com.keyri.demo.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.keyri.demo.composables.KeyriButton
 import com.keyri.demo.composables.KeyriTextField
@@ -24,14 +26,11 @@ import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.primaryDisabled
 import com.keyri.demo.ui.theme.textColor
 import com.keyri.demo.ui.theme.textFieldUnfocusedColor
-import com.keyri.demo.utils.isValidEmail
-import com.keyri.demo.utils.isValidPhoneNumber
 
 @Composable
-fun SignupScreen(navController: NavHostController) {
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var mobile by remember { mutableStateOf("") }
+fun MakePayment(navController: NavHostController) {
+    var amount by remember { mutableStateOf<Float?>(null) }
+    var recipientInfo by remember { mutableStateOf("") }
 
     Column {
         Text(
@@ -40,62 +39,86 @@ fun SignupScreen(navController: NavHostController) {
                 .padding(top = 80.dp)
                 .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
-            text = "Provide your details below",
+            text = "Make payment",
             style = MaterialTheme.typography.headlineSmall,
             color = textColor
         )
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center,
+                text = "Enter dollar amount",
+                style = MaterialTheme.typography.bodySmall,
+                color = textColor
+            )
+
             KeyriTextField(
-                value = name,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp),
+                value = (amount ?: "").toString(),
                 placeholder = {
                     Text(
-                        text = "Name",
+                        text = "$0.00",
                         color = textFieldUnfocusedColor
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                onValueChange = { name = it }
+                onValueChange = { amount = it.toFloat() }
+            )
+
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp)
+                    .align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center,
+                text = "Enter recipient information",
+                style = MaterialTheme.typography.bodySmall,
+                color = textColor
             )
 
             KeyriTextField(
-                modifier = Modifier.padding(top = 20.dp),
-                value = email,
+                modifier = Modifier.padding(top = 5.dp),
+                value = recipientInfo,
                 placeholder = {
                     Text(
-                        text = "Email",
+                        text = "Name or id",
                         color = textFieldUnfocusedColor
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                onValueChange = { email = it },
-            )
-
-            KeyriTextField(
-                modifier = Modifier.padding(top = 20.dp),
-                value = mobile,
-                placeholder = {
-                    Text(
-                        text = "+1 (---) --- - ----",
-                        color = textFieldUnfocusedColor
-                    )
-                },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                onValueChange = {
-                    mobile = it
-                },
+                onValueChange = { recipientInfo = it },
             )
         }
 
         KeyriButton(modifier = Modifier.padding(top = 28.dp),
-            enabled = name.length > 2 && email.isValidEmail() && mobile.isEmpty() or mobile.isValidPhoneNumber(),
+            enabled = (amount?.takeIf { !it.isNaN() } ?: 0F) > 0F && recipientInfo.isNotEmpty(),
             disabledTextColor = primaryDisabled,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
             disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
             disabledBorderColor = primaryDisabled,
-            text = "Continue",
+            text = "Confirm",
             onClick = {
-                navController.navigate("${Routes.VerifyScreen.name}?email=$email&number=$mobile")
+                navController.navigate("${Routes.PaymentResultScreen.name}?success=true") // TODO: Based on event result
             })
+
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 28.dp)
+                .align(Alignment.CenterHorizontally)
+                .clickable {
+                    navController.popBackStack()
+                },
+            textAlign = TextAlign.Center,
+            text = "Cancel",
+            style = MaterialTheme.typography.headlineSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 14.sp
+        )
     }
 }

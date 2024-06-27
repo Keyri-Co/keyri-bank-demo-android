@@ -1,4 +1,4 @@
-package com.keyri.demo.screens
+package com.keyri.demo.screens.verify
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,18 +20,17 @@ import com.keyri.demo.composables.KeyriButton
 import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.primaryDisabled
 import com.keyri.demo.ui.theme.textColor
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun VerifyScreen(
+    viewModel: VerifyViewModel = koinViewModel(),
     navController: NavHostController,
     isVerify: Boolean,
     email: String,
     number: String? = null
 ) {
     Column {
-        // TODO: Fix back button
-//        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-
         Text(
             modifier = Modifier
                 .fillMaxWidth()
@@ -60,6 +59,8 @@ fun VerifyScreen(
                 color = textColor
             )
 
+            // TODO: Add loader to this button to await verify process
+
             KeyriButton(modifier = Modifier.padding(top = 20.dp),
                 disabledTextColor = primaryDisabled,
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
@@ -67,7 +68,8 @@ fun VerifyScreen(
                 disabledBorderColor = primaryDisabled,
                 text = "${if (isVerify) "Verify" else "Confirm"} email",
                 onClick = {
-                    navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number")
+                    viewModel.sendEvent(email)
+                    navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=$isVerify")
                 })
 
             Text(
@@ -87,6 +89,8 @@ fun VerifyScreen(
                 color = textColor
             )
 
+            // TODO: Add loader to this button to await verify process
+
             KeyriButton(modifier = Modifier.padding(top = 20.dp),
                 enabled = number != null,
                 disabledTextColor = primaryDisabled,
@@ -95,6 +99,7 @@ fun VerifyScreen(
                 disabledBorderColor = primaryDisabled,
                 text = "${if (isVerify) "Verify" else "Confirm"} phone number",
                 onClick = {
+                    viewModel.sendEvent(email)
                     navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number")
                 })
 
@@ -115,6 +120,8 @@ fun VerifyScreen(
                 color = textColor
             )
 
+            // TODO: Add loader to this button to await verify process
+
             KeyriButton(modifier = Modifier.padding(top = 20.dp),
                 enabled = number != null,
                 disabledTextColor = primaryDisabled,
@@ -123,6 +130,7 @@ fun VerifyScreen(
                 disabledBorderColor = primaryDisabled,
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
+                    viewModel.sendEvent(email)
                     navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=$isVerify")
                 })
         }
