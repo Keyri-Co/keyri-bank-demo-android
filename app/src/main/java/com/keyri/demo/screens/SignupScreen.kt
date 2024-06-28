@@ -95,7 +95,7 @@ fun SignupScreen(navController: NavHostController) {
             disabledBorderColor = primaryDisabled,
             text = "Continue",
             onClick = {
-                navController.navigate("${Routes.VerifyScreen.name}?email=$email&number=$mobile")
+                navController.navigate("${Routes.VerifyScreen.name}?email=$email&number=$mobile&isVerify=true")
             })
     }
 }

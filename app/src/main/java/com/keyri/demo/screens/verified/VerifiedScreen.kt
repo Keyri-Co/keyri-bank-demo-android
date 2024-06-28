@@ -1,16 +1,5 @@
 package com.keyri.demo.screens.verified
 
-import android.content.Intent
-import android.os.Build
-import android.provider.Settings
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
-import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
-import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -32,14 +21,13 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.keyri.demo.R
+import com.keyri.demo.composables.BiometricAuth
 import com.keyri.demo.composables.KeyriButton
 import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.textColor
 import com.keyri.demo.ui.theme.verifiedTextColor
-import com.keyri.demo.utils.getActivity
 import com.keyri.demo.utils.navigateWithPopUp
 import org.koin.androidx.compose.koinViewModel
 
@@ -54,14 +42,7 @@ fun VerifiedScreen(
 ) {
     Column {
         val context = LocalContext.current
-
         var showBiometricPrompt by remember { mutableStateOf(false) }
-
-        val launcher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.StartActivityForResult()
-        ) {
-            showBiometricPrompt = true
-        }
 
         Text(
             modifier = Modifier
@@ -122,53 +103,18 @@ fun VerifiedScreen(
         )
 
         if (showBiometricPrompt) {
-            val fragmentActivity = context.getActivity()
-                ?: throw IllegalArgumentException("Should be FragmentActivity")
-            val executor = ContextCompat.getMainExecutor(fragmentActivity)
-            val biometricPrompt = BiometricPrompt(
-                fragmentActivity,
-                executor,
-                object : BiometricPrompt.AuthenticationCallback() {
-                    override fun onAuthenticationError(
-                        errorCode: Int,
-                        errString: CharSequence
-                    ) {
-                        super.onAuthenticationError(errorCode, errString)
-                        showBiometricPrompt = false
+            BiometricAuth(context, "Set up Biometric authentication", null, {
+                onShowSnackbar(it)
+            }, { showBiometricPrompt = false }) {
+                showBiometricPrompt = false
 
-                        Log.e("KeyriDemo", "Biometric authentication failed")
-                        onShowSnackbar("Biometric authentication failed")
-                    }
-
-                    override fun onAuthenticationSucceeded(
-                        result: BiometricPrompt.AuthenticationResult
-                    ) {
-                        super.onAuthenticationSucceeded(result)
-                        showBiometricPrompt = false
-                        viewModel.saveBiometricAuth()
-                        navController.navigateWithPopUp(
-                            "${Routes.MainScreen.name}?email={$email}",
-                            Routes.WelcomeScreen.name
-                        )
-                    }
-
-                    override fun onAuthenticationFailed() {
-                        super.onAuthenticationFailed()
-                        showBiometricPrompt = false
-
-                        Log.e("KeyriDemo", "Biometric authentication failed")
-                        onShowSnackbar("Biometric authentication failed")
-                    }
+                viewModel.saveBiometricAuth(email) {
+                    navController.navigateWithPopUp(
+                        "${Routes.MainScreen.name}?email={$email}",
+                        Routes.WelcomeScreen.name
+                    )
                 }
-            )
-
-            val promptInfo = BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Set up")
-                .setSubtitle("biometric authentication")
-                .setAllowedAuthenticators(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
-                .build()
-
-            biometricPrompt.authenticate(promptInfo)
+            }
         }
 
         KeyriButton(
@@ -178,35 +124,7 @@ fun VerifiedScreen(
             text = "Set up biometric authentication",
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
         ) {
-            when (BiometricManager.from(context)
-                .canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)) {
-                BiometricManager.BIOMETRIC_SUCCESS -> {
-                    Log.d("KeyriDemo", "App can authenticate using biometrics.")
-                    showBiometricPrompt = true
-                }
-
-                BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        val enrollIntent = Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                            putExtra(
-                                Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                                BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL
-                            )
-                        }
-
-                        showBiometricPrompt = false
-
-                        launcher.launch(enrollIntent)
-                    }
-                }
-
-                else -> {
-                    val message = "Biometric features are currently unavailable"
-
-                    Log.e("KeyriDemo", message)
-                    onShowSnackbar(message)
-                }
-            }
+            showBiometricPrompt = true
         }
     }
 }

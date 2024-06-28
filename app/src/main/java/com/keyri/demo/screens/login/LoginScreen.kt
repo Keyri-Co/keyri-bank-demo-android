@@ -1,4 +1,4 @@
-package com.keyri.demo.screens
+package com.keyri.demo.screens.login
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -26,9 +26,10 @@ import com.keyri.demo.ui.theme.primaryDisabled
 import com.keyri.demo.ui.theme.textColor
 import com.keyri.demo.ui.theme.textFieldUnfocusedColor
 import com.keyri.demo.utils.isValidEmail
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun LoginScreen(viewModel: LoginViewModel = koinViewModel(), navController: NavController) {
     var email by remember { mutableStateOf("") }
 
     Column {
@@ -77,7 +78,9 @@ fun LoginScreen(navController: NavController) {
             disabledBorderColor = primaryDisabled,
             text = "Confirm",
             onClick = {
-                navController.navigate("${Routes.VerifiedScreen.name}?email=$email&isVerified=false")
+                viewModel.sendEvent(email) {
+                    navController.navigate("${Routes.VerifiedScreen.name}?email=$email&isVerified=false")
+                }
             })
 
         Text(

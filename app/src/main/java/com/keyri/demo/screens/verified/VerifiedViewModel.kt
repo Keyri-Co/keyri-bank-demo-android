@@ -9,18 +9,21 @@ import kotlinx.coroutines.launch
 
 class VerifiedViewModel(private val dataStore: DataStore<KeyriProfiles>) : ViewModel() {
 
-    fun saveBiometricAuth() {
+    fun saveBiometricAuth(currentProfile: String, onDone: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO) {
             dataStore.updateData { keyriProfiles ->
                 val mappedProfiles = keyriProfiles.profiles.map {
-                    if (keyriProfiles.currentProfile == it.name) {
+                    if (currentProfile == it.name) {
                         it.copy(biometricAuthEnabled = true)
                     } else {
                         it
                     }
                 }
 
-                keyriProfiles.copy(profiles = mappedProfiles)
+                keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
+                    .apply {
+                        onDone()
+                    }
             }
         }
     }

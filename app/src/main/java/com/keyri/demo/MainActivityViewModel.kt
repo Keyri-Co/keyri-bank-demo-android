@@ -12,8 +12,12 @@ import kotlinx.coroutines.launch
 
 class MainActivityViewModel(private val dataStore: DataStore<KeyriProfiles>) : ViewModel() {
 
-    private val _keyriAccounts = MutableStateFlow<KeyriProfiles?>(null)
+    private val _keyriAccounts = MutableStateFlow(KeyriProfiles(null, emptyList()))
     val keyriAccounts = _keyriAccounts.asStateFlow()
+
+    init {
+        checkKeyriAccounts()
+    }
 
     fun checkKeyriAccounts() {
         viewModelScope.launch(Dispatchers.IO) {

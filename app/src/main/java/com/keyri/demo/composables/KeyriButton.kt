@@ -46,10 +46,11 @@ fun KeyriButton(
         onClick = onClick,
     ) {
         Text(
-            modifier = Modifier.weight(1F),
             text = text,
             color = if (enabled) textColor else disabledTextColor
         )
+
+        // TODO: Fix size
 
         if (progress) {
             CircularProgressIndicator(color = textColor)

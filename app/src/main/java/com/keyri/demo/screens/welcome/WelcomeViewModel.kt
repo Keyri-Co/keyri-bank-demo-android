@@ -11,18 +11,18 @@ import kotlinx.coroutines.launch
 class WelcomeViewModel(private val dataStore: DataStore<KeyriProfiles>, private val keyri: Keyri) :
     ViewModel() {
 
-    fun saveBiometricAuth() {
+    fun setCurrentProfile(currentProfile: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             dataStore.updateData { keyriProfiles ->
                 val mappedProfiles = keyriProfiles.profiles.map {
-                    if (keyriProfiles.currentProfile == it.name) {
+                    if (currentProfile == it.name) {
                         it.copy(biometricAuthEnabled = true)
                     } else {
                         it
                     }
                 }
 
-                keyriProfiles.copy(profiles = mappedProfiles)
+                keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
             }
         }
     }

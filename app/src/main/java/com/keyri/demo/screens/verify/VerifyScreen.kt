@@ -20,12 +20,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.keyri.demo.composables.KeyriButton
 import com.keyri.demo.data.VerifyType
 import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.primaryDisabled
 import com.keyri.demo.ui.theme.textColor
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.concurrent.timer
@@ -35,11 +37,11 @@ fun VerifyScreen(
     viewModel: VerifyViewModel = koinViewModel(),
     navController: NavHostController,
     isVerify: Boolean,
-    email: String, // TODO: Set to null, if not verify but confirm - open login screen
+    email: String? = null,
     number: String? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var verifyTriple by remember { mutableStateOf<VerifyType?>(null) }
+    var verifyType by remember { mutableStateOf<VerifyType?>(null) }
 
     Column {
         Text(
@@ -76,19 +78,11 @@ fun VerifyScreen(
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
                 text = "${if (isVerify) "Verify" else "Confirm"} email",
-                progress = verifyTriple == VerifyType.EMAIL,
+                progress = verifyType == VerifyType.EMAIL,
                 onClick = {
-                    if (verifyTriple == null) {
-                        verifyTriple = VerifyType.EMAIL
-
-                        coroutineScope.launch {
-                            kotlin.concurrent.timer(period = 3L) {
-                                cancel()
-
-                                viewModel.sendEvent(email)
-                                navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=$isVerify")
-                            }
-                        }
+                    if (verifyType == null) {
+                        verifyType = VerifyType.EMAIL
+                        startEventTimer(coroutineScope, isVerify, viewModel, email, number, navController)
                     }
                 })
 
@@ -115,20 +109,12 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                progress = verifyTriple == VerifyType.NUMBER,
+                progress = verifyType == VerifyType.NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} phone number",
                 onClick = {
-                    if (verifyTriple == null) {
-                        verifyTriple = VerifyType.NUMBER
-
-                        coroutineScope.launch {
-                            kotlin.concurrent.timer(period = 3L) {
-                                cancel()
-
-                                viewModel.sendEvent(email)
-                                navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=$isVerify")
-                            }
-                        }
+                    if (verifyType == null) {
+                        verifyType = VerifyType.NUMBER
+                        startEventTimer(coroutineScope, isVerify, viewModel, email, number, navController)
                     }
                 })
 
@@ -155,22 +141,37 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                progress = verifyTriple == VerifyType.EMAIL_NUMBER,
+                progress = verifyType == VerifyType.EMAIL_NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
-                    if (verifyTriple == null) {
-                        verifyTriple = VerifyType.EMAIL_NUMBER
-
-                        coroutineScope.launch {
-                            kotlin.concurrent.timer(period = 3L) {
-                                cancel()
-
-                                viewModel.sendEvent(email)
-                                navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=$isVerify")
-                            }
-                        }
+                    if (verifyType == null) {
+                        verifyType = VerifyType.EMAIL_NUMBER
+                        startEventTimer(coroutineScope, isVerify, viewModel, email, number, navController)
                     }
                 })
+        }
+    }
+}
+
+private fun startEventTimer(
+    coroutineScope: CoroutineScope,
+    isVerify: Boolean,
+    viewModel: VerifyViewModel,
+    email: String?,
+    number: String?,
+    navController: NavController
+) {
+    coroutineScope.launch {
+        timer(period = 3L) {
+            if (isVerify) {
+                viewModel.sendEvent(email) {
+                    navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=true")
+                    cancel()
+                }
+            } else {
+                navController.navigate(Routes.LoginScreen.name)
+                cancel()
+            }
         }
     }
 }

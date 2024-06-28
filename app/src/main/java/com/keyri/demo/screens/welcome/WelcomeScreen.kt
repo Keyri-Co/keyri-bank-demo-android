@@ -1,19 +1,9 @@
 package com.keyri.demo.screens.welcome
 
 import android.content.Context
-import android.content.Intent
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
-import android.provider.Settings
-import android.util.Log
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
-import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
-import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
-import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -33,6 +23,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,14 +34,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.keyri.demo.R
+import com.keyri.demo.composables.BiometricAuth
 import com.keyri.demo.composables.KeyriButton
 import com.keyri.demo.data.KeyriProfiles
 import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.textColor
-import com.keyri.demo.utils.getActivity
 import com.keyri.demo.utils.navigateWithPopUp
 import org.koin.androidx.compose.koinViewModel
 
@@ -63,19 +53,11 @@ fun WelcomeScreen(
     onShowSnackbar: (String) -> Unit,
     onAccountsRemoved: () -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState()
-    var showAccountsList by remember { mutableStateOf(false) }
-
     val context = LocalContext.current
-
+    val sheetState = rememberModalBottomSheetState()
+    val accountsNumber by remember { mutableIntStateOf(keyriAccounts?.profiles?.size ?: 0) }
+    var showAccountsList by remember { mutableStateOf(false) }
     var showBiometricPrompt by remember { mutableStateOf(false) }
-
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) {
-        showBiometricPrompt = true
-    }
-
     var clickedAccount by remember { mutableStateOf<String?>(null) }
 
     Column {
@@ -100,9 +82,7 @@ fun WelcomeScreen(
                     .size(130.dp, 62.dp)
                     .align(Alignment.Center)
                     .combinedClickable(
-                        onClick = {
-                            // Do nothing
-                        },
+                        onClick = {},
                         onLongClick = {
                             viewModel.removeAllAccounts {
                                 onAccountsRemoved()
@@ -137,12 +117,13 @@ fun WelcomeScreen(
         }
 
         KeyriButton(Modifier, text = "Log in", containerColor = containerColors.first, onClick = {
-            // TODO: If one account -> show biometric prompt to login into this account
-            if (keyriAccounts.isNotEmpty()) {
+            if (accountsNumber == 1) {
+                showBiometricPrompt = true
+            } else if (accountsNumber > 1) {
                 showAccountsList = true
             } else {
-                navController.navigate(Routes.LoginScreen.name)
-//                navController.navigate("${Routes.VerifyScreen.name}?email=$email&number=$mobile&isVerify=false")
+                // TODO: Fix crashes
+                navController.navigate("${Routes.VerifyScreen.name}?email=null&number=null&isVerify=false")
             }
         })
 
@@ -154,56 +135,24 @@ fun WelcomeScreen(
             })
     }
 
+    val promptInfo = if (accountsNumber == 1) {
+        "Use Biometric to login as" to keyriAccounts?.profiles?.first()?.email
+    } else {
+        "Use Biometric to login" to null
+    }
+
     if (showBiometricPrompt) {
-        val fragmentActivity = context.getActivity()
-            ?: throw IllegalArgumentException("Should be FragmentActivity")
-        val executor = ContextCompat.getMainExecutor(fragmentActivity)
-        val biometricPrompt = BiometricPrompt(
-            fragmentActivity,
-            executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(
-                    errorCode: Int,
-                    errString: CharSequence
-                ) {
-                    super.onAuthenticationError(errorCode, errString)
-                    showBiometricPrompt = false
+        BiometricAuth(context, promptInfo.first, promptInfo.second, {
+            onShowSnackbar(it)
+        }, { showBiometricPrompt = false }) {
+            viewModel.setCurrentProfile(clickedAccount ?: keyriAccounts?.profiles?.first()?.email)
 
-                    Log.e("KeyriDemo", "Biometric authentication failed")
-                    onShowSnackbar("Biometric authentication failed")
-                }
-
-                override fun onAuthenticationSucceeded(
-                    result: BiometricPrompt.AuthenticationResult
-                ) {
-                    super.onAuthenticationSucceeded(result)
-                    showBiometricPrompt = false
-                    viewModel.saveBiometricAuth()
-
-                    // TODO: Add impl (enter email screen)
-                    navController.navigateWithPopUp(
-                        Routes.MainScreen.name,
-                        Routes.WelcomeScreen.name
-                    )
-                }
-
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    showBiometricPrompt = false
-
-                    Log.e("KeyriDemo", "Biometric authentication failed")
-                    onShowSnackbar("Biometric authentication failed")
-                }
-            }
-        )
-
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Set up")
-            .setSubtitle("biometric authentication")
-            .setAllowedAuthenticators(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
-            .build()
-
-        biometricPrompt.authenticate(promptInfo)
+            navController.navigateWithPopUp(
+                Routes.MainScreen.name,
+                Routes.WelcomeScreen.name
+            )
+            showBiometricPrompt = false
+        }
     }
 
     if (showAccountsList) {
@@ -227,41 +176,8 @@ fun WelcomeScreen(
                         Column(modifier = Modifier
                             .wrapContentHeight()
                             .clickable {
-                                when (BiometricManager
-                                    .from(context)
-                                    .canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)) {
-                                    BiometricManager.BIOMETRIC_SUCCESS -> {
-                                        Log.d(
-                                            "KeyriDemo",
-                                            "App can authenticate using biometrics."
-                                        )
-                                        showBiometricPrompt = true
-                                        clickedAccount = it
-                                    }
-
-                                    BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                                            val enrollIntent =
-                                                Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                                                    putExtra(
-                                                        Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                                                        BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL
-                                                    )
-                                                }
-
-                                            showBiometricPrompt = false
-
-                                            launcher.launch(enrollIntent)
-                                        }
-                                    }
-
-                                    else -> {
-                                        val message = "Biometric features are currently unavailable"
-
-                                        Log.e("KeyriDemo", message)
-                                        onShowSnackbar(message)
-                                    }
-                                }
+                                showBiometricPrompt = true
+                                clickedAccount = it
                             }) {
                             Text(
                                 textAlign = TextAlign.Center,

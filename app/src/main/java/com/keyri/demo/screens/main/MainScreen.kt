@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,8 +29,8 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: NavController) {
-    // TODO: Pass email and risk signals
-    val email by remember { mutableStateOf("saif@keyri.com") }
+    val currentProfile = viewModel.currentProfile.collectAsState()
+
     val riskSignals by remember { mutableStateOf(listOf("VPN")) }
 
     Column {
@@ -43,7 +44,7 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
                 append("Authenticated as\n")
 
                 withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                    append(email)
+                    append(currentProfile.value?.email)
                 }
             },
             style = MaterialTheme.typography.headlineSmall,
@@ -132,15 +133,10 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
             text = "Log out",
             onClick = {
                 viewModel.logout {
-
-                }
-
-                // TODO: Add impl
-
-
-                navController.navigate(Routes.WelcomeScreen.name) {
-                    popUpTo(Routes.MainScreen.name) {
-                        inclusive = true
+                    navController.navigate(Routes.WelcomeScreen.name) {
+                        popUpTo(Routes.MainScreen.name) {
+                            inclusive = true
+                        }
                     }
                 }
             })

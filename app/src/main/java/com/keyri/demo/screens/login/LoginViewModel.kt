@@ -1,4 +1,4 @@
-package com.keyri.demo.screens.verify
+package com.keyri.demo.screens.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,7 +7,7 @@ import com.keyrico.keyrisdk.sec.fraud.event.EventType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class VerifyViewModel(private val keyri: Keyri) : ViewModel() {
+class LoginViewModel(private val keyri: Keyri) : ViewModel() {
 
     fun sendEvent(email: String?, onSent: () -> Unit) {
         if (email == null) return
@@ -17,7 +17,7 @@ class VerifyViewModel(private val keyri: Keyri) : ViewModel() {
                 keyri.generateAssociationKey(email)
             }
 
-            keyri.sendEvent(email, EventType.signup(), true)
+            keyri.sendEvent(email, EventType.login(), true)
             onSent()
         }
     }
