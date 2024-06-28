@@ -7,6 +7,7 @@ import com.keyri.demo.data.KeyriProfiles
 import com.keyrico.keyrisdk.Keyri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class WelcomeViewModel(private val dataStore: DataStore<KeyriProfiles>, private val keyri: Keyri) :
     ViewModel() {
@@ -38,7 +39,9 @@ class WelcomeViewModel(private val dataStore: DataStore<KeyriProfiles>, private 
                     keyriProfiles.copy(currentProfile = null, profiles = listOf())
                 }
 
-                callback()
+                withContext(Dispatchers.Main) {
+                    callback()
+                }
             }
         }
     }

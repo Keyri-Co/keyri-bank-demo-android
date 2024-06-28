@@ -13,6 +13,7 @@ import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -85,38 +86,40 @@ fun BiometricAuth(
         biometricPrompt.authenticate(promptInfoBuilder)
     }
 
-    when (BiometricManager
-        .from(context)
-        .canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)) {
-        BiometricManager.BIOMETRIC_SUCCESS -> {
-            Log.d(
-                "KeyriDemo",
-                "App can authenticate using biometrics."
-            )
-            showBiometricPrompt = true
-        }
-
-        BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                val enrollIntent =
-                    Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
-                        putExtra(
-                            Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                            BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL
-                        )
-                    }
-
-                showBiometricPrompt = false
-
-                launcher.launch(enrollIntent)
+    LaunchedEffect(biometricPromptTitle) {
+        when (BiometricManager
+            .from(context)
+            .canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)) {
+            BiometricManager.BIOMETRIC_SUCCESS -> {
+                Log.d(
+                    "KeyriDemo",
+                    "App can authenticate using biometrics."
+                )
+                showBiometricPrompt = true
             }
-        }
 
-        else -> {
-            val message = "Biometric features are currently unavailable"
+            BiometricManager.BIOMETRIC_ERROR_NONE_ENROLLED -> {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    val enrollIntent =
+                        Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
+                            putExtra(
+                                Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
+                                BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL
+                            )
+                        }
 
-            Log.e("KeyriDemo", message)
-            onShowSnackbar(message)
+                    showBiometricPrompt = false
+
+                    launcher.launch(enrollIntent)
+                }
+            }
+
+            else -> {
+                val message = "Biometric features are currently unavailable"
+
+                Log.e("KeyriDemo", message)
+                onShowSnackbar(message)
+            }
         }
     }
 }

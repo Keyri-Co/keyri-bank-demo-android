@@ -6,6 +6,7 @@ import com.keyrico.keyrisdk.Keyri
 import com.keyrico.keyrisdk.sec.fraud.event.EventType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class LoginViewModel(private val keyri: Keyri) : ViewModel() {
 
@@ -18,7 +19,9 @@ class LoginViewModel(private val keyri: Keyri) : ViewModel() {
             }
 
             keyri.sendEvent(email, EventType.login(), true)
-            onSent()
+            withContext(Dispatchers.Main) {
+                onSent()
+            }
         }
     }
 }

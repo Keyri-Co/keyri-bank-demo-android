@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
 class MakePaymentViewModel(
@@ -26,7 +27,9 @@ class MakePaymentViewModel(
                             put("recipient", recipient)
                             put("amount", amount)
                         }), true)
-                    result(eventResult.isSuccess)
+                    withContext(Dispatchers.Main) {
+                        result(eventResult.isSuccess)
+                    }
                 }
         }
     }

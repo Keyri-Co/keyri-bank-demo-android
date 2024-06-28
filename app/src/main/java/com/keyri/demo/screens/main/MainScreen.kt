@@ -43,8 +43,10 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
             text = buildAnnotatedString {
                 append("Authenticated as\n")
 
+                // TODO: Fix current profile is null?
+
                 withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                    append(currentProfile.value?.email)
+                    append(currentProfile.value)
                 }
             },
             style = MaterialTheme.typography.headlineSmall,
@@ -132,6 +134,7 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
             containerColor = MaterialTheme.colorScheme.onPrimary,
             text = "Log out",
             onClick = {
+                // TODO: On logout need to show dialog to confirm this action
                 viewModel.logout {
                     navController.navigate(Routes.WelcomeScreen.name) {
                         popUpTo(Routes.MainScreen.name) {

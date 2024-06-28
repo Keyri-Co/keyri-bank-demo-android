@@ -71,7 +71,7 @@ fun MakePayment(
                         color = textFieldUnfocusedColor
                     )
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 onValueChange = { amount = it.toFloatOrNull() ?: 0F }
             )
 
@@ -109,7 +109,7 @@ fun MakePayment(
             text = "Confirm",
             onClick = {
                 viewModel.performMakePaymentEvent(recipientInfo, amount) { success ->
-                    navController.navigate("${Routes.PaymentResultScreen.name}?success={$success}")
+                    navController.navigate("${Routes.PaymentResultScreen.name}?success=$success")
                 }
             })
 

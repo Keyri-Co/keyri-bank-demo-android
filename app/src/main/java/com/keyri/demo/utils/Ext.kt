@@ -43,9 +43,9 @@ val Context.keyriProfilesDataStore: DataStore<KeyriProfiles> by dataStore(
 object KeyriProfilesSerializer : Serializer<KeyriProfiles> {
     override val defaultValue: KeyriProfiles = KeyriProfiles(null, listOf())
 
-    override suspend fun readFrom(input: InputStream): KeyriProfiles {
+    override suspend fun readFrom(input: InputStream): KeyriProfiles = withContext(Dispatchers.IO) {
         try {
-            return Json.decodeFromString<KeyriProfiles>(input.readBytes().decodeToString())
+            Json.decodeFromString<KeyriProfiles>(input.readBytes().decodeToString())
         } catch (serialization: SerializationException) {
             throw CorruptionException("Unable to read Settings", serialization)
         }

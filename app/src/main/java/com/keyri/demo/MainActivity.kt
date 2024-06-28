@@ -135,7 +135,7 @@ class MainActivity : FragmentActivity() {
                                 "${Routes.VerifyScreen.name}?email={email}&number={number}&isVerify={isVerify}",
                                 arguments = listOf(navArgument("email") {
                                     type = NavType.StringType
-                                    nullable = false
+                                    nullable = true
                                 }, navArgument("number") {
                                     type = NavType.StringType
                                     nullable = true
@@ -144,7 +144,6 @@ class MainActivity : FragmentActivity() {
                                 })
                             ) { backStackEntry ->
                                 val email = backStackEntry.arguments?.getString("email")
-                                    ?: throw IllegalStateException("Email shouldn't be null")
                                 val number = backStackEntry.arguments?.getString("number")
                                     ?.takeIf { it.isNotEmpty() }
                                 val isVerify =

@@ -49,7 +49,7 @@ import org.koin.androidx.compose.koinViewModel
 fun WelcomeScreen(
     viewModel: WelcomeViewModel = koinViewModel(),
     navController: NavHostController,
-    keyriAccounts: KeyriProfiles?,
+    keyriAccounts: KeyriProfiles?, // TODO: Remove here and get actual accounts from viewModel?
     onShowSnackbar: (String) -> Unit,
     onAccountsRemoved: () -> Unit
 ) {
@@ -59,6 +59,8 @@ fun WelcomeScreen(
     var showAccountsList by remember { mutableStateOf(false) }
     var showBiometricPrompt by remember { mutableStateOf(false) }
     var clickedAccount by remember { mutableStateOf<String?>(null) }
+
+    // TODO: Do not show biometric prompt when opening MainScreen! -> maybe move prompt to Welcome screen?
 
     Column {
         Text(
@@ -122,7 +124,6 @@ fun WelcomeScreen(
             } else if (accountsNumber > 1) {
                 showAccountsList = true
             } else {
-                // TODO: Fix crashes
                 navController.navigate("${Routes.VerifyScreen.name}?email=null&number=null&isVerify=false")
             }
         })

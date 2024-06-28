@@ -28,6 +28,7 @@ import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.primaryDisabled
 import com.keyri.demo.ui.theme.textColor
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.concurrent.timer
@@ -82,7 +83,14 @@ fun VerifyScreen(
                 onClick = {
                     if (verifyType == null) {
                         verifyType = VerifyType.EMAIL
-                        startEventTimer(coroutineScope, isVerify, viewModel, email, number, navController)
+                        startEventTimer(
+                            coroutineScope,
+                            isVerify,
+                            viewModel,
+                            email,
+                            number,
+                            navController
+                        )
                     }
                 })
 
@@ -114,7 +122,14 @@ fun VerifyScreen(
                 onClick = {
                     if (verifyType == null) {
                         verifyType = VerifyType.NUMBER
-                        startEventTimer(coroutineScope, isVerify, viewModel, email, number, navController)
+                        startEventTimer(
+                            coroutineScope,
+                            isVerify,
+                            viewModel,
+                            email,
+                            number,
+                            navController
+                        )
                     }
                 })
 
@@ -146,7 +161,14 @@ fun VerifyScreen(
                 onClick = {
                     if (verifyType == null) {
                         verifyType = VerifyType.EMAIL_NUMBER
-                        startEventTimer(coroutineScope, isVerify, viewModel, email, number, navController)
+                        startEventTimer(
+                            coroutineScope,
+                            isVerify,
+                            viewModel,
+                            email,
+                            number,
+                            navController
+                        )
                     }
                 })
         }
@@ -161,16 +183,18 @@ private fun startEventTimer(
     number: String?,
     navController: NavController
 ) {
-    coroutineScope.launch {
-        timer(period = 3L) {
+    coroutineScope.launch(Dispatchers.IO) {
+        timer(initialDelay = 2_000L, period = 1_000L) {
             if (isVerify) {
+                cancel()
                 viewModel.sendEvent(email) {
                     navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=true")
-                    cancel()
                 }
             } else {
-                navController.navigate(Routes.LoginScreen.name)
                 cancel()
+                coroutineScope.launch(Dispatchers.Main) {
+                    navController.navigate(Routes.LoginScreen.name)
+                }
             }
         }
     }

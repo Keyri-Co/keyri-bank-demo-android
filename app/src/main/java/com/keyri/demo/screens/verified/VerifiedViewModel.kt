@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.keyri.demo.data.KeyriProfiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class VerifiedViewModel(private val dataStore: DataStore<KeyriProfiles>) : ViewModel() {
 
@@ -22,7 +23,9 @@ class VerifiedViewModel(private val dataStore: DataStore<KeyriProfiles>) : ViewM
 
                 keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
                     .apply {
-                        onDone()
+                        withContext(Dispatchers.Main) {
+                            onDone()
+                        }
                     }
             }
         }
