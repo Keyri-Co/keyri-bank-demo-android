@@ -24,9 +24,10 @@ import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.textColor
 import com.keyri.demo.ui.theme.verifiedTextColor
 import com.keyri.demo.ui.theme.warningTextColor
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun MainScreen(navController: NavController) {
+fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: NavController) {
     // TODO: Pass email and risk signals
     val email by remember { mutableStateOf("saif@keyri.com") }
     val riskSignals by remember { mutableStateOf(listOf("VPN")) }
@@ -130,8 +131,13 @@ fun MainScreen(navController: NavController) {
             containerColor = MaterialTheme.colorScheme.onPrimary,
             text = "Log out",
             onClick = {
+                viewModel.logout {
+
+                }
+
                 // TODO: Add impl
-                // TODO: Replace with ext
+
+
                 navController.navigate(Routes.WelcomeScreen.name) {
                     popUpTo(Routes.MainScreen.name) {
                         inclusive = true

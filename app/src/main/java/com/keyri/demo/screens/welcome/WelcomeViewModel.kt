@@ -1,20 +1,44 @@
 package com.keyri.demo.screens.welcome
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.keyri.demo.data.KeyriProfiles
+import com.keyrico.keyrisdk.Keyri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class WelcomeViewModel(private val dataStore: DataStore<Preferences>) : ViewModel() {
+class WelcomeViewModel(private val dataStore: DataStore<KeyriProfiles>, private val keyri: Keyri) :
+    ViewModel() {
 
     fun saveBiometricAuth() {
         viewModelScope.launch(Dispatchers.IO) {
-            dataStore.edit { preferences ->
-                preferences[booleanPreferencesKey("isBiometricAuthSet")] = true
+            dataStore.updateData { keyriProfiles ->
+                val mappedProfiles = keyriProfiles.profiles.map {
+                    if (keyriProfiles.currentProfile == it.name) {
+                        it.copy(biometricAuthEnabled = true)
+                    } else {
+                        it
+                    }
+                }
+
+                keyriProfiles.copy(profiles = mappedProfiles)
+            }
+        }
+    }
+
+    fun removeAllAccounts(callback: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            keyri.listUniqueAccounts().onSuccess { accounts ->
+                accounts.forEach { (name, _) ->
+                    keyri.removeAssociationKey(name)
+                }
+
+                dataStore.updateData { keyriProfiles ->
+                    keyriProfiles.copy(currentProfile = null, profiles = listOf())
+                }
+
+                callback()
             }
         }
     }

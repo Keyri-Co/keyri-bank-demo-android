@@ -1,20 +1,26 @@
 package com.keyri.demo.screens.verified
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.keyri.demo.data.KeyriProfiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class VerifiedViewModel(private val dataStore: DataStore<Preferences>) : ViewModel() {
+class VerifiedViewModel(private val dataStore: DataStore<KeyriProfiles>) : ViewModel() {
 
     fun saveBiometricAuth() {
         viewModelScope.launch(Dispatchers.IO) {
-            dataStore.edit { preferences ->
-                preferences[booleanPreferencesKey("isBiometricAuthSet")] = true
+            dataStore.updateData { keyriProfiles ->
+                val mappedProfiles = keyriProfiles.profiles.map {
+                    if (keyriProfiles.currentProfile == it.name) {
+                        it.copy(biometricAuthEnabled = true)
+                    } else {
+                        it
+                    }
+                }
+
+                keyriProfiles.copy(profiles = mappedProfiles)
             }
         }
     }

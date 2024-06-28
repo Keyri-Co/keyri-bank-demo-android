@@ -1,4 +1,4 @@
-package com.keyri.demo.screens
+package com.keyri.demo.screens.payment
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -26,10 +27,14 @@ import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.primaryDisabled
 import com.keyri.demo.ui.theme.textColor
 import com.keyri.demo.ui.theme.textFieldUnfocusedColor
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun MakePayment(navController: NavHostController) {
-    var amount by remember { mutableStateOf<Float?>(null) }
+fun MakePayment(
+    viewModel: MakePaymentViewModel = koinViewModel(),
+    navController: NavHostController
+) {
+    var amount by remember { mutableFloatStateOf(0.0F) }
     var recipientInfo by remember { mutableStateOf("") }
 
     Column {
@@ -59,7 +64,7 @@ fun MakePayment(navController: NavHostController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 5.dp),
-                value = (amount ?: "").toString(),
+                value = amount.takeIf { it != 0F }?.toString() ?: "",
                 placeholder = {
                     Text(
                         text = "$0.00",
@@ -67,7 +72,7 @@ fun MakePayment(navController: NavHostController) {
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                onValueChange = { amount = it.toFloat() }
+                onValueChange = { amount = it.toFloatOrNull() ?: 0F }
             )
 
             Text(
@@ -96,14 +101,16 @@ fun MakePayment(navController: NavHostController) {
         }
 
         KeyriButton(modifier = Modifier.padding(top = 28.dp),
-            enabled = (amount?.takeIf { !it.isNaN() } ?: 0F) > 0F && recipientInfo.isNotEmpty(),
+            enabled = amount > 0F && recipientInfo.isNotEmpty(),
             disabledTextColor = primaryDisabled,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
             disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
             disabledBorderColor = primaryDisabled,
             text = "Confirm",
             onClick = {
-                navController.navigate("${Routes.PaymentResultScreen.name}?success=true") // TODO: Based on event result
+                viewModel.performMakePaymentEvent(recipientInfo, amount) { success ->
+                    navController.navigate("${Routes.PaymentResultScreen.name}?success={$success}")
+                }
             })
 
         Text(

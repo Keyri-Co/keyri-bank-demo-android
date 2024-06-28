@@ -76,6 +76,8 @@ dependencies {
     implementation("io.insert-koin:koin-android")
     implementation("io.insert-koin:koin-compose")
     implementation("io.insert-koin:koin-androidx-compose")
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     implementation(libs.keyrisdk)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

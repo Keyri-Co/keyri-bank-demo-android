@@ -1,7 +1,10 @@
 package com.keyri.demo.screens.welcome
 
+import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.provider.Settings
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -11,8 +14,10 @@ import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +27,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -43,19 +47,21 @@ import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.keyri.demo.R
 import com.keyri.demo.composables.KeyriButton
+import com.keyri.demo.data.KeyriProfiles
 import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.textColor
 import com.keyri.demo.utils.getActivity
 import com.keyri.demo.utils.navigateWithPopUp
 import org.koin.androidx.compose.koinViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun WelcomeScreen(
     viewModel: WelcomeViewModel = koinViewModel(),
     navController: NavHostController,
-    keyriAccounts: Map<String, String> = emptyMap(),
-    onShowSnackbar: (String) -> Unit
+    keyriAccounts: KeyriProfiles?,
+    onShowSnackbar: (String) -> Unit,
+    onAccountsRemoved: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
     var showAccountsList by remember { mutableStateOf(false) }
@@ -79,7 +85,7 @@ fun WelcomeScreen(
                 .fillMaxWidth()
                 .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
-            text = if (keyriAccounts.isEmpty()) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
+            text = if (keyriAccounts?.profiles?.isEmpty() == true) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
             style = MaterialTheme.typography.headlineLarge,
             color = textColor
         )
@@ -92,20 +98,46 @@ fun WelcomeScreen(
             Image(
                 modifier = Modifier
                     .size(130.dp, 62.dp)
-                    .align(Alignment.Center),
+                    .align(Alignment.Center)
+                    .combinedClickable(
+                        onClick = {
+                            // Do nothing
+                        },
+                        onLongClick = {
+                            viewModel.removeAllAccounts {
+                                onAccountsRemoved()
+
+                                val vibrator =
+                                    context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+
+                                vibrator?.cancel()
+
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    val effect = VibrationEffect.createOneShot(
+                                        100,
+                                        VibrationEffect.DEFAULT_AMPLITUDE
+                                    )
+                                    vibrator?.vibrate(effect)
+                                } else {
+                                    vibrator?.vibrate(100)
+                                }
+                            }
+                        },
+                    ),
                 contentScale = ContentScale.Fit,
                 painter = painterResource(id = R.drawable.keyri_logo),
                 contentDescription = null
             )
         }
 
-        val containerColors = if (keyriAccounts.isEmpty()) {
+        val containerColors = if (keyriAccounts?.profiles?.isEmpty() == true) {
             MaterialTheme.colorScheme.onPrimary to MaterialTheme.colorScheme.primary.copy(alpha = 0.04F)
         } else {
             MaterialTheme.colorScheme.primary.copy(alpha = 0.04F) to MaterialTheme.colorScheme.onPrimary
         }
 
         KeyriButton(Modifier, text = "Log in", containerColor = containerColors.first, onClick = {
+            // TODO: If one account -> show biometric prompt to login into this account
             if (keyriAccounts.isNotEmpty()) {
                 showAccountsList = true
             } else {
@@ -191,7 +223,7 @@ fun WelcomeScreen(
                 )
 
                 LazyColumn(modifier = Modifier.padding(vertical = 40.dp)) {
-                    items(keyriAccounts.map { it.key }) {
+                    items(keyriAccounts?.profiles?.map { it.email } ?: emptyList()) {
                         Column(modifier = Modifier
                             .wrapContentHeight()
                             .clickable {
@@ -236,8 +268,8 @@ fun WelcomeScreen(
                                 modifier = Modifier
                                     .padding(vertical = 16.dp)
                                     .fillMaxWidth(),
-                                text = it)
-//                            HorizontalDivider(thickness = 1.dp)
+                                text = it
+                            )
                         }
                     }
                 }

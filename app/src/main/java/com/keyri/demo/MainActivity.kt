@@ -14,8 +14,6 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -29,7 +27,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.keyri.demo.routes.Routes
 import com.keyri.demo.screens.LoginScreen
-import com.keyri.demo.screens.MakePayment
+import com.keyri.demo.screens.payment.MakePayment
 import com.keyri.demo.screens.PaymentResult
 import com.keyri.demo.screens.SignupScreen
 import com.keyri.demo.screens.main.MainScreen
@@ -49,7 +47,6 @@ class MainActivity : FragmentActivity() {
         enableEdgeToEdge()
 
         viewModel.checkKeyriAccounts()
-        viewModel.checkIsBiometricAuthSet()
 
         installSplashScreen().apply {
             setKeepOnScreenCondition {
@@ -63,16 +60,9 @@ class MainActivity : FragmentActivity() {
                 val navController = rememberNavController()
                 val snackbarHostState = remember { SnackbarHostState() }
 
-//                val keyriAccounts by remember {
-//                    mutableStateOf(viewModel.keyriAccounts.value ?: emptyMap())
-//                }
-
                 val keyriAccounts = viewModel.keyriAccounts.collectAsState()
 
-                // TODO: Use to auth later
-                val isBiometricAuthSet by remember {
-                    mutableStateOf(viewModel.isBiometricAuthSet.value)
-                }
+                // TODO: Check is current Keyri account not null -> show biometric and open main
 
                 Scaffold(
                     modifier = Modifier
@@ -93,15 +83,17 @@ class MainActivity : FragmentActivity() {
                             composable(Routes.WelcomeScreen.name) {
                                 WelcomeScreen(
                                     navController = navController,
-                                    keyriAccounts = keyriAccounts.value ?: emptyMap(),
-                                ) {
-                                    scope.launch {
-                                        snackbarHostState.showSnackbar(
-                                            message = it,
-                                            withDismissAction = true,
-                                            duration = SnackbarDuration.Long
-                                        )
-                                    }
+                                    keyriAccounts = keyriAccounts.value,
+                                    onShowSnackbar = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = it,
+                                                withDismissAction = true,
+                                                duration = SnackbarDuration.Long
+                                            )
+                                        }
+                                    }) {
+                                    viewModel.checkKeyriAccounts()
                                 }
                             }
 

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 fun KeyriButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    progress: Boolean = false,
     textColor: Color = MaterialTheme.colorScheme.primary,
     disabledTextColor: Color = Color.Companion.Unspecified,
     containerColor: Color = Color.Companion.Unspecified,
@@ -31,12 +33,26 @@ fun KeyriButton(
             .fillMaxWidth()
             .height(54.dp),
         shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(width = 1.dp, color = if (enabled) borderColor else disabledBorderColor),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (enabled) borderColor else disabledBorderColor
+        ),
         colors = ButtonDefaults.outlinedButtonColors()
-            .copy(containerColor = containerColor, disabledContainerColor = disabledContainerColor, ),
+            .copy(
+                containerColor = containerColor,
+                disabledContainerColor = disabledContainerColor,
+            ),
         enabled = enabled,
         onClick = onClick,
     ) {
-        Text(text = text, color = if (enabled) textColor else disabledTextColor)
+        Text(
+            modifier = Modifier.weight(1F),
+            text = text,
+            color = if (enabled) textColor else disabledTextColor
+        )
+
+        if (progress) {
+            CircularProgressIndicator(color = textColor)
+        }
     }
 }
