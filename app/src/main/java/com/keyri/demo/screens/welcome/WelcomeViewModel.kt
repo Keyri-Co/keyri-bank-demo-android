@@ -6,11 +6,29 @@ import androidx.lifecycle.viewModelScope
 import com.keyri.demo.data.KeyriProfiles
 import com.keyrico.keyrisdk.Keyri
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class WelcomeViewModel(private val dataStore: DataStore<KeyriProfiles>, private val keyri: Keyri) :
     ViewModel() {
+
+    private val _keyriAccounts = MutableStateFlow(KeyriProfiles(null, emptyList()))
+    val keyriAccounts = _keyriAccounts.asStateFlow()
+
+    init {
+        checkKeyriAccounts()
+    }
+
+    fun checkKeyriAccounts() {
+        viewModelScope.launch(Dispatchers.IO) {
+            dataStore.data.collectLatest {
+                _keyriAccounts.value = it
+            }
+        }
+    }
 
     fun setCurrentProfile(currentProfile: String?) {
         viewModelScope.launch(Dispatchers.IO) {

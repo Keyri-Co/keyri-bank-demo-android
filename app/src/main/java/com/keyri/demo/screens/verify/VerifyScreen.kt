@@ -38,6 +38,7 @@ fun VerifyScreen(
     viewModel: VerifyViewModel = koinViewModel(),
     navController: NavHostController,
     isVerify: Boolean,
+    name: String? = null,
     email: String? = null,
     number: String? = null
 ) {
@@ -87,6 +88,7 @@ fun VerifyScreen(
                             coroutineScope,
                             isVerify,
                             viewModel,
+                            name,
                             email,
                             number,
                             navController
@@ -126,6 +128,7 @@ fun VerifyScreen(
                             coroutineScope,
                             isVerify,
                             viewModel,
+                            name,
                             email,
                             number,
                             navController
@@ -165,6 +168,7 @@ fun VerifyScreen(
                             coroutineScope,
                             isVerify,
                             viewModel,
+                            name,
                             email,
                             number,
                             navController
@@ -179,6 +183,7 @@ private fun startEventTimer(
     coroutineScope: CoroutineScope,
     isVerify: Boolean,
     viewModel: VerifyViewModel,
+    name: String?,
     email: String?,
     number: String?,
     navController: NavController
@@ -187,7 +192,7 @@ private fun startEventTimer(
         timer(initialDelay = 2_000L, period = 1_000L) {
             if (isVerify) {
                 cancel()
-                viewModel.sendEvent(email) {
+                viewModel.sendEvent(name, email, number) {
                     navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=true")
                 }
             } else {

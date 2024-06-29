@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.keyri.demo.composables.KeyriAlertDialog
 import com.keyri.demo.composables.KeyriButton
 import com.keyri.demo.routes.Routes
 import com.keyri.demo.ui.theme.textColor
@@ -29,9 +31,13 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: NavController) {
-    val currentProfile = viewModel.currentProfile.collectAsState()
+    SideEffect {
+        viewModel.getCurrentProfile()
+    }
 
+    val currentProfile = viewModel.currentProfile.collectAsState()
     val riskSignals by remember { mutableStateOf(listOf("VPN")) }
+    val openAlertDialog = remember { mutableStateOf(false) }
 
     Column {
         Text(
@@ -42,8 +48,6 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
             textAlign = TextAlign.Center,
             text = buildAnnotatedString {
                 append("Authenticated as\n")
-
-                // TODO: Fix current profile is null?
 
                 withStyle(style = SpanStyle(color = verifiedTextColor)) {
                     append(currentProfile.value)
@@ -123,6 +127,33 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
             )
         }
 
+        if (openAlertDialog.value) {
+            KeyriAlertDialog(
+                onDismissRequest = { openAlertDialog.value = false },
+                onConfirmation = {
+                    openAlertDialog.value = false
+
+                    viewModel.logout {
+                        navController.navigate(Routes.WelcomeScreen.name) {
+                            popUpTo(Routes.MainScreen.name) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                },
+                dialogTitle = "Log out?",
+                dialogText = buildAnnotatedString {
+                    append("Are you sure you want to log out from ")
+
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                        append(currentProfile.value)
+                    }
+
+                    append("?")
+                },
+            )
+        }
+
         KeyriButton(
             text = "Make payment",
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
@@ -134,14 +165,7 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
             containerColor = MaterialTheme.colorScheme.onPrimary,
             text = "Log out",
             onClick = {
-                // TODO: On logout need to show dialog to confirm this action
-                viewModel.logout {
-                    navController.navigate(Routes.WelcomeScreen.name) {
-                        popUpTo(Routes.MainScreen.name) {
-                            inclusive = true
-                        }
-                    }
-                }
+                openAlertDialog.value = true
             })
     }
 }

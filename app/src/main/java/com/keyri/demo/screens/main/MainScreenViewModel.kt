@@ -32,7 +32,7 @@ class MainScreenViewModel(private val dataStore: DataStore<KeyriProfiles>) : Vie
         }
     }
 
-    private fun getCurrentProfile() {
+    fun getCurrentProfile() {
         viewModelScope.launch(Dispatchers.IO) {
             dataStore.data.collectLatest { keyriProfiles ->
                 _currentProfile.value = keyriProfiles.currentProfile

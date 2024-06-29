@@ -13,11 +13,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
@@ -26,7 +24,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.keyri.demo.composables.BiometricAuth
 import com.keyri.demo.routes.Routes
 import com.keyri.demo.screens.PaymentResult
 import com.keyri.demo.screens.SignupScreen
@@ -37,14 +34,9 @@ import com.keyri.demo.screens.verified.VerifiedScreen
 import com.keyri.demo.screens.verify.VerifyScreen
 import com.keyri.demo.screens.welcome.WelcomeScreen
 import com.keyri.demo.ui.theme.KeyriDemoTheme
-import com.keyri.demo.utils.getActivity
-import com.keyri.demo.utils.navigateWithPopUp
 import kotlinx.coroutines.launch
-import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class MainActivity : FragmentActivity() {
-
-    private val viewModel by viewModel<MainActivityViewModel>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,8 +48,6 @@ class MainActivity : FragmentActivity() {
                 val scope = rememberCoroutineScope()
                 val navController = rememberNavController()
                 val snackbarHostState = remember { SnackbarHostState() }
-
-                val keyriAccounts = viewModel.keyriAccounts.collectAsState()
 
                 Scaffold(modifier = Modifier
                     .fillMaxSize()
@@ -75,7 +65,6 @@ class MainActivity : FragmentActivity() {
                         ) {
                             composable(Routes.WelcomeScreen.name) {
                                 WelcomeScreen(navController = navController,
-                                    keyriAccounts = keyriAccounts.value,
                                     onShowSnackbar = {
                                         scope.launch {
                                             snackbarHostState.showSnackbar(
@@ -84,9 +73,7 @@ class MainActivity : FragmentActivity() {
                                                 duration = SnackbarDuration.Long
                                             )
                                         }
-                                    }) {
-                                    viewModel.checkKeyriAccounts()
-                                }
+                                    })
                             }
 
                             composable(Routes.SignupScreen.name) {
@@ -179,27 +166,6 @@ class MainActivity : FragmentActivity() {
                                 )
                             }
                         }
-                    }
-                }
-
-                if (keyriAccounts.value.currentProfile != null) {
-                    BiometricAuth(
-                        LocalContext.current,
-                        "Use Biometric to login as",
-                        keyriAccounts.value.currentProfile,
-                        {
-                            scope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = it,
-                                    withDismissAction = true,
-                                    duration = SnackbarDuration.Long
-                                )
-                            }
-                        },
-                        { getActivity()?.finish() }) {
-                        navController.navigateWithPopUp(
-                            Routes.MainScreen.name, Routes.WelcomeScreen.name
-                        )
                     }
                 }
             }
