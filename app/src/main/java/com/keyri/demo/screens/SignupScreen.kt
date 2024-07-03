@@ -33,6 +33,13 @@ fun SignupScreen(navController: NavHostController) {
     var email by remember { mutableStateOf("") }
     var mobile by remember { mutableStateOf("") }
 
+    // TODO: Fix issue -> unable to input + digit
+    // TODO: +1 Should be autopopulated
+
+
+
+    // TODO: If user close app on verified screen - force them to login with biometrics on next opening app
+
     Column {
         Text(
             modifier = Modifier

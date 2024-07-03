@@ -159,6 +159,9 @@ fun WelcomeScreen(
             "Use Biometric to login" to null
         }
 
+        // TODO: Add sending SMS through Keyri Demo app (need permission):
+        // TODO: Ask for permission, if no permission - open app intent
+
         if (showBiometricPrompt) {
             BiometricAuth(context, promptInfo.first, promptInfo.second, {
                 onShowSnackbar(it)
@@ -190,6 +193,14 @@ fun WelcomeScreen(
                             .fillMaxWidth(),
                         text = "Choose an account\nto continue to Keyri Bank"
                     )
+
+                    // TODO: Add Keyri logo to the side of account ( from https://keyri.slack.com/archives/D0760PRVCE5/p1720013532362389)
+                    // TODO: Also add dividers
+
+
+                    // TODO: Second biometric prompt appear after selecting account from list
+
+                    // TODO: If user have existing account (but not logged in) and it's new device (signal from fraud device) -> open verification screen
 
                     LazyColumn(modifier = Modifier.padding(vertical = 40.dp)) {
                         items(keyriAccounts.value.profiles.map { it.email }) {
