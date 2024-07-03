@@ -1,0 +1,34 @@
+package com.keyri.keyridemo.di
+
+import android.content.Context
+import androidx.datastore.core.DataStore
+import com.keyri.keyridemo.data.KeyriProfiles
+import com.keyri.keyridemo.utils.keyriProfilesDataStore
+import com.keyrico.keyrisdk.Keyri
+import com.keyrico.keyrisdk.config.KeyriDetectionsConfig
+import org.koin.dsl.module
+
+val appModule = module {
+    single { getKeyriProfilesDataStore(get()) }
+    single { getKeyri(get()) }
+}
+
+private fun getKeyriProfilesDataStore(context: Context): DataStore<KeyriProfiles> {
+    return context.keyriProfilesDataStore
+}
+
+private fun getKeyri(context: Context): Keyri {
+    return Keyri(
+        context,
+        "Ekrdi04LFJSRraLObtJpUap6fkh45fwi",
+        "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEzteySVilYBihc6V67mN084ajGYlBOqXr6JmZ2A26Z6iW/9G8EYxPxfPRgzADrcZUHAcCuXfnv3alDvwYoGaFg==",
+        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgDSsMLClY0b0s4LdbXSujp//2kE2kkKDCVoUq0d+z0jmhRANCAAQTO17JJWKVgGKFzpXruY3TzhqMZiUE6pevomZnYDbpnqJb/0bwRjE/F89GDMAOtxlQcBwK5d+e/dqUO/BigZoW",
+        KeyriDetectionsConfig(
+            blockEmulatorDetection = true,
+            blockRootDetection = true,
+            blockDangerousAppsDetection = true,
+            blockTamperDetection = true,
+            blockSwizzleDetection = true
+        )
+    )
+}

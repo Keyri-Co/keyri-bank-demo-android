@@ -5,16 +5,15 @@ plugins {
 }
 
 android {
-    namespace = "com.keyri.demo"
-    compileSdk = 35
-    compileSdkPreview = "VanillaIceCream"
+    namespace = "com.keyri.keyridemo"
+    compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.keyri.demo"
+        applicationId = "com.keyri.keyridemo"
         minSdk = 24
-        targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 34
+        versionCode = 2
+        versionName = "1.2"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -32,12 +31,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     buildFeatures {
