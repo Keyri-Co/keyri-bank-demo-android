@@ -47,9 +47,6 @@ fun PaymentResult(navController: NavController, success: Boolean) {
             color = textColor
         )
 
-        // TODO: On biometric cancellation on main screen with one logged in user -> show welcome back screen
-        // TODO: If user tap on Login in this case -> show biometric prompt
-
         Image(
             modifier = Modifier
                 .size(180.dp)

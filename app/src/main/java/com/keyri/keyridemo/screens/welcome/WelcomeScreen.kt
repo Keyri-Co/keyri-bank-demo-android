@@ -159,6 +159,10 @@ fun WelcomeScreen(
             "Use Biometric to login" to null
         }
 
+        // TODO: If user close app on verified screen - force them to login with biometrics on next opening app
+
+
+
         // TODO: Add sending SMS through Keyri Demo app (need permission):
         // TODO: Ask for permission, if no permission - open app intent
 
@@ -193,6 +197,11 @@ fun WelcomeScreen(
                             .fillMaxWidth(),
                         text = "Choose an account\nto continue to Keyri Bank"
                     )
+
+                    // TODO: On biometric cancellation on main screen with one logged in user -> show welcome back screen
+                    // TODO: If user tap on Login in this case -> show biometric prompt
+
+
 
                     // TODO: Add Keyri logo to the side of account ( from https://keyri.slack.com/archives/D0760PRVCE5/p1720013532362389)
                     // TODO: Also add dividers
