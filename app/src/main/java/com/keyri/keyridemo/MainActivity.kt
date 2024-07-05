@@ -26,7 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.keyri.keyridemo.routes.Routes
 import com.keyri.keyridemo.screens.PaymentResult
-import com.keyri.keyridemo.screens.SignupScreen
+import com.keyri.keyridemo.screens.signup.SignupScreen
 import com.keyri.keyridemo.screens.login.LoginScreen
 import com.keyri.keyridemo.screens.main.MainScreen
 import com.keyri.keyridemo.screens.payment.MakePayment
@@ -77,7 +77,7 @@ class MainActivity : FragmentActivity() {
                             }
 
                             composable(Routes.SignupScreen.name) {
-                                SignupScreen(navController)
+                                SignupScreen(navController = navController)
                             }
 
                             composable(Routes.LoginScreen.name) {

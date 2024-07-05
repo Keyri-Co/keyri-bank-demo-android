@@ -12,8 +12,8 @@ android {
         applicationId = "com.keyri.keyridemo"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.2"
+        versionCode = 4
+        versionName = "1.4"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -70,11 +70,11 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore.preferences.core)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(platform("io.insert-koin:koin-bom:3.6.0-wasm-alpha2"))
-    implementation("io.insert-koin:koin-core")
-    implementation("io.insert-koin:koin-android")
-    implementation("io.insert-koin:koin-compose")
-    implementation("io.insert-koin:koin-androidx-compose")
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.androidx.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.keyrisdk)
 }

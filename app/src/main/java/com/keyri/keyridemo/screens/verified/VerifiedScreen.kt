@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +41,10 @@ fun VerifiedScreen(
     number: String? = null,
     onShowSnackbar: (String) -> Unit
 ) {
+    SideEffect {
+        viewModel.saveBiometricAuth(email) {}
+    }
+
     Column {
         val context = LocalContext.current
         var showBiometricPrompt by remember { mutableStateOf(false) }
@@ -108,12 +113,10 @@ fun VerifiedScreen(
             }, { showBiometricPrompt = false }) {
                 showBiometricPrompt = false
 
-                viewModel.saveBiometricAuth(email) {
-                    navController.navigateWithPopUp(
-                        "${Routes.MainScreen.name}?email={$email}",
-                        Routes.WelcomeScreen.name
-                    )
-                }
+                navController.navigateWithPopUp(
+                    "${Routes.MainScreen.name}?email={$email}",
+                    Routes.WelcomeScreen.name
+                )
             }
         }
 

@@ -3,6 +3,7 @@ package com.keyri.keyridemo.di
 import com.keyri.keyridemo.screens.login.LoginViewModel
 import com.keyri.keyridemo.screens.main.MainScreenViewModel
 import com.keyri.keyridemo.screens.payment.MakePaymentViewModel
+import com.keyri.keyridemo.screens.signup.SignupViewModel
 import com.keyri.keyridemo.screens.verified.VerifiedViewModel
 import com.keyri.keyridemo.screens.verify.VerifyViewModel
 import com.keyri.keyridemo.screens.welcome.WelcomeViewModel
@@ -16,4 +17,5 @@ val viewModelsModule = module {
     viewModelOf(::VerifiedViewModel)
     viewModelOf(::LoginViewModel)
     viewModelOf(::MakePaymentViewModel)
+    viewModelOf(::SignupViewModel)
 }

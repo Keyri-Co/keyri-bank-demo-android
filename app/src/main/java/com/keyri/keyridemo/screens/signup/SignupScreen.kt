@@ -1,4 +1,4 @@
-package com.keyri.keyridemo.screens
+package com.keyri.keyridemo.screens.signup
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,15 +28,12 @@ import com.keyri.keyridemo.routes.Routes
 import com.keyri.keyridemo.ui.theme.primaryDisabled
 import com.keyri.keyridemo.ui.theme.textColor
 import com.keyri.keyridemo.ui.theme.textFieldUnfocusedColor
-import com.keyri.keyridemo.utils.isValidEmail
-import com.keyri.keyridemo.utils.isValidPhoneNumber
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SignupScreen(navController: NavHostController) {
+fun SignupScreen(viewModel: SignupViewModel = koinViewModel(), navController: NavHostController) {
     val prefix = "+1"
-    var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var mobile by remember { mutableStateOf(TextFieldValue(text = "")) }
+    val inputState = viewModel.signupState.collectAsState()
     var isMobileTextFieldFocused by remember { mutableStateOf(false) }
 
     Column {
@@ -51,29 +49,25 @@ fun SignupScreen(navController: NavHostController) {
         )
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
-            KeyriTextField(
-                value = name,
+            KeyriTextField(value = inputState.value.name,
                 placeholder = {
                     Text(
-                        text = "Name",
-                        color = textFieldUnfocusedColor
+                        text = "Name", color = textFieldUnfocusedColor
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                onValueChange = { name = it }
-            )
+                onValueChange = { viewModel.updateName(it) })
 
             KeyriTextField(
                 modifier = Modifier.padding(top = 20.dp),
-                value = email,
+                value = inputState.value.email,
                 placeholder = {
                     Text(
-                        text = "Email",
-                        color = textFieldUnfocusedColor
+                        text = "Email", color = textFieldUnfocusedColor
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                onValueChange = { email = it },
+                onValueChange = { viewModel.updateEmail(it) },
             )
 
             KeyriTextField(
@@ -82,51 +76,56 @@ fun SignupScreen(navController: NavHostController) {
                     .onFocusChanged {
                         isMobileTextFieldFocused = it.isFocused
 
-                        val newText = if (isMobileTextFieldFocused && mobile.text.isEmpty()) {
-                            prefix
-                        } else if (!isMobileTextFieldFocused && (mobile.text == prefix || mobile.text == "")) {
-                            ""
-                        } else {
-                            mobile.text
-                        }
+                        val newText =
+                            if (isMobileTextFieldFocused && inputState.value.mobile.text.isEmpty()) {
+                                prefix
+                            } else if (!isMobileTextFieldFocused && (inputState.value.mobile.text == prefix || inputState.value.mobile.text == "")) {
+                                ""
+                            } else {
+                                inputState.value.mobile.text
+                            }
 
-                        mobile = mobile.copy(
-                            text = newText,
-                            selection = TextRange(newText.length)
+                        viewModel.updateMobile(
+                            inputState.value.mobile.copy(
+                                text = newText, selection = TextRange(newText.length)
+                            )
                         )
                     },
-                value = if (mobile.text.isEmpty()) mobile.copy(text = "") else if (mobile.text.startsWith(
+                value = if (inputState.value.mobile.text.isEmpty()) inputState.value.mobile.copy(
+                    text = ""
+                ) else if (inputState.value.mobile.text.startsWith(
                         prefix
                     )
-                ) mobile else mobile.copy(text = prefix + mobile.text),
+                ) inputState.value.mobile else inputState.value.mobile.copy(text = prefix + inputState.value.mobile.text),
                 placeholder = {
                     Text(
-                        text = "+1 (---) --- - ----",
-                        color = textFieldUnfocusedColor
+                        text = "+1 (---) --- - ----", color = textFieldUnfocusedColor
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 onValueChange = {
-                    mobile = if (!it.text.startsWith(prefix)) {
+                    val newMobile = if (!it.text.startsWith(prefix)) {
                         TextFieldValue("")
                     } else if (it.text.length > 11) {
-                        mobile
+                        inputState.value.mobile
                     } else {
                         it
                     }
+
+                    viewModel.updateMobile(newMobile)
                 },
             )
         }
 
         KeyriButton(modifier = Modifier.padding(top = 28.dp),
-            enabled = name.length > 2 && email.isValidEmail() && mobile.text.isEmpty() or mobile.text.isValidPhoneNumber(),
+            enabled = viewModel.validateInputs(),
             disabledTextColor = primaryDisabled,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
             disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
             disabledBorderColor = primaryDisabled,
             text = "Continue",
             onClick = {
-                navController.navigate("${Routes.VerifyScreen.name}?email=$email&number=$mobile&isVerify=true")
+                navController.navigate("${Routes.VerifyScreen.name}?email=${inputState.value.email}&number=${inputState.value.mobile.text.takeIf { it.isNotEmpty() }}&isVerify=true")
             })
     }
 }

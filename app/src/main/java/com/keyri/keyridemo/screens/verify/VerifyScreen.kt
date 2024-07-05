@@ -1,5 +1,13 @@
 package com.keyri.keyridemo.screens.verify
 
+import android.Manifest
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.net.Uri
+import android.telephony.SmsManager
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +22,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -33,6 +42,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.concurrent.timer
 
+
 @Composable
 fun VerifyScreen(
     viewModel: VerifyViewModel = koinViewModel(),
@@ -42,8 +52,38 @@ fun VerifyScreen(
     email: String? = null,
     number: String? = null
 ) {
+    // TODO: Add loaders here
+
     val coroutineScope = rememberCoroutineScope()
     var verifyType by remember { mutableStateOf<VerifyType?>(null) }
+    val context = LocalContext.current
+
+    val sendSmsPermissionState =
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            // TODO: Change recipient and sms body
+            val smsAddress = "+15555555555"
+            val smsText = "sms message"
+
+            if (isGranted) {
+                context.getSystemService(SmsManager::class.java)
+                    .sendTextMessage(smsAddress, null, smsText, null, null)
+            } else {
+                try {
+                    val sendIntent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("smsto:$smsAddress")
+                        putExtra("sms_body", smsText)
+                    }
+
+                    context.startActivity(sendIntent)
+                } catch (e: ActivityNotFoundException) {
+                    Toast.makeText(
+                        context,
+                        "There is no SMS app installed.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+        }
 
     Column {
         Text(
@@ -82,18 +122,32 @@ fun VerifyScreen(
                 text = "${if (isVerify) "Verify" else "Confirm"} email",
                 progress = verifyType == VerifyType.EMAIL,
                 onClick = {
-                    if (verifyType == null) {
-                        verifyType = VerifyType.EMAIL
-                        startEventTimer(
-                            coroutineScope,
-                            isVerify,
-                            viewModel,
-                            name,
-                            email,
-                            number,
-                            navController
-                        )
+                    try {
+                        val intent = Intent(Intent.ACTION_MAIN)
+
+                        intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+                        context.startActivity(intent)
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(
+                            context,
+                            "There is no email client installed.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
+
+                    // TODO: Do this after verify
+//                    if (verifyType == null) {
+//                        verifyType = VerifyType.EMAIL
+//                        startEventTimer(
+//                            coroutineScope,
+//                            isVerify,
+//                            viewModel,
+//                            name,
+//                            email,
+//                            number,
+//                            navController
+//                        )
+//                    }
                 })
 
             Text(
@@ -122,18 +176,21 @@ fun VerifyScreen(
                 progress = verifyType == VerifyType.NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} phone number",
                 onClick = {
-                    if (verifyType == null) {
-                        verifyType = VerifyType.NUMBER
-                        startEventTimer(
-                            coroutineScope,
-                            isVerify,
-                            viewModel,
-                            name,
-                            email,
-                            number,
-                            navController
-                        )
-                    }
+                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+
+                    // TODO: Do this after verify
+//                    if (verifyType == null) {
+//                        verifyType = VerifyType.NUMBER
+//                        startEventTimer(
+//                            coroutineScope,
+//                            isVerify,
+//                            viewModel,
+//                            name,
+//                            email,
+//                            number,
+//                            navController
+//                        )
+//                    }
                 })
 
             Text(
@@ -162,18 +219,34 @@ fun VerifyScreen(
                 progress = verifyType == VerifyType.EMAIL_NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
-                    if (verifyType == null) {
-                        verifyType = VerifyType.EMAIL_NUMBER
-                        startEventTimer(
-                            coroutineScope,
-                            isVerify,
-                            viewModel,
-                            name,
-                            email,
-                            number,
-                            navController
-                        )
+                    try {
+                        val intent = Intent(Intent.ACTION_MAIN)
+
+                        intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+                        context.startActivity(intent)
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(
+                            context,
+                            "There is no email client installed.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
+
+                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+
+                    // TODO: Do this after verify
+//                    if (verifyType == null) {
+//                        verifyType = VerifyType.EMAIL_NUMBER
+//                        startEventTimer(
+//                            coroutineScope,
+//                            isVerify,
+//                            viewModel,
+//                            name,
+//                            email,
+//                            number,
+//                            navController
+//                        )
+//                    }
                 })
         }
     }

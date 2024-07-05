@@ -4,6 +4,7 @@ biometric = "1.2.0-alpha05"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.1"
 keyrisdk = "4.3.0"
+koinBom = "3.6.0-wasm-alpha2"
 kotlin = "1.9.24"
 coreKtx = "1.13.1"
 kotlinxSerializationJson = "1.6.3"
@@ -29,10 +30,14 @@ androidx-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-toolin
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
-keyrisdk = { module = "com.keyri:keyrisdk", version.ref = "keyrisdk" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+keyrisdk = { module = "com.keyri:keyrisdk", version.ref = "keyrisdk" }
+koin-bom = { module = "io.insert-koin:koin-bom", version.ref = "koinBom" }
+koin-android = { module = "io.insert-koin:koin-android" }
+koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose" }
+koin-compose = { module = "io.insert-koin:koin-compose" }
+koin-core = { module = "io.insert-koin:koin-core" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
-
