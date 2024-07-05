@@ -42,8 +42,6 @@ import androidx.navigation.NavHostController
 import com.keyri.keyridemo.R
 import com.keyri.keyridemo.composables.BiometricAuth
 import com.keyri.keyridemo.composables.KeyriButton
-import com.keyri.keyridemo.data.KeyriProfile
-import com.keyri.keyridemo.data.KeyriProfiles
 import com.keyri.keyridemo.routes.Routes
 import com.keyri.keyridemo.ui.theme.primaryDisabled
 import com.keyri.keyridemo.ui.theme.textColor

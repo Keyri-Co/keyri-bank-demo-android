@@ -65,6 +65,7 @@ fun VerifyScreen(
             val smsText = "sms message"
 
             if (isGranted) {
+                // TODO: Process with result intent?
                 context.getSystemService(SmsManager::class.java)
                     .sendTextMessage(smsAddress, null, smsText, null, null)
             } else {
