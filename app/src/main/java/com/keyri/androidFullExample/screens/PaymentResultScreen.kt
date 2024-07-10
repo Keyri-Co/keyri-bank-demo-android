@@ -24,8 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.keyri.androidFullExample.R
 import com.keyri.androidFullExample.composables.KeyriButton
+import com.keyri.androidFullExample.data.KeyriIcon
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.textColor
+import com.keyri.androidFullExample.theme.verifiedTextColor
 import com.keyri.androidFullExample.theme.warningTextColor
 
 @Composable
@@ -47,13 +49,12 @@ fun PaymentResult(navController: NavController, success: Boolean) {
             color = textColor
         )
 
-        Image(
+        KeyriIcon(
             modifier = Modifier
-                .size(180.dp)
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 40.dp),
-            painter = painterResource(id = if (success) R.drawable.icon_check else R.drawable.icon_deny),
-            contentDescription = null
+            iconResId = if (success) R.drawable.ic_check else R.drawable.ic_deny,
+            iconTint = if (success) verifiedTextColor else warningTextColor
         )
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {

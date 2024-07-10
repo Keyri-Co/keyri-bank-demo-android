@@ -79,24 +79,13 @@ fun VerifiedScreen(
             color = textColor
         )
 
-        // TODO: Changing icons, remove old
-        Image(
+        KeyriIcon(
             modifier = Modifier
-                .size(180.dp)
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 40.dp),
-            painter = painterResource(id = R.drawable.icon_check),
-            contentDescription = null
+            iconResId = R.drawable.ic_check,
+            iconTint = verifiedTextColor
         )
-
-//        KeyriIcon(
-//            modifier = Modifier
-//                .padding(30.dp)
-//                .align(Alignment.CenterHorizontally)
-//                .size(180.dp),
-//            iconResId = R.drawable.ic_check,
-//            iconTint = verifiedTextColor
-//        )
 
         Text(
             modifier = Modifier
@@ -125,8 +114,7 @@ fun VerifiedScreen(
                 showBiometricPrompt = false
 
                 navController.navigateWithPopUp(
-                    "${Routes.MainScreen.name}?email={$email}",
-                    Routes.WelcomeScreen.name
+                    "${Routes.MainScreen.name}?email={$email}", Routes.WelcomeScreen.name
                 )
             }
         }

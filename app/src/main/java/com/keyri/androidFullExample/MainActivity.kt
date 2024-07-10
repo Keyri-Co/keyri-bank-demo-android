@@ -90,7 +90,7 @@ class MainActivity : FragmentActivity() {
                                 deepLinks = listOf(navDeepLink {
                                     // TODO: Finalize
                                     uriPattern =
-                                        "https://android-full-example.keyri.com/?email={email}&number={number}&isVerified={isVerified}"
+                                        "https://android-full-example.keyri.com?email={email}&number={number}&isVerified={isVerified}"
                                 })
                             ) { backStackEntry ->
                                 val email = backStackEntry.arguments?.getString("email")
