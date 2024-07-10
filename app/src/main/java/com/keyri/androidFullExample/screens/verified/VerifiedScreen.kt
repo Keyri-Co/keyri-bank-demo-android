@@ -80,16 +80,23 @@ fun VerifiedScreen(
         )
 
         // TODO: Changing icons, remove old
-//        Image(
-//            modifier = Modifier
-//                .size(180.dp)
-//                .align(Alignment.CenterHorizontally)
-//                .padding(top = 40.dp),
-//            painter = painterResource(id = R.drawable.icon_check),
-//            contentDescription = null
-//        )
+        Image(
+            modifier = Modifier
+                .size(180.dp)
+                .align(Alignment.CenterHorizontally)
+                .padding(top = 40.dp),
+            painter = painterResource(id = R.drawable.icon_check),
+            contentDescription = null
+        )
 
-        KeyriIcon(iconResId = R.drawable.ic_check)
+//        KeyriIcon(
+//            modifier = Modifier
+//                .padding(30.dp)
+//                .align(Alignment.CenterHorizontally)
+//                .size(180.dp),
+//            iconResId = R.drawable.ic_check,
+//            iconTint = verifiedTextColor
+//        )
 
         Text(
             modifier = Modifier

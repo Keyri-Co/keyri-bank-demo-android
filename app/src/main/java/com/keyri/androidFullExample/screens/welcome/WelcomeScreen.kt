@@ -45,7 +45,6 @@ import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.primaryDisabled
 import com.keyri.androidFullExample.theme.textColor
-import com.keyri.androidFullExample.utils.getActivity
 import com.keyri.androidFullExample.utils.navigateWithPopUp
 import org.koin.androidx.compose.koinViewModel
 
@@ -54,7 +53,6 @@ import org.koin.androidx.compose.koinViewModel
 fun WelcomeScreen(
     viewModel: WelcomeViewModel = koinViewModel(),
     navController: NavHostController,
-    onShowSnackbar: (String) -> Unit,
 ) {
     SideEffect {
         viewModel.checkKeyriAccounts()
@@ -64,17 +62,20 @@ fun WelcomeScreen(
     val sheetState = rememberModalBottomSheetState()
     val keyriAccounts = viewModel.keyriAccounts.collectAsState()
     var showAccountsList by remember { mutableStateOf(false) }
+    var needAuth by remember { mutableStateOf(false) }
     var showBiometricPrompt by remember { mutableStateOf(false) }
     var clickedAccount by remember { mutableStateOf<String?>(null) }
+    var blockBiometricPrompt by remember { mutableStateOf(false) }
 
-    if (keyriAccounts.value.currentProfile != null) {
+    if (!blockBiometricPrompt && keyriAccounts.value.currentProfile != null && !needAuth) {
         BiometricAuth(
             LocalContext.current,
             "Use Biometric to login as",
             keyriAccounts.value.currentProfile,
-            onShowSnackbar,
-            { context.getActivity()?.finish() }) {
+            {},
+            { needAuth = true }) {
             navController.navigateWithPopUp(Routes.MainScreen.name, Routes.WelcomeScreen.name)
+            blockBiometricPrompt = true
         }
     } else {
         Column {
@@ -146,7 +147,9 @@ fun WelcomeScreen(
                 text = "Log in",
                 containerColor = containerColors.first,
                 onClick = {
-                    if (keyriAccounts.value.profiles.size == 1) {
+                    if (needAuth) {
+                        showBiometricPrompt = true
+                    } else if (keyriAccounts.value.profiles.size == 1) {
                         showBiometricPrompt = true
                     } else if (keyriAccounts.value.profiles.size > 1) {
                         showAccountsList = true
@@ -170,18 +173,15 @@ fun WelcomeScreen(
         }
 
         if (showBiometricPrompt) {
-            BiometricAuth(context, promptInfo.first, promptInfo.second, {
-                onShowSnackbar(it)
-            }, { showBiometricPrompt = false }) {
+            BiometricAuth(context, promptInfo.first, promptInfo.second, {},
+                { showBiometricPrompt = false }) {
                 viewModel.setCurrentProfile(
                     clickedAccount ?: keyriAccounts.value.profiles.firstOrNull()?.email
                 )
 
-                navController.navigateWithPopUp(
-                    Routes.MainScreen.name,
-                    Routes.WelcomeScreen.name
-                )
+                navController.navigateWithPopUp(Routes.MainScreen.name, Routes.WelcomeScreen.name)
                 showBiometricPrompt = false
+                blockBiometricPrompt = true
             }
         }
 
@@ -200,13 +200,6 @@ fun WelcomeScreen(
                             .fillMaxWidth(),
                         text = "Choose an account\nto continue to Keyri Bank"
                     )
-
-                    // TODO: On biometric cancellation on main screen with one logged in user -> show welcome back screen
-                    // TODO: If user tap on Login in this case -> show biometric prompt
-
-                    // TODO: Second biometric prompt appear after selecting account from list
-
-                    // TODO: If user have existing account (but not logged in) and it's new device (signal from fraud device) -> open verification screen
 
                     LazyColumn(modifier = Modifier.padding(vertical = 20.dp)) {
                         items(keyriAccounts.value.profiles) {

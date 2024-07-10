@@ -24,6 +24,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.screens.PaymentResult
 import com.keyri.androidFullExample.screens.login.LoginScreen
@@ -42,8 +43,6 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         installSplashScreen()
-
-        // TODO: Add processing deep-linking
 
         setContent {
             KeyriDemoTheme {
@@ -66,16 +65,7 @@ class MainActivity : FragmentActivity() {
                             startDestination = Routes.WelcomeScreen.name
                         ) {
                             composable(Routes.WelcomeScreen.name) {
-                                WelcomeScreen(navController = navController,
-                                    onShowSnackbar = {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = it,
-                                                withDismissAction = true,
-                                                duration = SnackbarDuration.Long
-                                            )
-                                        }
-                                    })
+                                WelcomeScreen(navController = navController)
                             }
 
                             composable(Routes.SignupScreen.name) {
@@ -96,6 +86,11 @@ class MainActivity : FragmentActivity() {
                                     nullable = true
                                 }, navArgument("isVerified") {
                                     type = NavType.BoolType
+                                }),
+                                deepLinks = listOf(navDeepLink {
+                                    // TODO: Finalize
+                                    uriPattern =
+                                        "https://android-full-example.keyri.com/?email={email}&number={number}&isVerified={isVerified}"
                                 })
                             ) { backStackEntry ->
                                 val email = backStackEntry.arguments?.getString("email")
