@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "750841654979",
+    "project_id": "keyri-auth-waterfall",
+    "storage_bucket": "keyri-auth-waterfall.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:750841654979:android:feb8c637cab46a2a063c76",
+        "android_client_info": {
+          "package_name": "com.keyri.androidFullExample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "750841654979-mc716qfo61svpocjga8nj4vm264asd3u.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA_dXNXmosF85aI1qBXMwFhrkUK16rK0OQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "750841654979-mc716qfo61svpocjga8nj4vm264asd3u.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "750841654979-bce9a0olhi2skfr9opmiu7e1l1h5831o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.keyri.FirebaseKeyriServerside"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

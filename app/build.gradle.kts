@@ -2,18 +2,19 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlinx-serialization")
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
-    namespace = "com.keyri.keyridemo"
+    namespace = "com.keyri.androidFullExample"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.keyri.keyridemo"
+        applicationId = "com.keyri.androidFullExample"
         minSdk = 24
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.4"
+        versionCode = 5
+        versionName = "1.5"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -77,4 +78,5 @@ dependencies {
     implementation(libs.koin.androidx.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.keyrisdk)
+    implementation(libs.firebase.messaging)
 }

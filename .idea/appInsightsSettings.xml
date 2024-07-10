@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.keyri.androidFullExample" />
+                  <option name="mobileSdkAppId" value="1:750841654979:android:feb8c637cab46a2a063c76" />
+                  <option name="projectId" value="keyri-auth-waterfall" />
+                  <option name="projectNumber" value="750841654979" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
