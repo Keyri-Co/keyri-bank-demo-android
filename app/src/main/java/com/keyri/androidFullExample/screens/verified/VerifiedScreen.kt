@@ -1,10 +1,8 @@
 package com.keyri.androidFullExample.screens.verified
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,7 +14,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -83,7 +80,7 @@ fun VerifiedScreen(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 40.dp),
-            iconResId = R.drawable.ic_check,
+            iconResId = R.drawable.ic_done,
             iconTint = verifiedTextColor
         )
 
@@ -98,13 +95,13 @@ fun VerifiedScreen(
             color = textColor
         )
 
-        Image(
+        KeyriIcon(
             modifier = Modifier
-                .size(180.dp)
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 40.dp),
-            painter = painterResource(id = R.drawable.icon_key),
-            contentDescription = null
+            iconResId = R.drawable.ic_key,
+            iconTint = verifiedTextColor,
+            iconSizeFraction = 0.5F
         )
 
         if (showBiometricPrompt) {

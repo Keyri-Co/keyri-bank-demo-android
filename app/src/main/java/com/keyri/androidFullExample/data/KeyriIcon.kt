@@ -3,6 +3,7 @@ package com.keyri.androidFullExample.data
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -18,7 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.keyri.androidFullExample.theme.textFieldUnfocusedColor
 
 @Composable
-fun KeyriIcon(modifier: Modifier, @DrawableRes iconResId: Int, iconTint: Color) {
+fun KeyriIcon(modifier: Modifier, @DrawableRes iconResId: Int, iconTint: Color, iconSizeFraction: Float = 0.3F) {
     Box(
         modifier = modifier
             .size(110.dp)
@@ -45,7 +46,7 @@ fun KeyriIcon(modifier: Modifier, @DrawableRes iconResId: Int, iconTint: Color) 
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    modifier = Modifier.size(85.dp),
+                    modifier = Modifier.fillMaxSize(iconSizeFraction),
                     painter = painterResource(iconResId),
                     contentDescription = null,
                     tint = iconTint

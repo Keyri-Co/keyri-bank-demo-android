@@ -53,7 +53,7 @@ fun PaymentResult(navController: NavController, success: Boolean) {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(top = 40.dp),
-            iconResId = if (success) R.drawable.ic_check else R.drawable.ic_deny,
+            iconResId = if (success) R.drawable.ic_done else R.drawable.ic_denial,
             iconTint = if (success) verifiedTextColor else warningTextColor
         )
 

@@ -1,8 +1,8 @@
 package com.keyri.androidFullExample.screens.verify
 
-import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.telephony.SmsManager
@@ -13,8 +13,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -32,7 +34,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.keyri.androidFullExample.R
 import com.keyri.androidFullExample.composables.KeyriButton
+import com.keyri.androidFullExample.composables.ListModalBottomSheet
+import com.keyri.androidFullExample.data.ModalListItem
 import com.keyri.androidFullExample.data.VerifyType
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.primaryDisabled
@@ -43,7 +48,7 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import kotlin.concurrent.timer
 
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VerifyScreen(
     viewModel: VerifyViewModel = koinViewModel(),
@@ -59,11 +64,13 @@ fun VerifyScreen(
     var verifyType by remember { mutableStateOf<VerifyType?>(null) }
     val context = LocalContext.current
 
+    val sheetState = rememberModalBottomSheetState()
+
     val sendSmsPermissionState =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             // TODO: Change recipient and sms body
             val smsAddress = "+380960874951"
-            val smsText = "sms message"
+            val smsText = "sms message 1"
 
             if (isGranted) {
                 val smsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -173,6 +180,13 @@ fun VerifyScreen(
                 color = textColor
             )
 
+            // TODO: If user clicks on verify and we see installed Telegram or WhatsApp -> show simple chooser with 3 options (if only sms - no need to show option)
+
+
+            // TODO: Remove only do verify of chosen option
+
+            var showVerifyNumberChooser by remember { mutableStateOf(false) }
+
             KeyriButton(modifier = Modifier.padding(top = 20.dp),
                 enabled = number != null,
                 disabledTextColor = primaryDisabled,
@@ -182,22 +196,62 @@ fun VerifyScreen(
                 progress = verifyType == VerifyType.NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} phone number",
                 onClick = {
-//                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+                    showVerifyNumberChooser = true
+
+                    //                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+
+                    // TODO: Need to notify user sms sending status? -> if loader - everything good
+                    // TODO: If SMS wasn't sent - Show toast with error message and stop loader
 
                     // TODO: Do this after verify
-                    if (verifyType == null) {
-                        verifyType = VerifyType.NUMBER
-                        startEventTimer(
-                            coroutineScope,
-                            isVerify,
-                            viewModel,
-                            name,
-                            email,
-                            number,
-                            navController
-                        )
-                    }
+//                    if (verifyType == null) {
+//                        verifyType = VerifyType.NUMBER
+//                        startEventTimer(
+//                            coroutineScope,
+//                            isVerify,
+//                            viewModel,
+//                            name,
+//                            email,
+//                            number,
+//                            navController
+//                        )
+//                    }
                 })
+
+            if (showVerifyNumberChooser) {
+                val list = mutableListOf(ModalListItem(null, "Verify with sending SMS"))
+
+                try {
+                    context.packageManager.getPackageInfo("org.telegram.messenger", 0)
+
+                    list.add(ModalListItem(R.drawable.ic_telegram, "Verify with Telegram app"))
+                } catch (_: PackageManager.NameNotFoundException) {}
+
+                // TODO: Some issue with Whatsapp, can't see it
+                try {
+                    val packageManager = context.packageManager
+                    val i = Intent(Intent.ACTION_VIEW)
+
+                    val url = "https://api.whatsapp.com/send?phone=dummy&text=hey"
+                    i.setPackage("com.whatsapp")
+                    i.setData(Uri.parse(url))
+
+                    if (i.resolveActivity(packageManager) != null) {
+                        ModalListItem(R.drawable.ic_whatsapp, "Verify with Whatsapp app")
+                    }
+
+                    context.packageManager.getPackageInfo("com.whatsapp", 0)
+
+                    ModalListItem(R.drawable.ic_whatsapp, "Verify with Whatsapp app")
+                } catch (_: PackageManager.NameNotFoundException) {}
+
+                ListModalBottomSheet(sheetState = sheetState, "Choose how to verify your number?", list, {
+                    // TODO: Finalize
+
+                }) {
+
+                }
+            }
 
             Text(
                 modifier = Modifier
@@ -239,6 +293,8 @@ fun VerifyScreen(
 //                    }
 
 //                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+
+
 
                     // TODO: Do this after verify
                     if (verifyType == null) {

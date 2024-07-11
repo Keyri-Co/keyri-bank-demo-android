@@ -87,8 +87,13 @@ class MainActivity : FragmentActivity() {
                                 }, navArgument("isVerified") {
                                     type = NavType.BoolType
                                 }),
-                                deepLinks = listOf(navDeepLink {
-                                    // TODO: Finalize
+                                deepLinks = listOf(
+                                    // TODO: Without number
+//                                    navDeepLink {
+//                                        uriPattern =
+//                                            "https://android-full-example.keyri.com?email={email}&number={number}&isVerified={isVerified}"
+//                                    },
+                                    navDeepLink {
                                     uriPattern =
                                         "https://android-full-example.keyri.com?email={email}&number={number}&isVerified={isVerified}"
                                 })
@@ -114,6 +119,8 @@ class MainActivity : FragmentActivity() {
                                         }
                                     })
                             }
+
+                            // TODO: Add key icon, remove check and deny svg-s?
 
                             composable(
                                 "${Routes.VerifyScreen.name}?email={email}&number={number}&isVerify={isVerify}",

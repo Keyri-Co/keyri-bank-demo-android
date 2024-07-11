@@ -9,6 +9,11 @@
         android:name="android.hardware.telephony"
         android:required="false" />
 
+    <queries>
+        <package android:name="org.telegram.messenger" />
+        <package android:name="com.whatsapp" />
+    </queries>
+
     <application
         android:name=".KeyriDemoApp"
         android:allowBackup="true"
