@@ -59,6 +59,8 @@ fun WelcomeScreen(
     }
 
     val context = LocalContext.current
+
+    // TODO: Migrate to created Modal sheet component, add skip collapsed? state to all sheets in projects (2)
     val sheetState = rememberModalBottomSheetState()
     val keyriAccounts = viewModel.keyriAccounts.collectAsState()
     var showAccountsList by remember { mutableStateOf(false) }
