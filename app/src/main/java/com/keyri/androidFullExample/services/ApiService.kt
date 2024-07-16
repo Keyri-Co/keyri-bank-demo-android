@@ -10,7 +10,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface ApiService {
-
     @POST("crypto-register")
     suspend fun cryptoRegister(
         @Body request: CryptoRegisterRequest,

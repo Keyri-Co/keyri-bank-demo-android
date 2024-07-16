@@ -11,8 +11,9 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class MainScreenViewModel(private val dataStore: DataStore<KeyriProfiles>) : ViewModel() {
-
+class MainScreenViewModel(
+    private val dataStore: DataStore<KeyriProfiles>,
+) : ViewModel() {
     private val _currentProfile = MutableStateFlow<String?>(null)
     val currentProfile = _currentProfile.asStateFlow()
 

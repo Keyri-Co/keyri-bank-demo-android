@@ -28,72 +28,77 @@ fun BiometricAuth(
     biometricPromptSubtitle: String? = null,
     onShowSnackbar: (String) -> Unit,
     onBiometricAuthenticationCancelled: () -> Unit,
-    onBiometricAuthenticationSucceeded: () -> Unit
+    onBiometricAuthenticationSucceeded: () -> Unit,
 ) {
     var showBiometricPrompt by remember { mutableStateOf(false) }
 
-    val launcher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) {
-        showBiometricPrompt = true
-    }
+    val launcher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartActivityForResult(),
+        ) {
+            showBiometricPrompt = true
+        }
 
     if (showBiometricPrompt) {
-        val fragmentActivity = context.getActivity()
-            ?: throw IllegalArgumentException("Should be FragmentActivity")
+        val fragmentActivity =
+            context.getActivity()
+                ?: throw IllegalArgumentException("Should be FragmentActivity")
         val executor = ContextCompat.getMainExecutor(fragmentActivity)
-        val biometricPrompt = BiometricPrompt(
-            fragmentActivity,
-            executor,
-            object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationError(
-                    errorCode: Int,
-                    errString: CharSequence
-                ) {
-                    super.onAuthenticationError(errorCode, errString)
-                    showBiometricPrompt = false
+        val biometricPrompt =
+            BiometricPrompt(
+                fragmentActivity,
+                executor,
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationError(
+                        errorCode: Int,
+                        errString: CharSequence,
+                    ) {
+                        super.onAuthenticationError(errorCode, errString)
+                        showBiometricPrompt = false
 
-                    Log.e("KeyriDemo", "Biometric authentication cancelled")
-                    onShowSnackbar("Biometric authentication cancelled")
-                    onBiometricAuthenticationCancelled()
-                }
+                        Log.e("KeyriDemo", "Biometric authentication cancelled")
+                        onShowSnackbar("Biometric authentication cancelled")
+                        onBiometricAuthenticationCancelled()
+                    }
 
-                override fun onAuthenticationSucceeded(
-                    result: BiometricPrompt.AuthenticationResult
-                ) {
-                    super.onAuthenticationSucceeded(result)
-                    showBiometricPrompt = false
-                    onBiometricAuthenticationSucceeded()
-                }
+                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                        super.onAuthenticationSucceeded(result)
+                        showBiometricPrompt = false
+                        onBiometricAuthenticationSucceeded()
+                    }
 
-                override fun onAuthenticationFailed() {
-                    super.onAuthenticationFailed()
-                    showBiometricPrompt = false
+                    override fun onAuthenticationFailed() {
+                        super.onAuthenticationFailed()
+                        showBiometricPrompt = false
 
-                    Log.e("KeyriDemo", "Biometric authentication failed")
-                    onShowSnackbar("Biometric authentication failed")
-                    onBiometricAuthenticationCancelled()
-                }
-            }
-        )
+                        Log.e("KeyriDemo", "Biometric authentication failed")
+                        onShowSnackbar("Biometric authentication failed")
+                        onBiometricAuthenticationCancelled()
+                    }
+                },
+            )
 
-        val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
-            .setTitle(biometricPromptTitle)
-            .setSubtitle(biometricPromptSubtitle)
-            .setAllowedAuthenticators(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
-            .build()
+        val promptInfoBuilder =
+            BiometricPrompt.PromptInfo
+                .Builder()
+                .setTitle(biometricPromptTitle)
+                .setSubtitle(biometricPromptSubtitle)
+                .setAllowedAuthenticators(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
+                .build()
 
         biometricPrompt.authenticate(promptInfoBuilder)
     }
 
     LaunchedEffect(biometricPromptTitle) {
-        when (BiometricManager
-            .from(context)
-            .canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)) {
+        when (
+            BiometricManager
+                .from(context)
+                .canAuthenticate(BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL)
+        ) {
             BiometricManager.BIOMETRIC_SUCCESS -> {
                 Log.d(
                     "KeyriDemo",
-                    "App can authenticate using biometrics."
+                    "App can authenticate using biometrics.",
                 )
                 showBiometricPrompt = true
             }
@@ -104,7 +109,7 @@ fun BiometricAuth(
                         Intent(Settings.ACTION_BIOMETRIC_ENROLL).apply {
                             putExtra(
                                 Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-                                BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL
+                                BIOMETRIC_STRONG or BIOMETRIC_WEAK or DEVICE_CREDENTIAL,
                             )
                         }
 

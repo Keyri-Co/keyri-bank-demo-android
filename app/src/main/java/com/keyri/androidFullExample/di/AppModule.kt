@@ -10,18 +10,17 @@ import com.keyrico.keyrisdk.Keyri
 import com.keyrico.keyrisdk.config.KeyriDetectionsConfig
 import org.koin.dsl.module
 
-val appModule = module {
-    single { getKeyriProfilesDataStore(get()) }
-    single { getKeyri(get()) }
-    single { KeyriDemoRepository(provideApiService()) }
-}
+val appModule =
+    module {
+        single { getKeyriProfilesDataStore(get()) }
+        single { getKeyri(get()) }
+        single { KeyriDemoRepository(provideApiService()) }
+    }
 
-private fun getKeyriProfilesDataStore(context: Context): DataStore<KeyriProfiles> {
-    return context.keyriProfilesDataStore
-}
+private fun getKeyriProfilesDataStore(context: Context): DataStore<KeyriProfiles> = context.keyriProfilesDataStore
 
-private fun getKeyri(context: Context): Keyri {
-    return Keyri(
+private fun getKeyri(context: Context): Keyri =
+    Keyri(
         context,
         "Ekrdi04LFJSRraLObtJpUap6fkh45fwi",
         "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEzteySVilYBihc6V67mN084ajGYlBOqXr6JmZ2A26Z6iW/9G8EYxPxfPRgzADrcZUHAcCuXfnv3alDvwYoGaFg==",
@@ -31,7 +30,6 @@ private fun getKeyri(context: Context): Keyri {
             blockRootDetection = true,
             blockDangerousAppsDetection = true,
             blockTamperDetection = true,
-            blockSwizzleDetection = true
-        )
+            blockSwizzleDetection = true,
+        ),
     )
-}

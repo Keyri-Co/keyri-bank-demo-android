@@ -31,37 +31,44 @@ import com.keyri.androidFullExample.theme.textFieldUnfocusedColor
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SignupScreen(viewModel: SignupViewModel = koinViewModel(), navController: NavHostController) {
+fun SignupScreen(
+    viewModel: SignupViewModel = koinViewModel(),
+    navController: NavHostController,
+) {
     val prefix = "+1"
     val inputState = viewModel.signupState.collectAsState()
     var isMobileTextFieldFocused by remember { mutableStateOf(false) }
 
     Column {
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Provide your details below",
             style = MaterialTheme.typography.headlineSmall,
-            color = textColor
+            color = textColor,
         )
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
-            KeyriTextField(value = inputState.value.name,
+            KeyriTextField(
+                value = inputState.value.name,
                 placeholder = {
                     Text(text = "Name", color = textFieldUnfocusedColor)
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                onValueChange = { viewModel.updateName(it) })
+                onValueChange = { viewModel.updateName(it) },
+            )
 
             KeyriTextField(
                 modifier = Modifier.padding(top = 20.dp),
                 value = inputState.value.email,
                 placeholder = {
                     Text(
-                        text = "Email", color = textFieldUnfocusedColor
+                        text = "Email",
+                        color = textFieldUnfocusedColor,
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -69,53 +76,72 @@ fun SignupScreen(viewModel: SignupViewModel = koinViewModel(), navController: Na
             )
 
             KeyriTextField(
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .onFocusChanged {
-                        isMobileTextFieldFocused = it.isFocused
+                modifier =
+                    Modifier
+                        .padding(top = 20.dp)
+                        .onFocusChanged {
+                            isMobileTextFieldFocused = it.isFocused
 
-                        val newText =
-                            if (isMobileTextFieldFocused && inputState.value.mobile.text.isEmpty()) {
-                                prefix
-                            } else if (!isMobileTextFieldFocused && (inputState.value.mobile.text == prefix || inputState.value.mobile.text == "")) {
-                                ""
-                            } else {
-                                inputState.value.mobile.text
-                            }
+                            val newText =
+                                if (isMobileTextFieldFocused &&
+                                    inputState.value.mobile.text
+                                        .isEmpty()
+                                ) {
+                                    prefix
+                                } else if (!isMobileTextFieldFocused &&
+                                    (inputState.value.mobile.text == prefix || inputState.value.mobile.text == "")
+                                ) {
+                                    ""
+                                } else {
+                                    inputState.value.mobile.text
+                                }
 
-                        viewModel.updateMobile(
-                            inputState.value.mobile.copy(
-                                text = newText, selection = TextRange(newText.length)
+                            viewModel.updateMobile(
+                                inputState.value.mobile.copy(
+                                    text = newText,
+                                    selection = TextRange(newText.length),
+                                ),
                             )
+                        },
+                value =
+                    if (inputState.value.mobile.text
+                            .isEmpty()
+                    ) {
+                        inputState.value.mobile.copy(
+                            text = "",
                         )
+                    } else if (inputState.value.mobile.text.startsWith(
+                            prefix,
+                        )
+                    ) {
+                        inputState.value.mobile
+                    } else {
+                        inputState.value.mobile.copy(text = prefix + inputState.value.mobile.text)
                     },
-                value = if (inputState.value.mobile.text.isEmpty()) inputState.value.mobile.copy(
-                    text = ""
-                ) else if (inputState.value.mobile.text.startsWith(
-                        prefix
-                    )
-                ) inputState.value.mobile else inputState.value.mobile.copy(text = prefix + inputState.value.mobile.text),
                 placeholder = {
                     Text(
-                        text = "+1 (---) --- - ----", color = textFieldUnfocusedColor
+                        text = "+1 (---) --- - ----",
+                        color = textFieldUnfocusedColor,
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 onValueChange = {
-                    val newMobile = if (!it.text.startsWith(prefix)) {
-                        TextFieldValue("")
-                    } else if (it.text.length > 11) {
-                        inputState.value.mobile
-                    } else {
-                        it
-                    }
+                    val newMobile =
+                        if (!it.text.startsWith(prefix)) {
+                            TextFieldValue("")
+                        } else if (it.text.length > 11) {
+                            inputState.value.mobile
+                        } else {
+                            it
+                        }
 
                     viewModel.updateMobile(newMobile)
                 },
             )
         }
 
-        KeyriButton(modifier = Modifier.padding(top = 28.dp),
+        KeyriButton(
+            modifier = Modifier.padding(top = 28.dp),
             enabled = viewModel.validateInputs(),
             disabledTextColor = primaryDisabled,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
@@ -123,7 +149,13 @@ fun SignupScreen(viewModel: SignupViewModel = koinViewModel(), navController: Na
             disabledBorderColor = primaryDisabled,
             text = "Continue",
             onClick = {
-                navController.navigate("${Routes.VerifyScreen.name}?email=${inputState.value.email}&number=${inputState.value.mobile.text.takeIf { it.isNotEmpty() }}&isVerify=true")
-            })
+                navController.navigate(
+                    "${Routes.VerifyScreen.name}?email=${inputState.value.email}&number=${inputState.value.mobile.text.takeIf {
+                        it
+                            .isNotEmpty()
+                    }}&isVerify=true",
+                )
+            },
+        )
     }
 }

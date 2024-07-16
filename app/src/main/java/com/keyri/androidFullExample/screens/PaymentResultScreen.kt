@@ -1,11 +1,9 @@
 package com.keyri.androidFullExample.screens
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -31,7 +28,10 @@ import com.keyri.androidFullExample.theme.verifiedTextColor
 import com.keyri.androidFullExample.theme.warningTextColor
 
 @Composable
-fun PaymentResult(navController: NavController, success: Boolean) {
+fun PaymentResult(
+    navController: NavController,
+    success: Boolean,
+) {
     Column {
         val riskSignals by remember { mutableStateOf(listOf("No Signals")) }
 
@@ -39,91 +39,99 @@ fun PaymentResult(navController: NavController, success: Boolean) {
             if (success) "Payment processing confirmed with biometrics and passwordless credential" else "Payment denied"
 
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = mainText,
             style = MaterialTheme.typography.headlineSmall,
-            color = textColor
+            color = textColor,
         )
 
         KeyriIcon(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 40.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
             iconResId = if (success) R.drawable.ic_done else R.drawable.ic_denial,
-            iconTint = if (success) verifiedTextColor else warningTextColor
+            iconTint = if (success) verifiedTextColor else warningTextColor,
         )
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Summary risk determination:\n")
-                    }
+                text =
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Summary risk determination:\n")
+                        }
 
-                    withStyle(style = SpanStyle(color = warningTextColor)) {
-                        append("Warn")
-                    }
-                },
+                        withStyle(style = SpanStyle(color = warningTextColor)) {
+                            append("Warn")
+                        }
+                    },
                 style = MaterialTheme.typography.headlineSmall,
-                color = textColor
+                color = textColor,
             )
 
             if (riskSignals.isNotEmpty()) {
                 Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 30.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 30.dp),
                     textAlign = TextAlign.Center,
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Fraud risk signals:\n")
-                        }
+                    text =
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("Fraud risk signals:\n")
+                            }
 
-                        riskSignals.forEachIndexed { index, s ->
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                                append(s)
+                            riskSignals.forEachIndexed { index, s ->
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append(s)
 
-                                if (riskSignals.lastIndex != index) {
-                                    append(",")
+                                    if (riskSignals.lastIndex != index) {
+                                        append(",")
+                                    }
                                 }
                             }
-                        }
-                    },
+                        },
                     style = MaterialTheme.typography.headlineSmall,
-                    color = textColor
+                    color = textColor,
                 )
             }
 
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 20.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 20.dp),
                 textAlign = TextAlign.Center,
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Device info:\n")
-                    }
+                text =
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Device info:\n")
+                        }
 
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                        append("Device id: f8bd9...6d3b\n")
-                    }
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                            append("Device id: f8bd9...6d3b\n")
+                        }
 
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                        append("Location: New York City, NY, US")
-                    }
-                },
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                            append("Location: New York City, NY, US")
+                        }
+                    },
                 style = MaterialTheme.typography.headlineSmall,
-                color = textColor
+                color = textColor,
             )
         }
 
@@ -134,14 +142,17 @@ fun PaymentResult(navController: NavController, success: Boolean) {
                 containerColor = MaterialTheme.colorScheme.onPrimary,
                 onClick = {
                     navController.popBackStack(route = Routes.MainScreen.name, inclusive = false)
-                })
+                },
+            )
         } else {
-            KeyriButton(Modifier.padding(top = 28.dp),
+            KeyriButton(
+                Modifier.padding(top = 28.dp),
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 text = "Cancel",
                 onClick = {
                     navController.popBackStack(route = Routes.MainScreen.name, inclusive = false)
-                })
+                },
+            )
         }
     }
 }

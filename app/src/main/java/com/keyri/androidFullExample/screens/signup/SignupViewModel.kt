@@ -9,13 +9,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class SignupViewModel : ViewModel() {
-
     private val _signupState = MutableStateFlow(SignupInputState())
     val signupState = _signupState.asStateFlow()
 
-    fun validateInputs(): Boolean {
-        return _signupState.value.name.length > 2 && _signupState.value.email.isValidEmail() && _signupState.value.mobile.text.isEmpty() or _signupState.value.mobile.text.isValidPhoneNumber()
-    }
+    fun validateInputs(): Boolean =
+        _signupState.value.name.length > 2 &&
+            _signupState.value.email.isValidEmail() &&
+            _signupState.value.mobile.text
+                .isEmpty() or
+            _signupState.value.mobile.text
+                .isValidPhoneNumber()
 
     fun updateName(newName: String) {
         _signupState.value = _signupState.value.copy(name = newName)
@@ -29,4 +32,3 @@ class SignupViewModel : ViewModel() {
         _signupState.value = _signupState.value.copy(mobile = newMobile)
     }
 }
-

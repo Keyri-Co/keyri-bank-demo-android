@@ -8,9 +8,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class LoginViewModel(private val keyri: Keyri) : ViewModel() {
-
-    fun sendEvent(email: String?, onSent: () -> Unit) {
+class LoginViewModel(
+    private val keyri: Keyri,
+) : ViewModel() {
+    fun sendEvent(
+        email: String?,
+        onSent: () -> Unit,
+    ) {
         if (email == null) return
 
         viewModelScope.launch(Dispatchers.IO) {

@@ -29,31 +29,36 @@ import com.keyri.androidFullExample.utils.isValidEmail
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun LoginScreen(viewModel: LoginViewModel = koinViewModel(), navController: NavController) {
+fun LoginScreen(
+    viewModel: LoginViewModel = koinViewModel(),
+    navController: NavController,
+) {
     var email by remember { mutableStateOf("") }
 
     Column {
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Enter email address to log in",
             style = MaterialTheme.typography.headlineSmall,
-            color = textColor
+            color = textColor,
         )
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-                    .align(Alignment.CenterHorizontally),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "We’ll send you an email magic link. It expires 15 minutes after you request it.",
                 style = MaterialTheme.typography.bodySmall,
-                color = textColor
+                color = textColor,
             )
 
             KeyriTextField(
@@ -62,7 +67,7 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel(), navController: NavC
                 placeholder = {
                     Text(
                         text = "Email address",
-                        color = textFieldUnfocusedColor
+                        color = textFieldUnfocusedColor,
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -70,7 +75,8 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel(), navController: NavC
             )
         }
 
-        KeyriButton(modifier = Modifier.padding(top = 28.dp),
+        KeyriButton(
+            modifier = Modifier.padding(top = 28.dp),
             enabled = email.isValidEmail(),
             disabledTextColor = primaryDisabled,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
@@ -81,20 +87,22 @@ fun LoginScreen(viewModel: LoginViewModel = koinViewModel(), navController: NavC
                 viewModel.sendEvent(email) {
                     navController.navigate("${Routes.VerifiedScreen.name}?email=$email&isVerified=false")
                 }
-            })
+            },
+        )
 
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 28.dp)
-                .align(Alignment.CenterHorizontally)
-                .clickable {
-                    navController.popBackStack()
-                },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 28.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .clickable {
+                        navController.popBackStack()
+                    },
             textAlign = TextAlign.Center,
             text = "Cancel",
             style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.primary,
         )
     }
 }

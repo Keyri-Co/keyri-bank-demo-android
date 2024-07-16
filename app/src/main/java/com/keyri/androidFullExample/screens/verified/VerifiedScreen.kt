@@ -37,7 +37,7 @@ fun VerifiedScreen(
     isVerified: Boolean,
     email: String,
     number: String? = null,
-    onShowSnackbar: (String) -> Unit
+    onShowSnackbar: (String) -> Unit,
 ) {
     SideEffect {
         viewModel.saveBiometricAuth(email) {}
@@ -48,60 +48,65 @@ fun VerifiedScreen(
         var showBiometricPrompt by remember { mutableStateOf(false) }
 
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
-            text = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                    append(email)
-                }
-
-                if (number != null) {
-                    append(" and ")
-
+            text =
+                buildAnnotatedString {
                     withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                        append(number)
+                        append(email)
                     }
-                }
 
-                if (isVerified) {
-                    append(" verified")
-                } else {
-                    append(" confirmed")
-                }
-            },
+                    if (number != null) {
+                        append(" and ")
+
+                        withStyle(style = SpanStyle(color = verifiedTextColor)) {
+                            append(number)
+                        }
+                    }
+
+                    if (isVerified) {
+                        append(" verified")
+                    } else {
+                        append(" confirmed")
+                    }
+                },
             style = MaterialTheme.typography.headlineSmall,
-            color = textColor
+            color = textColor,
         )
 
         KeyriIcon(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 40.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
             iconResId = R.drawable.ic_done,
-            iconTint = verifiedTextColor
+            iconTint = verifiedTextColor,
         )
 
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 40.dp)
-                .align(Alignment.CenterHorizontally),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Passwordless credential created",
             style = MaterialTheme.typography.headlineSmall,
-            color = textColor
+            color = textColor,
         )
 
         KeyriIcon(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 40.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
             iconResId = R.drawable.ic_key,
             iconTint = verifiedTextColor,
-            iconSizeFraction = 0.5F
+            iconSizeFraction = 0.5F,
         )
 
         if (showBiometricPrompt) {
@@ -111,15 +116,17 @@ fun VerifiedScreen(
                 showBiometricPrompt = false
 
                 navController.navigateWithPopUp(
-                    "${Routes.MainScreen.name}?email={$email}", Routes.WelcomeScreen.name
+                    "${Routes.MainScreen.name}?email={$email}",
+                    Routes.WelcomeScreen.name,
                 )
             }
         }
 
         KeyriButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 40.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp),
             text = "Set up biometric authentication",
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
         ) {

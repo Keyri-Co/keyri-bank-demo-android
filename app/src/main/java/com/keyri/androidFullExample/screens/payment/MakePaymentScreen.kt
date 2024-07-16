@@ -32,58 +32,62 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun MakePayment(
     viewModel: MakePaymentViewModel = koinViewModel(),
-    navController: NavHostController
+    navController: NavHostController,
 ) {
     var amount by remember { mutableFloatStateOf(0.0F) }
     var recipientInfo by remember { mutableStateOf("") }
 
     Column {
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Make payment",
             style = MaterialTheme.typography.headlineSmall,
-            color = textColor
+            color = textColor,
         )
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "Enter dollar amount",
                 style = MaterialTheme.typography.bodySmall,
-                color = textColor
+                color = textColor,
             )
 
             KeyriTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 5.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 5.dp),
                 value = amount.takeIf { it != 0F }?.toString() ?: "",
                 placeholder = {
                     Text(
                         text = "$0.00",
-                        color = textFieldUnfocusedColor
+                        color = textFieldUnfocusedColor,
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                onValueChange = { amount = it.toFloatOrNull() ?: 0F }
+                onValueChange = { amount = it.toFloatOrNull() ?: 0F },
             )
 
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-                    .align(Alignment.CenterHorizontally),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "Enter recipient information",
                 style = MaterialTheme.typography.bodySmall,
-                color = textColor
+                color = textColor,
             )
 
             KeyriTextField(
@@ -92,7 +96,7 @@ fun MakePayment(
                 placeholder = {
                     Text(
                         text = "Name or id",
-                        color = textFieldUnfocusedColor
+                        color = textFieldUnfocusedColor,
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -100,7 +104,8 @@ fun MakePayment(
             )
         }
 
-        KeyriButton(modifier = Modifier.padding(top = 28.dp),
+        KeyriButton(
+            modifier = Modifier.padding(top = 28.dp),
             enabled = amount > 0F && recipientInfo.isNotEmpty(),
             disabledTextColor = primaryDisabled,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
@@ -111,21 +116,23 @@ fun MakePayment(
                 viewModel.performMakePaymentEvent(recipientInfo, amount) { success ->
                     navController.navigate("${Routes.PaymentResultScreen.name}?success=$success")
                 }
-            })
+            },
+        )
 
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 28.dp)
-                .align(Alignment.CenterHorizontally)
-                .clickable {
-                    navController.popBackStack()
-                },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 28.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .clickable {
+                        navController.popBackStack()
+                    },
             textAlign = TextAlign.Center,
             text = "Cancel",
             style = MaterialTheme.typography.headlineSmall,
             color = MaterialTheme.colorScheme.primary,
-            fontSize = 14.sp
+            fontSize = 14.sp,
         )
     }
 }

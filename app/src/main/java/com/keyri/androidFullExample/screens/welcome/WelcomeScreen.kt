@@ -72,74 +72,80 @@ fun WelcomeScreen(
             "Use Biometric to login as",
             keyriAccounts.value.currentProfile,
             {},
-            { needAuth = true }) {
+            { needAuth = true },
+        ) {
             navController.navigateWithPopUp(Routes.MainScreen.name, Routes.WelcomeScreen.name)
             blockBiometricPrompt = true
         }
     } else {
         Column {
             Text(
-                modifier = Modifier
-                    .padding(top = 80.dp)
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                modifier =
+                    Modifier
+                        .padding(top = 80.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = if (keyriAccounts.value.profiles.isEmpty()) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
                 style = MaterialTheme.typography.headlineLarge,
-                color = textColor
+                color = textColor,
             )
 
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1F)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1F),
             ) {
                 Image(
-                    modifier = Modifier
-                        .size(130.dp, 62.dp)
-                        .align(Alignment.Center)
-                        .combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                viewModel.removeAllAccounts {
-                                    viewModel.checkKeyriAccounts()
+                    modifier =
+                        Modifier
+                            .size(130.dp, 62.dp)
+                            .align(Alignment.Center)
+                            .combinedClickable(
+                                onClick = {},
+                                onLongClick = {
+                                    viewModel.removeAllAccounts {
+                                        viewModel.checkKeyriAccounts()
 
-                                    @Suppress("Deprecation")
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        val effect = VibrationEffect.createOneShot(
-                                            100,
-                                            VibrationEffect.DEFAULT_AMPLITUDE
-                                        )
-
+                                        @Suppress("Deprecation")
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            val vibratorManager =
-                                                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-                                            val vibrator = vibratorManager?.defaultVibrator
+                                            val effect =
+                                                VibrationEffect.createOneShot(
+                                                    100,
+                                                    VibrationEffect.DEFAULT_AMPLITUDE,
+                                                )
+
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                                val vibratorManager =
+                                                    context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                                                val vibrator = vibratorManager?.defaultVibrator
+
+                                                vibrator?.cancel()
+                                                vibrator?.vibrate(effect)
+                                            }
+                                        } else {
+                                            val vibrator =
+                                                context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
 
                                             vibrator?.cancel()
-                                            vibrator?.vibrate(effect)
+                                            vibrator?.vibrate(100)
                                         }
-                                    } else {
-                                        val vibrator =
-                                            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-
-                                        vibrator?.cancel()
-                                        vibrator?.vibrate(100)
                                     }
-                                }
-                            },
-                        ),
+                                },
+                            ),
                     contentScale = ContentScale.Fit,
                     painter = painterResource(id = R.drawable.ic_keyri_icon_full),
-                    contentDescription = null
+                    contentDescription = null,
                 )
             }
 
-            val containerColors = if (keyriAccounts.value.profiles.isEmpty()) {
-                MaterialTheme.colorScheme.onPrimary to MaterialTheme.colorScheme.primary.copy(alpha = 0.04F)
-            } else {
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.04F) to MaterialTheme.colorScheme.onPrimary
-            }
+            val containerColors =
+                if (keyriAccounts.value.profiles.isEmpty()) {
+                    MaterialTheme.colorScheme.onPrimary to MaterialTheme.colorScheme.primary.copy(alpha = 0.04F)
+                } else {
+                    MaterialTheme.colorScheme.primary.copy(alpha = 0.04F) to MaterialTheme.colorScheme.onPrimary
+                }
 
             KeyriButton(
                 Modifier,
@@ -155,27 +161,41 @@ fun WelcomeScreen(
                     } else {
                         navController.navigate("${Routes.VerifyScreen.name}?email=null&number=null&isVerify=false")
                     }
-                })
+                },
+            )
 
-            KeyriButton(Modifier.padding(top = 28.dp),
+            KeyriButton(
+                Modifier.padding(top = 28.dp),
                 containerColor = containerColors.second,
                 text = "Sign up",
                 onClick = {
                     navController.navigate(Routes.SignupScreen.name)
-                })
+                },
+            )
         }
 
-        val promptInfo = if (keyriAccounts.value.profiles.size == 1) {
-            "Use Biometric to login as" to keyriAccounts.value.profiles.firstOrNull()?.email
-        } else {
-            "Use Biometric to login" to null
-        }
+        val promptInfo =
+            if (keyriAccounts.value.profiles.size == 1) {
+                "Use Biometric to login as" to
+                    keyriAccounts.value.profiles
+                        .firstOrNull()
+                        ?.email
+            } else {
+                "Use Biometric to login" to null
+            }
 
         if (showBiometricPrompt) {
-            BiometricAuth(context, promptInfo.first, promptInfo.second, {},
-                { showBiometricPrompt = false }) {
+            BiometricAuth(
+                context,
+                promptInfo.first,
+                promptInfo.second,
+                {},
+                { showBiometricPrompt = false },
+            ) {
                 viewModel.setCurrentProfile(
-                    clickedAccount ?: keyriAccounts.value.profiles.firstOrNull()?.email
+                    clickedAccount ?: keyriAccounts.value.profiles
+                        .firstOrNull()
+                        ?.email,
                 )
 
                 navController.navigateWithPopUp(Routes.MainScreen.name, Routes.WelcomeScreen.name)
@@ -204,7 +224,7 @@ fun WelcomeScreen(
                     coroutineScope.launch(Dispatchers.IO) {
                         sheetState.hide()
                     }
-                }
+                },
             )
         }
     }

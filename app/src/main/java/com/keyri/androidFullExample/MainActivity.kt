@@ -38,7 +38,6 @@ import com.keyri.androidFullExample.theme.KeyriDemoTheme
 import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -50,19 +49,23 @@ class MainActivity : FragmentActivity() {
                 val navController = rememberNavController()
                 val snackbarHostState = remember { SnackbarHostState() }
 
-                Scaffold(modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.onPrimary)
-                    .imePadding(),
-                    snackbarHost = { SnackbarHost(snackbarHostState) }) { innerPadding ->
+                Scaffold(
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.onPrimary)
+                            .imePadding(),
+                    snackbarHost = { SnackbarHost(snackbarHostState) },
+                ) { innerPadding ->
                     Box(
-                        modifier = Modifier
-                            .padding(innerPadding)
-                            .padding(50.dp)
+                        modifier =
+                            Modifier
+                                .padding(innerPadding)
+                                .padding(50.dp),
                     ) {
                         NavHost(
                             navController = navController,
-                            startDestination = Routes.WelcomeScreen.name
+                            startDestination = Routes.WelcomeScreen.name,
                         ) {
                             composable(Routes.WelcomeScreen.name) {
                                 WelcomeScreen(navController = navController)
@@ -78,33 +81,44 @@ class MainActivity : FragmentActivity() {
 
                             composable(
                                 "${Routes.VerifiedScreen.name}?email={email}&number={number}&isVerified={isVerified}",
-                                arguments = listOf(navArgument("email") {
-                                    type = NavType.StringType
-                                    nullable = false
-                                }, navArgument("number") {
-                                    type = NavType.StringType
-                                    nullable = true
-                                }, navArgument("isVerified") {
-                                    type = NavType.BoolType
-                                }),
-                                deepLinks = listOf(
-                                    navDeepLink {
-                                        uriPattern =
-                                            "https://android-full-example.keyri.com?email={email}&isVerified={isVerified}"
-                                    },
-                                    navDeepLink {
-                                        uriPattern =
-                                            "https://android-full-example.keyri.com?email={email}&number={number}&isVerified={isVerified}"
-                                    })
+                                arguments =
+                                    listOf(
+                                        navArgument("email") {
+                                            type = NavType.StringType
+                                            nullable = false
+                                        },
+                                        navArgument("number") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("isVerified") {
+                                            type = NavType.BoolType
+                                        },
+                                    ),
+                                deepLinks =
+                                    listOf(
+                                        navDeepLink {
+                                            uriPattern =
+                                                "https://android-full-example.keyri.com?email={email}&isVerified={isVerified}"
+                                        },
+                                        navDeepLink {
+                                            uriPattern =
+                                                "https://android-full-example.keyri.com?email={email}&number={number}&isVerified={isVerified}"
+                                        },
+                                    ),
                             ) { backStackEntry ->
-                                val email = backStackEntry.arguments?.getString("email")
-                                    ?: throw IllegalStateException("Email shouldn't be null")
-                                val number = backStackEntry.arguments?.getString("number")
-                                    ?.takeIf { it.isNotEmpty() }
+                                val email =
+                                    backStackEntry.arguments?.getString("email")
+                                        ?: throw IllegalStateException("Email shouldn't be null")
+                                val number =
+                                    backStackEntry.arguments
+                                        ?.getString("number")
+                                        ?.takeIf { it.isNotEmpty() }
                                 val isVerified =
                                     backStackEntry.arguments?.getBoolean("isVerified") ?: true
 
-                                VerifiedScreen(navController = navController,
+                                VerifiedScreen(
+                                    navController = navController,
                                     isVerified = isVerified,
                                     email = email,
                                     number = number,
@@ -113,27 +127,35 @@ class MainActivity : FragmentActivity() {
                                             snackbarHostState.showSnackbar(
                                                 message = it,
                                                 withDismissAction = true,
-                                                duration = SnackbarDuration.Long
+                                                duration = SnackbarDuration.Long,
                                             )
                                         }
-                                    })
+                                    },
+                                )
                             }
 
                             composable(
                                 "${Routes.VerifyScreen.name}?email={email}&number={number}&isVerify={isVerify}",
-                                arguments = listOf(navArgument("email") {
-                                    type = NavType.StringType
-                                    nullable = true
-                                }, navArgument("number") {
-                                    type = NavType.StringType
-                                    nullable = true
-                                }, navArgument("isVerify") {
-                                    type = NavType.BoolType
-                                })
+                                arguments =
+                                    listOf(
+                                        navArgument("email") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("number") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("isVerify") {
+                                            type = NavType.BoolType
+                                        },
+                                    ),
                             ) { backStackEntry ->
                                 val email = backStackEntry.arguments?.getString("email")
-                                val number = backStackEntry.arguments?.getString("number")
-                                    ?.takeIf { it.isNotEmpty() }
+                                val number =
+                                    backStackEntry.arguments
+                                        ?.getString("number")
+                                        ?.takeIf { it.isNotEmpty() }
                                 val isVerify =
                                     backStackEntry.arguments?.getBoolean("isVerify") ?: true
 
@@ -147,10 +169,10 @@ class MainActivity : FragmentActivity() {
                                             snackbarHostState.showSnackbar(
                                                 message = it,
                                                 withDismissAction = true,
-                                                duration = SnackbarDuration.Long
+                                                duration = SnackbarDuration.Long,
                                             )
                                         }
-                                    }
+                                    },
                                 )
                             }
 
@@ -164,15 +186,19 @@ class MainActivity : FragmentActivity() {
 
                             composable(
                                 "${Routes.PaymentResultScreen.name}?success={success}",
-                                arguments = listOf(navArgument("success") {
-                                    type = NavType.BoolType
-                                })
+                                arguments =
+                                    listOf(
+                                        navArgument("success") {
+                                            type = NavType.BoolType
+                                        },
+                                    ),
                             ) { backStackEntry ->
                                 val success =
                                     backStackEntry.arguments?.getBoolean("success") ?: false
 
                                 PaymentResult(
-                                    navController = navController, success
+                                    navController = navController,
+                                    success,
                                 )
                             }
                         }

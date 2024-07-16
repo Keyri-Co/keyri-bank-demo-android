@@ -32,48 +32,51 @@ fun ListModalBottomSheet(
     title: String,
     list: List<ModalListItem>,
     onListItemClicked: (ModalListItem) -> Unit,
-    onDismissRequest: () -> Unit
+    onDismissRequest: () -> Unit,
 ) {
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.onPrimary,
         dragHandle = null,
         onDismissRequest = onDismissRequest,
-        sheetState = sheetState
+        sheetState = sheetState,
     ) {
         Column {
             Text(
                 textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .padding(20.dp)
-                    .fillMaxWidth(),
-                text = title
+                modifier =
+                    Modifier
+                        .padding(20.dp)
+                        .fillMaxWidth(),
+                text = title,
             )
 
             LazyColumn(modifier = Modifier.padding(vertical = 20.dp)) {
                 items(list) {
                     Row(
-                        modifier = Modifier
-                            .wrapContentHeight()
-                            .padding(8.dp)
-                            .fillMaxWidth()
-                            .clickable {
-                                onListItemClicked(it)
-                            }
+                        modifier =
+                            Modifier
+                                .wrapContentHeight()
+                                .padding(8.dp)
+                                .fillMaxWidth()
+                                .clickable {
+                                    onListItemClicked(it)
+                                },
                     ) {
                         it.iconRes?.let { iconRes ->
                             Image(
                                 modifier = Modifier.size(54.dp),
                                 painter = painterResource(iconRes),
-                                contentDescription = null
+                                contentDescription = null,
                             )
                         }
 
                         Text(
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .padding(start = 16.dp),
+                            modifier =
+                                Modifier
+                                    .align(Alignment.CenterVertically)
+                                    .padding(start = 16.dp),
                             textAlign = TextAlign.Center,
-                            text = it.text
+                            text = it.text,
                         )
                     }
 

@@ -30,7 +30,10 @@ import com.keyri.androidFullExample.theme.warningTextColor
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: NavController) {
+fun MainScreen(
+    viewModel: MainScreenViewModel = koinViewModel(),
+    navController: NavController,
+) {
     SideEffect {
         viewModel.getCurrentProfile()
     }
@@ -41,89 +44,97 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
 
     Column {
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 40.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
             textAlign = TextAlign.Center,
-            text = buildAnnotatedString {
-                append("Authenticated as\n")
+            text =
+                buildAnnotatedString {
+                    append("Authenticated as\n")
 
-                withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                    append(currentProfile.value)
-                }
-            },
+                    withStyle(style = SpanStyle(color = verifiedTextColor)) {
+                        append(currentProfile.value)
+                    }
+                },
             style = MaterialTheme.typography.headlineSmall,
-            color = textColor
+            color = textColor,
         )
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Summary risk determination:\n")
-                    }
+                text =
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Summary risk determination:\n")
+                        }
 
-                    withStyle(style = SpanStyle(color = warningTextColor)) {
-                        append("Warn")
-                    }
-                },
+                        withStyle(style = SpanStyle(color = warningTextColor)) {
+                            append("Warn")
+                        }
+                    },
                 style = MaterialTheme.typography.headlineSmall,
-                color = textColor
+                color = textColor,
             )
 
             if (riskSignals.isNotEmpty()) {
                 Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 30.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 30.dp),
                     textAlign = TextAlign.Center,
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Fraud risk signals:\n")
-                        }
+                    text =
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("Fraud risk signals:\n")
+                            }
 
-                        riskSignals.forEachIndexed { index, s ->
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                                append(s)
+                            riskSignals.forEachIndexed { index, s ->
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append(s)
 
-                                if (riskSignals.lastIndex != index) {
-                                    append(",")
+                                    if (riskSignals.lastIndex != index) {
+                                        append(",")
+                                    }
                                 }
                             }
-                        }
-                    },
+                        },
                     style = MaterialTheme.typography.headlineSmall,
-                    color = textColor
+                    color = textColor,
                 )
             }
 
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 20.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 20.dp),
                 textAlign = TextAlign.Center,
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Device info:\n")
-                    }
+                text =
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Device info:\n")
+                        }
 
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                        append("Device id: f8bd9...6d3b\n")
-                    }
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                            append("Device id: f8bd9...6d3b\n")
+                        }
 
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                        append("Location: New York City, NY, US")
-                    }
-                },
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                            append("Location: New York City, NY, US")
+                        }
+                    },
                 style = MaterialTheme.typography.headlineSmall,
-                color = textColor
+                color = textColor,
             )
         }
 
@@ -142,15 +153,16 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
                     }
                 },
                 dialogTitle = "Log out?",
-                dialogText = buildAnnotatedString {
-                    append("Are you sure you want to log out from ")
+                dialogText =
+                    buildAnnotatedString {
+                        append("Are you sure you want to log out from ")
 
-                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append(currentProfile.value)
-                    }
+                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                            append(currentProfile.value)
+                        }
 
-                    append("?")
-                },
+                        append("?")
+                    },
             )
         }
 
@@ -159,13 +171,16 @@ fun MainScreen(viewModel: MainScreenViewModel = koinViewModel(), navController: 
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
             onClick = {
                 navController.navigate(Routes.MakePaymentScreen.name)
-            })
+            },
+        )
 
-        KeyriButton(Modifier.padding(top = 28.dp),
+        KeyriButton(
+            Modifier.padding(top = 28.dp),
             containerColor = MaterialTheme.colorScheme.onPrimary,
             text = "Log out",
             onClick = {
                 openAlertDialog.value = true
-            })
+            },
+        )
     }
 }

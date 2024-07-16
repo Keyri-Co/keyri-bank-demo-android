@@ -8,36 +8,38 @@ import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRe
 import com.keyri.androidFullExample.services.entities.responses.KeyriResponse
 import com.keyri.androidFullExample.services.makeApiCall
 
-class KeyriDemoRepository(private val apiService: ApiService) {
-
-    suspend fun cryptoRegister(email: String, associationKey: String): KeyriResponse {
-        return makeApiCall {
+class KeyriDemoRepository(
+    private val apiService: ApiService,
+) {
+    suspend fun cryptoRegister(
+        email: String,
+        associationKey: String,
+    ): KeyriResponse =
+        makeApiCall {
             apiService.cryptoRegister(
                 CryptoRegisterRequest(
                     email,
-                    associationKey
-                )
+                    associationKey,
+                ),
             )
         }.getOrThrow()
-    }
 
-    suspend fun cryptoLogin(email: String, data: String, signatureB64: String): KeyriResponse {
-        return makeApiCall {
+    suspend fun cryptoLogin(
+        email: String,
+        data: String,
+        signatureB64: String,
+    ): KeyriResponse =
+        makeApiCall {
             apiService.cryptoLogin(
                 CryptoLoginRequest(
                     email,
                     data,
-                    signatureB64
-                )
+                    signatureB64,
+                ),
             )
         }.getOrThrow()
-    }
 
-    suspend fun emailLogin(email: String): KeyriResponse {
-        return makeApiCall { apiService.emailLogin(EmailLoginRequest(email)) }.getOrThrow()
-    }
+    suspend fun emailLogin(email: String): KeyriResponse = makeApiCall { apiService.emailLogin(EmailLoginRequest(email)) }.getOrThrow()
 
-    suspend fun smsLogin(number: String): KeyriResponse {
-        return makeApiCall { apiService.smsLogin(ReverseSmsLoginRequest(number)) }.getOrThrow()
-    }
+    suspend fun smsLogin(number: String): KeyriResponse = makeApiCall { apiService.smsLogin(ReverseSmsLoginRequest(number)) }.getOrThrow()
 }

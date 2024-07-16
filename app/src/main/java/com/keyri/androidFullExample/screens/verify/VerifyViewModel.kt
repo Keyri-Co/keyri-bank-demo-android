@@ -19,21 +19,27 @@ import kotlin.concurrent.timer
 class VerifyViewModel(
     private val keyri: Keyri,
     private val dataStore: DataStore<KeyriProfiles>,
-    private val repository: KeyriDemoRepository
+    private val repository: KeyriDemoRepository,
 ) : ViewModel() {
-
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow()
 
-    private val throwableScope = Dispatchers.IO + CoroutineExceptionHandler { _, throwable ->
-        _errorMessage.value = throwable.message
+    private val throwableScope =
+        Dispatchers.IO +
+            CoroutineExceptionHandler { _, throwable ->
+                _errorMessage.value = throwable.message
 
-        timer(initialDelay = 1_000L, period = 1_000L) {
-            _errorMessage.value = null
-        }
-    }
+                timer(initialDelay = 1_000L, period = 1_000L) {
+                    _errorMessage.value = null
+                }
+            }
 
-    fun sendEvent(name: String?, email: String?, number: String?, onSuccess: () -> Unit) {
+    fun sendEvent(
+        name: String?,
+        email: String?,
+        number: String?,
+        onSuccess: () -> Unit,
+    ) {
         if (email == null) return
 
         viewModelScope.launch(throwableScope) {
@@ -45,7 +51,9 @@ class VerifyViewModel(
 
             dataStore.updateData {
                 val mappedProfiles =
-                    if (it.profiles.any { profile -> profile.email == email }) it.profiles else {
+                    if (it.profiles.any { profile -> profile.email == email }) {
+                        it.profiles
+                    } else {
                         it.profiles + KeyriProfile(name, email, number, false)
                     }
 
@@ -58,10 +66,14 @@ class VerifyViewModel(
         }
     }
 
-    fun cryptoRegister(email: String, onSuccess: () -> Unit) {
+    fun cryptoRegister(
+        email: String,
+        onSuccess: () -> Unit,
+    ) {
         viewModelScope.launch(throwableScope) {
-            val associationKey = keyri.getAssociationKey(email).getOrNull()
-                ?: keyri.generateAssociationKey(email).getOrThrow()
+            val associationKey =
+                keyri.getAssociationKey(email).getOrNull()
+                    ?: keyri.generateAssociationKey(email).getOrThrow()
 
             repository.cryptoRegister(email, associationKey)
 
@@ -71,7 +83,10 @@ class VerifyViewModel(
         }
     }
 
-    fun cryptoLogin(email: String, onSuccess: () -> Unit) {
+    fun cryptoLogin(
+        email: String,
+        onSuccess: () -> Unit,
+    ) {
         viewModelScope.launch(throwableScope) {
             val data = System.currentTimeMillis().toString()
             val signatureB64 = keyri.generateUserSignature(email, data).getOrThrow()
@@ -84,7 +99,10 @@ class VerifyViewModel(
         }
     }
 
-    fun emailLogin(email: String, onSuccess: () -> Unit) {
+    fun emailLogin(
+        email: String,
+        onSuccess: () -> Unit,
+    ) {
         viewModelScope.launch(throwableScope) {
             repository.emailLogin(email)
 
@@ -94,7 +112,10 @@ class VerifyViewModel(
         }
     }
 
-    fun smsLogin(number: String, onSuccess: () -> Unit) {
+    fun smsLogin(
+        number: String,
+        onSuccess: () -> Unit,
+    ) {
         viewModelScope.launch(throwableScope) {
             repository.smsLogin(number)
 

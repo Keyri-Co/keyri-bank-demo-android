@@ -28,38 +28,44 @@ fun KeyriButton(
     borderColor: Color = MaterialTheme.colorScheme.primary,
     disabledBorderColor: Color = Color.Companion.Unspecified,
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     OutlinedButton(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(54.dp),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(54.dp),
         shape = RoundedCornerShape(8.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (enabled) borderColor else disabledBorderColor
-        ),
-        colors = ButtonDefaults.outlinedButtonColors()
-            .copy(
-                containerColor = containerColor,
-                disabledContainerColor = disabledContainerColor,
+        border =
+            BorderStroke(
+                width = 1.dp,
+                color = if (enabled) borderColor else disabledBorderColor,
             ),
+        colors =
+            ButtonDefaults
+                .outlinedButtonColors()
+                .copy(
+                    containerColor = containerColor,
+                    disabledContainerColor = disabledContainerColor,
+                ),
         enabled = enabled,
         onClick = onClick,
     ) {
         if (progress) {
             CircularProgressIndicator(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .size(32.dp),
-                color = textColor
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterVertically)
+                        .size(32.dp),
+                color = textColor,
             )
         } else {
             Text(
-                modifier = Modifier
-                    .align(Alignment.CenterVertically),
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterVertically),
                 text = text,
-                color = if (enabled) textColor else disabledTextColor
+                color = if (enabled) textColor else disabledTextColor,
             )
         }
     }

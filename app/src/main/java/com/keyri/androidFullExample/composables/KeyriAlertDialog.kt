@@ -23,11 +23,12 @@ fun KeyriAlertDialog(
     AlertDialog(
         icon = {
             Image(
-                modifier = Modifier
-                    .size(42.dp, 42.dp),
+                modifier =
+                    Modifier
+                        .size(42.dp, 42.dp),
                 contentScale = ContentScale.Fit,
                 painter = painterResource(id = R.drawable.ic_keyri_icon_full),
-                contentDescription = null
+                contentDescription = null,
             )
         },
         title = {
@@ -43,7 +44,7 @@ fun KeyriAlertDialog(
             TextButton(
                 onClick = {
                     onConfirmation()
-                }
+                },
             ) {
                 Text("Confirm")
             }
@@ -52,10 +53,10 @@ fun KeyriAlertDialog(
             TextButton(
                 onClick = {
                     onDismissRequest()
-                }
+                },
             ) {
                 Text("Cancel")
             }
-        }
+        },
     )
 }

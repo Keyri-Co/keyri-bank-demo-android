@@ -19,37 +19,45 @@ import androidx.compose.ui.unit.dp
 import com.keyri.androidFullExample.theme.textFieldUnfocusedColor
 
 @Composable
-fun KeyriIcon(modifier: Modifier, @DrawableRes iconResId: Int, iconTint: Color, iconSizeFraction: Float = 0.3F) {
+fun KeyriIcon(
+    modifier: Modifier,
+    @DrawableRes iconResId: Int,
+    iconTint: Color,
+    iconSizeFraction: Float = 0.3F,
+) {
     Box(
-        modifier = modifier
-            .size(110.dp)
-            .background(
-                brush = Brush.radialGradient(
-                    colors = listOf(
-                        textFieldUnfocusedColor.copy(alpha = 0.4F),
-                        Color.Transparent
-                    )
-                )
-            )
-            .padding(bottom = 10.dp),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .size(110.dp)
+                .background(
+                    brush =
+                        Brush.radialGradient(
+                            colors =
+                                listOf(
+                                    textFieldUnfocusedColor.copy(alpha = 0.4F),
+                                    Color.Transparent,
+                                ),
+                        ),
+                ).padding(bottom = 10.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Surface(
             shape = CircleShape,
-            modifier = Modifier
-                .padding()
-                .size(90.dp)
-                .background(Color.Transparent)
+            modifier =
+                Modifier
+                    .padding()
+                    .size(90.dp)
+                    .background(Color.Transparent),
         ) {
             Box(
                 modifier = Modifier.background(Color.White),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     modifier = Modifier.fillMaxSize(iconSizeFraction),
                     painter = painterResource(iconResId),
                     contentDescription = null,
-                    tint = iconTint
+                    tint = iconTint,
                 )
             }
         }

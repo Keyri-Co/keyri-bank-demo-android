@@ -12,9 +12,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class WelcomeViewModel(private val dataStore: DataStore<KeyriProfiles>, private val keyri: Keyri) :
-    ViewModel() {
-
+class WelcomeViewModel(
+    private val dataStore: DataStore<KeyriProfiles>,
+    private val keyri: Keyri,
+) : ViewModel() {
     private val _keyriAccounts = MutableStateFlow(KeyriProfiles(null, emptyList()))
     val keyriAccounts = _keyriAccounts.asStateFlow()
 
@@ -33,13 +34,14 @@ class WelcomeViewModel(private val dataStore: DataStore<KeyriProfiles>, private 
     fun setCurrentProfile(currentProfile: String?) {
         viewModelScope.launch(Dispatchers.IO) {
             dataStore.updateData { keyriProfiles ->
-                val mappedProfiles = keyriProfiles.profiles.map {
-                    if (currentProfile == it.name) {
-                        it.copy(biometricAuthEnabled = true)
-                    } else {
-                        it
+                val mappedProfiles =
+                    keyriProfiles.profiles.map {
+                        if (currentProfile == it.name) {
+                            it.copy(biometricAuthEnabled = true)
+                        } else {
+                            it
+                        }
                     }
-                }
 
                 keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
             }

@@ -1,6 +1,5 @@
 package com.keyri.androidFullExample.services
 
-import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.keyri.androidFullExample.converter.ConverterFactory
@@ -8,7 +7,6 @@ import com.keyri.androidFullExample.services.entities.responses.ErrorResponse
 import com.keyrico.keyrisdk.exception.AuthorizationException
 import com.keyrico.keyrisdk.exception.KeyriApiException
 import com.keyrico.keyrisdk.exception.NetworkException
-import com.keyrico.keyrisdk.telemetry.TelemetryManager
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONObject
@@ -70,14 +68,17 @@ suspend fun <T : Any> makeApiCall(call: suspend () -> Response<T>): Result<T> {
 fun provideApiService(): ApiService {
     val okHttpClientBuilder = OkHttpClient.Builder()
 
-    okHttpClientBuilder.connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+    okHttpClientBuilder
+        .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
         .readTimeout(TIMEOUT, TimeUnit.SECONDS)
 
-    HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }.let(okHttpClientBuilder::addInterceptor)
+    HttpLoggingInterceptor()
+        .apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }.let(okHttpClientBuilder::addInterceptor)
 
-    return Retrofit.Builder()
+    return Retrofit
+        .Builder()
         .baseUrl("https://app-demo-api.keyri.com")
         .addConverterFactory(ConverterFactory())
         .client(okHttpClientBuilder.build())

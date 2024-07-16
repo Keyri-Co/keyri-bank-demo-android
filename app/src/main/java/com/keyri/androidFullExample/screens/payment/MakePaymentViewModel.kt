@@ -15,18 +15,29 @@ import org.json.JSONObject
 
 class MakePaymentViewModel(
     private val keyri: Keyri,
-    private val dataStore: DataStore<KeyriProfiles>
+    private val dataStore: DataStore<KeyriProfiles>,
 ) : ViewModel() {
-    fun performMakePaymentEvent(recipient: String, amount: Float, result: (Boolean) -> Unit) {
+    fun performMakePaymentEvent(
+        recipient: String,
+        amount: Float,
+        result: (Boolean) -> Unit,
+    ) {
         viewModelScope.launch(Dispatchers.IO) {
             dataStore.data
                 .mapNotNull { it.currentProfile }
                 .collectLatest { email ->
                     val eventResult =
-                        keyri.sendEvent(email, EventType.withdrawal(metadata = JSONObject().apply {
-                            put("recipient", recipient)
-                            put("amount", amount)
-                        }), true)
+                        keyri.sendEvent(
+                            email,
+                            EventType.withdrawal(
+                                metadata =
+                                    JSONObject().apply {
+                                        put("recipient", recipient)
+                                        put("amount", amount)
+                                    },
+                            ),
+                            true,
+                        )
                     withContext(Dispatchers.Main) {
                         result(eventResult.isSuccess)
                     }

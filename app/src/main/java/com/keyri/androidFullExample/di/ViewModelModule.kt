@@ -10,12 +10,13 @@ import com.keyri.androidFullExample.screens.welcome.WelcomeViewModel
 import org.koin.androidx.viewmodel.dsl.viewModelOf
 import org.koin.dsl.module
 
-val viewModelsModule = module {
-    viewModelOf(::MainScreenViewModel)
-    viewModelOf(::WelcomeViewModel)
-    viewModelOf(::VerifyViewModel)
-    viewModelOf(::VerifiedViewModel)
-    viewModelOf(::LoginViewModel)
-    viewModelOf(::MakePaymentViewModel)
-    viewModelOf(::SignupViewModel)
-}
+val viewModelsModule =
+    module {
+        viewModelOf(::MainScreenViewModel)
+        viewModelOf(::WelcomeViewModel)
+        viewModelOf(::VerifyViewModel)
+        viewModelOf(::VerifiedViewModel)
+        viewModelOf(::LoginViewModel)
+        viewModelOf(::MakePaymentViewModel)
+        viewModelOf(::SignupViewModel)
+    }
