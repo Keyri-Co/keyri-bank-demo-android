@@ -34,8 +34,6 @@ fun ListModalBottomSheet(
     onListItemClicked: (ModalListItem) -> Unit,
     onDismissRequest: () -> Unit
 ) {
-    // TODO: Use it to show modal lists
-
     ModalBottomSheet(
         containerColor = MaterialTheme.colorScheme.onPrimary,
         dragHandle = null,

@@ -1,5 +1,6 @@
 package com.keyri.androidFullExample.screens.verify
 
+import android.Manifest
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -18,6 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,15 +58,30 @@ fun VerifyScreen(
     isVerify: Boolean,
     name: String? = null,
     email: String? = null,
-    number: String? = null
+    number: String? = null,
+    onShowSnackbar: (String) -> Unit
 ) {
-    // TODO: Add loaders here
-
     val coroutineScope = rememberCoroutineScope()
     var verifyType by remember { mutableStateOf<VerifyType?>(null) }
+//    var showVerifyNumberChooser by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val error = viewModel.errorMessage.collectAsState()
 
-    val sheetState = rememberModalBottomSheetState()
+    if (error.value != null) {
+        error.value?.let {
+            onShowSnackbar(it)
+        }
+    }
+
+
+    // TODO: Questions:
+    // 1. Ask Zain how magic link should looks like
+    // 2. Ask about FCM payload structure
+    // 3. Ask about responses (payload)
+    // 4. Phone verify and confirm number
+    // 5. Flow sequence
+
 
     val sendSmsPermissionState =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -135,32 +152,47 @@ fun VerifyScreen(
                 text = "${if (isVerify) "Verify" else "Confirm"} email",
                 progress = verifyType == VerifyType.EMAIL,
                 onClick = {
-//                    try {
-//                        val intent = Intent(Intent.ACTION_MAIN)
+                    email?.let {
+                        viewModel.emailLogin(it) {
+                            try {
+                                val intent = Intent(Intent.ACTION_MAIN)
+
+                                intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+                                context.startActivity(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                Toast.makeText(
+                                    context,
+                                    "There is no email client installed.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        }
+
+//                        if (isVerify) {
+//                            viewModel.cryptoRegister(it) {
 //
-//                        intent.addCategory(Intent.CATEGORY_APP_EMAIL)
-//                        context.startActivity(intent)
-//                    } catch (e: ActivityNotFoundException) {
-//                        Toast.makeText(
-//                            context,
-//                            "There is no email client installed.",
-//                            Toast.LENGTH_SHORT
-//                        ).show()
-//                    }
+//                            }
+//                        } else {
+//                            viewModel.cryptoLogin(it) {
+//
+//                            }
+//                        }
+                    }
+
 
                     // TODO: Do this after verify
-                    if (verifyType == null) {
-                        verifyType = VerifyType.EMAIL
-                        startEventTimer(
-                            coroutineScope,
-                            isVerify,
-                            viewModel,
-                            name,
-                            email,
-                            number,
-                            navController
-                        )
-                    }
+//                    if (verifyType == null) {
+//                        verifyType = VerifyType.EMAIL
+//                        startEventTimer(
+//                            coroutineScope,
+//                            isVerify,
+//                            viewModel,
+//                            name,
+//                            email,
+//                            number,
+//                            navController
+//                        )
+//                    }
                 })
 
             Text(
@@ -182,10 +214,7 @@ fun VerifyScreen(
 
             // TODO: If user clicks on verify and we see installed Telegram or WhatsApp -> show simple chooser with 3 options (if only sms - no need to show option)
 
-
             // TODO: Remove only do verify of chosen option
-
-            var showVerifyNumberChooser by remember { mutableStateOf(false) }
 
             KeyriButton(modifier = Modifier.padding(top = 20.dp),
                 enabled = number != null,
@@ -196,9 +225,9 @@ fun VerifyScreen(
                 progress = verifyType == VerifyType.NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} phone number",
                 onClick = {
-                    showVerifyNumberChooser = true
+//                    showVerifyNumberChooser = true
 
-                    //                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
 
                     // TODO: Need to notify user sms sending status? -> if loader - everything good
                     // TODO: If SMS wasn't sent - Show toast with error message and stop loader
@@ -218,40 +247,46 @@ fun VerifyScreen(
 //                    }
                 })
 
-            if (showVerifyNumberChooser) {
-                val list = mutableListOf(ModalListItem(null, "Verify with sending SMS"))
-
-                try {
-                    context.packageManager.getPackageInfo("org.telegram.messenger", 0)
-
-                    list.add(ModalListItem(R.drawable.ic_telegram, "Verify with Telegram app"))
-                } catch (_: PackageManager.NameNotFoundException) {}
-
-                // TODO: Some issue with Whatsapp, can't see it
-                try {
-                    val packageManager = context.packageManager
-                    val i = Intent(Intent.ACTION_VIEW)
-
-                    val url = "https://api.whatsapp.com/send?phone=dummy&text=hey"
-                    i.setPackage("com.whatsapp")
-                    i.setData(Uri.parse(url))
-
-                    if (i.resolveActivity(packageManager) != null) {
-                        ModalListItem(R.drawable.ic_whatsapp, "Verify with Whatsapp app")
-                    }
-
-                    context.packageManager.getPackageInfo("com.whatsapp", 0)
-
-                    ModalListItem(R.drawable.ic_whatsapp, "Verify with Whatsapp app")
-                } catch (_: PackageManager.NameNotFoundException) {}
-
-                ListModalBottomSheet(sheetState = sheetState, "Choose how to verify your number?", list, {
-                    // TODO: Finalize
-
-                }) {
-
-                }
-            }
+//            if (showVerifyNumberChooser) {
+//                val list = mutableListOf(ModalListItem(null, "Verify with sending SMS"))
+//
+//                try {
+//                    context.packageManager.getPackageInfo("org.telegram.messenger", 0)
+//
+//                    list.add(ModalListItem(R.drawable.ic_telegram, "Verify with Telegram app"))
+//                } catch (_: PackageManager.NameNotFoundException) {
+//                }
+//
+//                // TODO: Some issue with Whatsapp, can't see it
+//                try {
+//                    val packageManager = context.packageManager
+//                    val i = Intent(Intent.ACTION_VIEW)
+//
+//                    val url = "https://api.whatsapp.com/send?phone=dummy&text=hey"
+//                    i.setPackage("com.whatsapp")
+//                    i.setData(Uri.parse(url))
+//
+//                    if (i.resolveActivity(packageManager) != null) {
+//                        ModalListItem(R.drawable.ic_whatsapp, "Verify with Whatsapp app")
+//                    }
+//
+//                    context.packageManager.getPackageInfo("com.whatsapp", 0)
+//
+//                    ModalListItem(R.drawable.ic_whatsapp, "Verify with Whatsapp app")
+//                } catch (_: PackageManager.NameNotFoundException) {
+//                }
+//
+//                ListModalBottomSheet(
+//                    sheetState = sheetState,
+//                    "Choose how to verify your number?",
+//                    list,
+//                    {
+//                        // TODO: Finalize
+//
+//                    }) {
+//
+//                }
+//            }
 
             Text(
                 modifier = Modifier
@@ -279,36 +314,34 @@ fun VerifyScreen(
                 progress = verifyType == VerifyType.EMAIL_NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
-//                    try {
-//                        val intent = Intent(Intent.ACTION_MAIN)
-//
-//                        intent.addCategory(Intent.CATEGORY_APP_EMAIL)
-//                        context.startActivity(intent)
-//                    } catch (e: ActivityNotFoundException) {
-//                        Toast.makeText(
-//                            context,
-//                            "There is no email client installed.",
-//                            Toast.LENGTH_SHORT
-//                        ).show()
-//                    }
+                    try {
+                        val intent = Intent(Intent.ACTION_MAIN)
 
-//                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+                        intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+                        context.startActivity(intent)
+                    } catch (e: ActivityNotFoundException) {
+                        Toast.makeText(
+                            context,
+                            "There is no email client installed.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
 
-
+                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
 
                     // TODO: Do this after verify
-                    if (verifyType == null) {
-                        verifyType = VerifyType.EMAIL_NUMBER
-                        startEventTimer(
-                            coroutineScope,
-                            isVerify,
-                            viewModel,
-                            name,
-                            email,
-                            number,
-                            navController
-                        )
-                    }
+//                    if (verifyType == null) {
+//                        verifyType = VerifyType.EMAIL_NUMBER
+//                        startEventTimer(
+//                            coroutineScope,
+//                            isVerify,
+//                            viewModel,
+//                            name,
+//                            email,
+//                            number,
+//                            navController
+//                        )
+//                    }
                 })
         }
     }

@@ -3,6 +3,8 @@ package com.keyri.androidFullExample.di
 import android.content.Context
 import androidx.datastore.core.DataStore
 import com.keyri.androidFullExample.data.KeyriProfiles
+import com.keyri.androidFullExample.repositories.KeyriDemoRepository
+import com.keyri.androidFullExample.services.provideApiService
 import com.keyri.androidFullExample.utils.keyriProfilesDataStore
 import com.keyrico.keyrisdk.Keyri
 import com.keyrico.keyrisdk.config.KeyriDetectionsConfig
@@ -11,6 +13,7 @@ import org.koin.dsl.module
 val appModule = module {
     single { getKeyriProfilesDataStore(get()) }
     single { getKeyri(get()) }
+    single { KeyriDemoRepository(provideApiService()) }
 }
 
 private fun getKeyriProfilesDataStore(context: Context): DataStore<KeyriProfiles> {

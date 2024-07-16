@@ -7,21 +7,14 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -30,6 +23,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,10 +36,13 @@ import androidx.navigation.NavHostController
 import com.keyri.androidFullExample.R
 import com.keyri.androidFullExample.composables.BiometricAuth
 import com.keyri.androidFullExample.composables.KeyriButton
+import com.keyri.androidFullExample.composables.ListModalBottomSheet
+import com.keyri.androidFullExample.data.ModalListItem
 import com.keyri.androidFullExample.routes.Routes
-import com.keyri.androidFullExample.theme.primaryDisabled
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.utils.navigateWithPopUp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -60,8 +57,8 @@ fun WelcomeScreen(
 
     val context = LocalContext.current
 
-    // TODO: Migrate to created Modal sheet component, add skip collapsed? state to all sheets in projects (2)
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val coroutineScope = rememberCoroutineScope()
     val keyriAccounts = viewModel.keyriAccounts.collectAsState()
     var showAccountsList by remember { mutableStateOf(false) }
     var needAuth by remember { mutableStateOf(false) }
@@ -188,54 +185,27 @@ fun WelcomeScreen(
         }
 
         if (showAccountsList) {
-            ModalBottomSheet(
-                containerColor = MaterialTheme.colorScheme.onPrimary,
-                dragHandle = null,
-                onDismissRequest = { showAccountsList = false },
-                sheetState = sheetState
-            ) {
-                Column {
-                    Text(
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier
-                            .padding(20.dp)
-                            .fillMaxWidth(),
-                        text = "Choose an account\nto continue to Keyri Bank"
-                    )
+            ListModalBottomSheet(
+                sheetState = sheetState,
+                title = "Choose an account\nto continue to Keyri Bank",
+                keyriAccounts.value.profiles.map { ModalListItem(iconRes = R.drawable.ic_keyri_logo, text = it.email) },
+                onListItemClicked = {
+                    showBiometricPrompt = true
+                    showAccountsList = false
+                    clickedAccount = it.text
 
-                    LazyColumn(modifier = Modifier.padding(vertical = 20.dp)) {
-                        items(keyriAccounts.value.profiles) {
-                            Row(
-                                modifier = Modifier
-                                    .wrapContentHeight()
-                                    .padding(8.dp)
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        showBiometricPrompt = true
-                                        clickedAccount = it.email
-                                    }
-                            ) {
-                                Image(
-                                    painter = painterResource(R.drawable.ic_keyri_logo),
-                                    contentDescription = null
-                                )
+                    coroutineScope.launch(Dispatchers.IO) {
+                        sheetState.hide()
+                    }
+                },
+                onDismissRequest = {
+                    showAccountsList = false
 
-                                Text(
-                                    modifier = Modifier
-                                        .align(Alignment.CenterVertically)
-                                        .padding(start = 16.dp),
-                                    textAlign = TextAlign.Center,
-                                    text = it.email
-                                )
-                            }
-
-                            if (keyriAccounts.value.profiles.indexOf(it) != keyriAccounts.value.profiles.lastIndex) {
-                                HorizontalDivider(color = primaryDisabled, thickness = 0.5.dp)
-                            }
-                        }
+                    coroutineScope.launch(Dispatchers.IO) {
+                        sheetState.hide()
                     }
                 }
-            }
+            )
         }
     }
 }

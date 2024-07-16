@@ -79,4 +79,8 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.keyrisdk)
     implementation(libs.firebase.messaging)
+    implementation(libs.squareup.okhttp3.okhttp)
+    implementation(libs.squareup.okhttp3.logging.interceptor)
+    implementation(libs.squareup.retrofit2.retrofit)
+    implementation(libs.google.gson)
 }

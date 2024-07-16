@@ -88,15 +88,14 @@ class MainActivity : FragmentActivity() {
                                     type = NavType.BoolType
                                 }),
                                 deepLinks = listOf(
-                                    // TODO: Without number
-//                                    navDeepLink {
-//                                        uriPattern =
-//                                            "https://android-full-example.keyri.com?email={email}&number={number}&isVerified={isVerified}"
-//                                    },
                                     navDeepLink {
-                                    uriPattern =
-                                        "https://android-full-example.keyri.com?email={email}&number={number}&isVerified={isVerified}"
-                                })
+                                        uriPattern =
+                                            "https://android-full-example.keyri.com?email={email}&isVerified={isVerified}"
+                                    },
+                                    navDeepLink {
+                                        uriPattern =
+                                            "https://android-full-example.keyri.com?email={email}&number={number}&isVerified={isVerified}"
+                                    })
                             ) { backStackEntry ->
                                 val email = backStackEntry.arguments?.getString("email")
                                     ?: throw IllegalStateException("Email shouldn't be null")
@@ -120,8 +119,6 @@ class MainActivity : FragmentActivity() {
                                     })
                             }
 
-                            // TODO: Add key icon, remove check and deny svg-s?
-
                             composable(
                                 "${Routes.VerifyScreen.name}?email={email}&number={number}&isVerify={isVerify}",
                                 arguments = listOf(navArgument("email") {
@@ -144,7 +141,16 @@ class MainActivity : FragmentActivity() {
                                     navController = navController,
                                     isVerify = isVerify,
                                     email = email,
-                                    number = number
+                                    number = number,
+                                    onShowSnackbar = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = it,
+                                                withDismissAction = true,
+                                                duration = SnackbarDuration.Long
+                                            )
+                                        }
+                                    }
                                 )
                             }
 
