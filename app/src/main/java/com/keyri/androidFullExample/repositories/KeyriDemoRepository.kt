@@ -8,9 +8,9 @@ import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRe
 import com.keyri.androidFullExample.services.entities.responses.KeyriResponse
 import com.keyri.androidFullExample.services.makeApiCall
 
-class KeyriDemoRepository(
-    private val apiService: ApiService,
-) {
+class KeyriDemoRepository(private val apiService: ApiService) {
+    // TODO: Save tokens to database
+
     suspend fun cryptoRegister(
         email: String,
         associationKey: String,

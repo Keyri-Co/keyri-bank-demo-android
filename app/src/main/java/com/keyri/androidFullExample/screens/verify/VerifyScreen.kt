@@ -70,13 +70,6 @@ fun VerifyScreen(
         }
     }
 
-    // TODO: Questions:
-    // 1. Ask Zain how magic link should looks like
-    // 2. Ask about FCM payload structure
-    // 3. Ask about responses (payload)
-    // 4. Phone verify and confirm number
-    // 5. Flow sequence
-
     val sendSmsPermissionState =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             // TODO: Change recipient and sms body
@@ -219,8 +212,6 @@ fun VerifyScreen(
 
             // TODO: If user clicks on verify and we see installed Telegram or WhatsApp -> show simple chooser with 3 options (if only sms - no need to show option)
 
-            // TODO: Remove only do verify of chosen option
-
             KeyriButton(
                 modifier = Modifier.padding(top = 20.dp),
                 enabled = number != null,
@@ -235,7 +226,7 @@ fun VerifyScreen(
 
                     sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
 
-                    // TODO: Need to notify user sms sending status? -> if loader - everything good
+                    // TODO: Need to notify user sms sending status? -> if sent - notify user and continue loading
                     // TODO: If SMS wasn't sent - Show toast with error message and stop loader
 
                     // TODO: Do this after verify
@@ -264,7 +255,7 @@ fun VerifyScreen(
 //                } catch (_: PackageManager.NameNotFoundException) {
 //                }
 //
-//                // TODO: Some issue with Whatsapp, can't see it
+//                // TODO: Can't find Whatsapp
 //                try {
 //                    val packageManager = context.packageManager
 //                    val i = Intent(Intent.ACTION_VIEW)
@@ -288,8 +279,6 @@ fun VerifyScreen(
 //                    "Choose how to verify your number?",
 //                    list,
 //                    {
-//                        // TODO: Finalize
-//
 //                    }) {
 //
 //                }

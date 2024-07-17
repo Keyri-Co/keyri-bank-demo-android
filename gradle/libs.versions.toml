@@ -5,18 +5,19 @@ coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.1"
 keyrisdk = "4.3.0"
 koinBom = "3.6.0-wasm-alpha2"
-kotlin = "1.9.24"
+kotlin = "2.0.0"
 coreKtx = "1.13.1"
 kotlinxSerializationJson = "1.7.1"
 lifecycleRuntimeKtx = "2.8.3"
 activityCompose = "1.9.0"
 composeBom = "2024.06.00"
+compose-plugin = "1.7.0-alpha01"
 navigationCompose = "2.7.7"
 appcompat = "1.7.0"
 googleGmsGoogleServices = "4.4.2"
 firebaseMessaging = "24.0.0"
 squareup-okhttp3 = "4.12.0"
-squareup-retrofit2-retrofit = "2.10.0"
+squareup-retrofit2-retrofit = "2.11.0"
 google-gson = "2.10.1"
 
 [libraries]
@@ -50,5 +51,7 @@ google-gson = { module = "com.google.code.gson:gson", version.ref = "google-gson
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
+jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 google-gms-google-services = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }

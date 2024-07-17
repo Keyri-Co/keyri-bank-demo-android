@@ -4,6 +4,8 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android) apply false
     id("org.jetbrains.kotlin.plugin.serialization") version "1.9.24"
     alias(libs.plugins.google.gms.google.services) apply false
+    alias(libs.plugins.jetbrainsCompose) apply false
+    alias(libs.plugins.compose.compiler) apply false
 }
 
 val ktLint: Configuration by configurations.creating
