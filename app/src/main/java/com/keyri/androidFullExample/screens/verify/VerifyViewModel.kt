@@ -1,8 +1,11 @@
 package com.keyri.androidFullExample.screens.verify
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.keyri.androidFullExample.data.KeyriProfile
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.repositories.KeyriDemoRepository
@@ -24,8 +27,7 @@ class VerifyViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow()
 
-    private val throwableScope =
-        Dispatchers.IO +
+    private val throwableScope = Dispatchers.IO +
             CoroutineExceptionHandler { _, throwable ->
                 _errorMessage.value = throwable.message
 
@@ -34,64 +36,41 @@ class VerifyViewModel(
                 }
             }
 
-    fun sendEvent(
-        name: String?,
-        email: String?,
-        number: String?,
-        onSuccess: () -> Unit,
-    ) {
-        if (email == null) return
+//    fun sendEvent(
+//        name: String?,
+//        email: String?,
+//        number: String?,
+//        onSuccess: () -> Unit,
+//    ) {
+//        if (email == null) return
+//
+//        viewModelScope.launch(throwableScope) {
+//            if (keyri.getAssociationKey(email).getOrThrow() == null) {
+//                keyri.generateAssociationKey(email)
+//            }
+//
+//            keyri.sendEvent(email, EventType.signup(), true)
+//
+//            dataStore.updateData {
+//                val mappedProfiles =
+//                    if (it.profiles.any { profile -> profile.email == email }) {
+//                        it.profiles
+//                    } else {
+//                        it.profiles + KeyriProfile(name, email, number, false)
+//                    }
+//
+//                it.copy(profiles = mappedProfiles)
+//            }
+//
+//            withContext(Dispatchers.Main) {
+//                onSuccess()
+//            }
+//        }
+//    }
 
+    fun userRegister(isVerify: Boolean, name: String, email: String, phone: String?, onSuccess: () -> Unit) {
         viewModelScope.launch(throwableScope) {
-            if (keyri.getAssociationKey(email).getOrThrow() == null) {
-                keyri.generateAssociationKey(email)
-            }
-
-            keyri.sendEvent(email, EventType.signup(), true)
-
-            dataStore.updateData {
-                val mappedProfiles =
-                    if (it.profiles.any { profile -> profile.email == email }) {
-                        it.profiles
-                    } else {
-                        it.profiles + KeyriProfile(name, email, number, false)
-                    }
-
-                it.copy(profiles = mappedProfiles)
-            }
-
-            withContext(Dispatchers.Main) {
-                onSuccess()
-            }
-        }
-    }
-
-    fun cryptoRegister(
-        email: String,
-        onSuccess: () -> Unit,
-    ) {
-        viewModelScope.launch(throwableScope) {
-            val associationKey =
-                keyri.getAssociationKey(email).getOrNull()
-                    ?: keyri.generateAssociationKey(email).getOrThrow()
-
-            repository.cryptoRegister(email, associationKey)
-
-            withContext(Dispatchers.Main) {
-                onSuccess()
-            }
-        }
-    }
-
-    fun cryptoLogin(
-        email: String,
-        onSuccess: () -> Unit,
-    ) {
-        viewModelScope.launch(throwableScope) {
-            val data = System.currentTimeMillis().toString()
-            val signatureB64 = keyri.generateUserSignature(email, data).getOrThrow()
-
-            repository.cryptoLogin(email, data, signatureB64)
+            repository.userRegister(isVerify, name, email, phone)
 
             withContext(Dispatchers.Main) {
                 onSuccess()
@@ -112,10 +91,7 @@ class VerifyViewModel(
         }
     }
 
-    fun smsLogin(
-        number: String,
-        onSuccess: () -> Unit,
-    ) {
+    fun smsLogin(number: String, onSuccess: () -> Unit) {
         viewModelScope.launch(throwableScope) {
             repository.smsLogin(number)
 

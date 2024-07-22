@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.google.firebase.crashlytics)
 }
 
 android {
@@ -80,4 +81,6 @@ dependencies {
     implementation(libs.squareup.okhttp3.logging.interceptor)
     implementation(libs.squareup.retrofit2.retrofit)
     implementation(libs.google.gson)
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.auth)
 }

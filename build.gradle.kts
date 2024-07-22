@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.google.gms.google.services) apply false
     alias(libs.plugins.jetbrainsCompose) apply false
     alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.google.firebase.crashlytics) apply false
 }
 
 val ktLint: Configuration by configurations.creating

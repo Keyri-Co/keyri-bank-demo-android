@@ -14,7 +14,8 @@ val appModule =
     module {
         single { getKeyriProfilesDataStore(get()) }
         single { getKeyri(get()) }
-        single { KeyriDemoRepository(provideApiService()) }
+        single { KeyriDemoRepository(get(), get()) }
+        single { provideApiService() }
     }
 
 private fun getKeyriProfilesDataStore(context: Context): DataStore<KeyriProfiles> = context.keyriProfilesDataStore

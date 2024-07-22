@@ -107,12 +107,31 @@ fun VerifyScreen(
         }
 
     Column {
+        // TODO: 1. Registration: verify email
+        // TODO: Create users with email and password method https://firebase.google.com/docs/auth/android/password-auth (but password may be static)
+        // TODO: When it successful -> send user info object (from Firebase) + name, email and phone number (optional)
+        // TODO: Send on "email-login" request
+        // TODO: Get deeplink (with custom token param) -> do Firebase sign in with custom token method (on mobile)
+
+        // TODO: 2. Registration: verify phone
+        // TODO: If user provided phone number -> do "sms-login" request
+        // TODO: API should return string, send this string to specified number
+        // TODO: Custom token will be sent with FCM
+        // TODO: Do Firebase sign in with custom token method (on mobile)
+
+        // TODO: 3. Registration: email and phone
+        // TODO: do both: first email and then phone
+
+        // TODO: 4. Login: same flow as above
+
+        // TODO: 5. Event: after login or signup or on purchase screen
+
         Text(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 80.dp)
-                    .align(Alignment.CenterHorizontally),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 80.dp)
+                .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Help us ${if (isVerify) "verify" else "confirm"} your identity",
             style = MaterialTheme.typography.headlineSmall,
@@ -122,18 +141,18 @@ fun VerifyScreen(
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Bottom) {
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Option 1:")
-                        }
+                buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Option 1:")
+                    }
 
-                        append(" We'll send you an email magic link. It expires 15 minutes after you request it.")
-                    },
+                    append(" We'll send you an email magic link. It expires 15 minutes after you request it.")
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -148,21 +167,28 @@ fun VerifyScreen(
                 progress = verifyType == VerifyType.EMAIL,
                 onClick = {
                     email?.let {
-                        viewModel.emailLogin(it) {
-                            try {
-                                val intent = Intent(Intent.ACTION_MAIN)
+                        viewModel.userRegister(isVerify, name ?: "name", email, number) {
 
-                                intent.addCategory(Intent.CATEGORY_APP_EMAIL)
-                                context.startActivity(intent)
-                            } catch (e: ActivityNotFoundException) {
-                                Toast
-                                    .makeText(
-                                        context,
-                                        "There is no email client installed.",
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                            }
                         }
+
+                        // TODO: Uncomment
+//                        viewModel.emailLogin(it) {
+//                            try {
+//                                val intent = Intent(Intent.ACTION_MAIN)
+//
+//                                intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+//                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//
+//                                context.startActivity(intent)
+//                            } catch (e: ActivityNotFoundException) {
+//                                Toast
+//                                    .makeText(
+//                                        context,
+//                                        "There is no email client installed.",
+//                                        Toast.LENGTH_SHORT,
+//                                    ).show()
+//                            }
+//                        }
 
 //                        if (isVerify) {
 //                            viewModel.cryptoRegister(it) {
@@ -193,19 +219,19 @@ fun VerifyScreen(
 
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 40.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
                 text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Option 2:")
-                        }
+                buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Option 2:")
+                    }
 
-                        append(" You'll send an auto populated message through messaging service.")
-                    },
+                    append(" You'll send an auto populated message through messaging service.")
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -286,19 +312,19 @@ fun VerifyScreen(
 
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 40.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
                 text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Option 3:")
-                        }
+                buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Option 3:")
+                    }
 
-                        append(" You'll send an auto populated message and then receive an email magic link.")
-                    },
+                    append(" You'll send an auto populated message and then receive an email magic link.")
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -317,6 +343,8 @@ fun VerifyScreen(
                         val intent = Intent(Intent.ACTION_MAIN)
 
                         intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
                         context.startActivity(intent)
                     } catch (e: ActivityNotFoundException) {
                         Toast
@@ -361,9 +389,10 @@ private fun startEventTimer(
         timer(initialDelay = 2_000L, period = 1_000L) {
             if (isVerify) {
                 cancel()
-                viewModel.sendEvent(name, email, number) {
-                    navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=true")
-                }
+                // TODO: Uncomment
+//                viewModel.sendEvent(name, email, number) {
+//                    navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=true")
+//                }
             } else {
                 cancel()
                 coroutineScope.launch(Dispatchers.Main) {

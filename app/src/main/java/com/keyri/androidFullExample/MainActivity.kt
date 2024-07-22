@@ -1,6 +1,7 @@
 package com.keyri.androidFullExample
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -15,6 +17,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -51,17 +54,17 @@ class MainActivity : FragmentActivity() {
 
                 Scaffold(
                     modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.onPrimary)
-                            .imePadding(),
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.onPrimary)
+                        .imePadding(),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                 ) { innerPadding ->
                     Box(
                         modifier =
-                            Modifier
-                                .padding(innerPadding)
-                                .padding(50.dp),
+                        Modifier
+                            .padding(innerPadding)
+                            .padding(50.dp),
                     ) {
                         NavHost(
                             navController = navController,
@@ -80,76 +83,66 @@ class MainActivity : FragmentActivity() {
                             }
 
                             composable(
-                                "${Routes.VerifiedScreen.name}?email={email}&number={number}&isVerified={isVerified}",
+                                "${Routes.VerifiedScreen.name}?customToken={customToken}}",
                                 arguments =
-                                    listOf(
-                                        navArgument("email") {
-                                            type = NavType.StringType
-                                            nullable = false
-                                        },
-                                        navArgument("number") {
-                                            type = NavType.StringType
-                                            nullable = true
-                                        },
-                                        navArgument("isVerified") {
-                                            type = NavType.BoolType
-                                        },
-                                    ),
-                                deepLinks =
-                                    listOf(
-                                        navDeepLink {
-                                            uriPattern =
-                                                "https://android-full-example.keyri.com?email={email}&isVerified={isVerified}"
-                                        },
-                                        navDeepLink {
-                                            uriPattern =
-                                                "https://android-full-example.keyri.com?email={email}&number={number}&isVerified={isVerified}"
-                                        },
-                                    ),
-                            ) { backStackEntry ->
-                                val email =
-                                    backStackEntry.arguments?.getString("email")
-                                        ?: throw IllegalStateException("Email shouldn't be null")
-                                val number =
-                                    backStackEntry.arguments
-                                        ?.getString("number")
-                                        ?.takeIf { it.isNotEmpty() }
-                                val isVerified =
-                                    backStackEntry.arguments?.getBoolean("isVerified") ?: true
-
-                                VerifiedScreen(
-                                    navController = navController,
-                                    isVerified = isVerified,
-                                    email = email,
-                                    number = number,
-                                    onShowSnackbar = {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = it,
-                                                withDismissAction = true,
-                                                duration = SnackbarDuration.Long,
-                                            )
-                                        }
+                                listOf(
+                                    navArgument("customToken") {
+                                        type = NavType.StringType
+                                        nullable = false
                                     },
-                                )
+                                ),
+                                deepLinks =
+                                listOf(
+                                    navDeepLink {
+                                        uriPattern =
+                                            "https://android-full-example.keyri.com/{customToken}"
+                                    },
+                                ),
+                            ) { backStackEntry ->
+                                val customToken =
+                                    backStackEntry.arguments?.getString("customToken")
+                                        ?: throw IllegalStateException("CustomToken shouldn't be null")
+
+                                // TODO: Remove logs
+                                Log.e("CUS TOKEN", customToken)
+
+                                // TODO: Show loader while processing deeplink
+                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+
+                                // TODO: Change and uncomment
+//                                VerifiedScreen(
+//                                    navController = navController,
+//                                    isVerified = isVerified,
+//                                    email = email,
+//                                    number = number,
+//                                    onShowSnackbar = {
+//                                        scope.launch {
+//                                            snackbarHostState.showSnackbar(
+//                                                message = it,
+//                                                withDismissAction = true,
+//                                                duration = SnackbarDuration.Long,
+//                                            )
+//                                        }
+//                                    },
+//                                )
                             }
 
                             composable(
                                 "${Routes.VerifyScreen.name}?email={email}&number={number}&isVerify={isVerify}",
                                 arguments =
-                                    listOf(
-                                        navArgument("email") {
-                                            type = NavType.StringType
-                                            nullable = true
-                                        },
-                                        navArgument("number") {
-                                            type = NavType.StringType
-                                            nullable = true
-                                        },
-                                        navArgument("isVerify") {
-                                            type = NavType.BoolType
-                                        },
-                                    ),
+                                listOf(
+                                    navArgument("email") {
+                                        type = NavType.StringType
+                                        nullable = true
+                                    },
+                                    navArgument("number") {
+                                        type = NavType.StringType
+                                        nullable = true
+                                    },
+                                    navArgument("isVerify") {
+                                        type = NavType.BoolType
+                                    },
+                                ),
                             ) { backStackEntry ->
                                 val email = backStackEntry.arguments?.getString("email")
                                 val number =
@@ -187,11 +180,11 @@ class MainActivity : FragmentActivity() {
                             composable(
                                 "${Routes.PaymentResultScreen.name}?success={success}",
                                 arguments =
-                                    listOf(
-                                        navArgument("success") {
-                                            type = NavType.BoolType
-                                        },
-                                    ),
+                                listOf(
+                                    navArgument("success") {
+                                        type = NavType.BoolType
+                                    },
+                                ),
                             ) { backStackEntry ->
                                 val success =
                                     backStackEntry.arguments?.getBoolean("success") ?: false

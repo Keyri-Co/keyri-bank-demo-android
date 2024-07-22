@@ -7,5 +7,6 @@ data class KeyriProfile(
     val name: String?,
     val email: String,
     val phone: String?,
+    val customToken: String?,
     val biometricAuthEnabled: Boolean,
 )
