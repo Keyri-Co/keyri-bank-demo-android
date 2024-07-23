@@ -42,10 +42,10 @@ fun SignupScreen(
     Column {
         Text(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 80.dp)
-                    .align(Alignment.CenterHorizontally),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 80.dp)
+                .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Provide your details below",
             style = MaterialTheme.typography.headlineSmall,
@@ -77,47 +77,47 @@ fun SignupScreen(
 
             KeyriTextField(
                 modifier =
-                    Modifier
-                        .padding(top = 20.dp)
-                        .onFocusChanged {
-                            isMobileTextFieldFocused = it.isFocused
+                Modifier
+                    .padding(top = 20.dp)
+                    .onFocusChanged {
+                        isMobileTextFieldFocused = it.isFocused
 
-                            val newText =
-                                if (isMobileTextFieldFocused &&
-                                    inputState.value.mobile.text
-                                        .isEmpty()
-                                ) {
-                                    PHONE_PREFIX
-                                } else if (!isMobileTextFieldFocused &&
-                                    (inputState.value.mobile.text == PHONE_PREFIX || inputState.value.mobile.text == "")
-                                ) {
-                                    ""
-                                } else {
-                                    inputState.value.mobile.text
-                                }
+                        val newText =
+                            if (isMobileTextFieldFocused &&
+                                inputState.value.mobile.text
+                                    .isEmpty()
+                            ) {
+                                PHONE_PREFIX
+                            } else if (!isMobileTextFieldFocused &&
+                                (inputState.value.mobile.text == PHONE_PREFIX || inputState.value.mobile.text == "")
+                            ) {
+                                ""
+                            } else {
+                                inputState.value.mobile.text
+                            }
 
-                            viewModel.updateMobile(
-                                inputState.value.mobile.copy(
-                                    text = newText,
-                                    selection = TextRange(newText.length),
-                                ),
-                            )
-                        },
-                value =
-                    if (inputState.value.mobile.text
-                            .isEmpty()
-                    ) {
-                        inputState.value.mobile.copy(
-                            text = "",
+                        viewModel.updateMobile(
+                            inputState.value.mobile.copy(
+                                text = newText,
+                                selection = TextRange(newText.length),
+                            ),
                         )
-                    } else if (inputState.value.mobile.text.startsWith(
-                            PHONE_PREFIX,
-                        )
-                    ) {
-                        inputState.value.mobile
-                    } else {
-                        inputState.value.mobile.copy(text = PHONE_PREFIX + inputState.value.mobile.text)
                     },
+                value =
+                if (inputState.value.mobile.text
+                        .isEmpty()
+                ) {
+                    inputState.value.mobile.copy(
+                        text = "",
+                    )
+                } else if (inputState.value.mobile.text.startsWith(
+                        PHONE_PREFIX,
+                    )
+                ) {
+                    inputState.value.mobile
+                } else {
+                    inputState.value.mobile.copy(text = PHONE_PREFIX + inputState.value.mobile.text)
+                },
                 placeholder = {
                     Text(
                         text = "+1 (---) --- - ----",
@@ -150,10 +150,9 @@ fun SignupScreen(
             text = "Continue",
             onClick = {
                 navController.navigate(
-                    "${Routes.VerifyScreen.name}?email=${inputState.value.email}&number=${inputState.value.mobile.text.takeIf {
-                        it
-                            .isNotEmpty()
-                    }}&isVerify=true",
+                    "${Routes.VerifyScreen.name}?name=${inputState.value.name}&email=${inputState.value.email}&number=${
+                        inputState.value.mobile.text.takeIf { it.isNotEmpty() }
+                    }&isVerify=true",
                 )
             },
         )

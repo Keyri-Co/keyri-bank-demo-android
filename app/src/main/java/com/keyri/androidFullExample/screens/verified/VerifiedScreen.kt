@@ -41,10 +41,16 @@ fun VerifiedScreen(
     onShowSnackbar: (String) -> Unit,
 ) {
     SideEffect {
-        // TODO: Show loader while processing deeplink (need to center it)
-        // TODO: Auth with FB custom token
+        viewModel.saveBiometricAuth(customToken)
+    }
 
-        viewModel.saveBiometricAuth(email) {}
+    val error = viewModel.errorMessage.collectAsState()
+    val currentProfile = viewModel.currentProfile.collectAsState()
+
+    if (error.value != null) {
+        error.value?.let {
+            onShowSnackbar(it)
+        }
     }
 
     val loading = viewModel.loading.collectAsState()
@@ -68,18 +74,18 @@ fun VerifiedScreen(
                 text =
                 buildAnnotatedString {
                     withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                        append(email)
+                        append(currentProfile.value?.email)
                     }
 
-                    if (number != null) {
+                    if (currentProfile.value?.phone != null) {
                         append(" and ")
 
                         withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                            append(number)
+                            append(currentProfile.value?.phone)
                         }
                     }
 
-                    if (isVerified) {
+                    if (currentProfile.value?.isVerify == true) {
                         append(" verified")
                     } else {
                         append(" confirmed")
@@ -127,7 +133,7 @@ fun VerifiedScreen(
                     showBiometricPrompt = false
 
                     navController.navigateWithPopUp(
-                        "${Routes.MainScreen.name}?email={$email}",
+                        "${Routes.MainScreen.name}?email={${currentProfile.value?.email}}",
                         Routes.WelcomeScreen.name,
                     )
                 }

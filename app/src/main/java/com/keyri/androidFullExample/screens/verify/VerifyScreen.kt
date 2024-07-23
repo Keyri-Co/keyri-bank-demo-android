@@ -161,7 +161,7 @@ fun VerifyScreen(
                     if (verifyType == null) {
                         verifyType = VerifyType.EMAIL
 
-                        viewModel.emailLogin(isVerify, requireNotNull(email)) {
+                        viewModel.emailLogin(isVerify, requireNotNull(name), requireNotNull(email)) {
                             try {
                                 val intent = Intent(Intent.ACTION_MAIN)
 
@@ -214,6 +214,7 @@ fun VerifyScreen(
 
                         viewModel.smsLogin(
                             isVerify,
+                            requireNotNull(name),
                             requireNotNull(email),
                             requireNotNull(number)
                         ) {

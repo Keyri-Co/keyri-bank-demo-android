@@ -1,10 +1,8 @@
 package com.keyri.androidFullExample.repositories
 
 import android.util.Log
-import androidx.datastore.core.DataStore
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.services.ApiService
 import com.keyri.androidFullExample.services.entities.requests.EmailLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRequest
@@ -22,11 +20,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import retrofit2.Response
 
-class KeyriDemoRepository(
-    private val apiService: ApiService,
-    private val dataStore: DataStore<KeyriProfiles>
-) {
-    // TODO: Save tokens to database?
+class KeyriDemoRepository(private val apiService: ApiService) {
 
     suspend fun emailLogin(isVerify: Boolean, email: String): KeyriResponse {
         return authWithFirebaseAndDoRequest(isVerify, email) {
@@ -47,7 +41,13 @@ class KeyriDemoRepository(
         number: String?,
     ): SmsLoginResponse {
         return authWithFirebaseAndDoRequest(isVerify, email) {
-            apiService.userRegister(UserRegisterRequest(name, email, number?.removePrefix(PHONE_PREFIX)))
+            apiService.userRegister(
+                UserRegisterRequest(
+                    name,
+                    email,
+                    number?.removePrefix(PHONE_PREFIX)
+                )
+            )
         }
     }
 
@@ -55,6 +55,25 @@ class KeyriDemoRepository(
         apiService.getUserInformation(EmailLoginRequest(email))
     }.getOrThrow()
 
+    suspend fun authWithToken(customToken: String): String {
+        return callbackFlow {
+            var callback: ((String) -> Unit)? = { trySend(it) }
+            Firebase.auth.signInWithCustomToken(customToken)
+                .addOnCompleteListener { task ->
+                    if (task.isSuccessful) {
+                        task.result.user?.email?.let {
+                            callback?.invoke(it)
+                        }
+                    } else {
+                        task.exception?.let {
+                            throw it
+                        }
+                    }
+                }
+
+            awaitClose { callback = null }
+        }.first()
+    }
 
     private suspend fun <T : Any> authWithFirebaseAndDoRequest(
         isVerify: Boolean,
@@ -84,8 +103,9 @@ class KeyriDemoRepository(
                         }
                     }
                 } else {
-                    // TODO: Show error if something wrong? Maybe throw
-                    Log.e("Keyri Demo error", task.exception?.message.toString())
+                    task.exception?.let {
+                        throw it
+                    }
                 }
             }
 

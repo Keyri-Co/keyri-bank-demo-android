@@ -3,76 +3,74 @@ package com.keyri.androidFullExample.screens.verified
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.keyri.androidFullExample.data.KeyriProfile
 import com.keyri.androidFullExample.data.KeyriProfiles
+import com.keyri.androidFullExample.repositories.KeyriDemoRepository
+import com.keyrico.keyrisdk.Keyri
+import com.keyrico.keyrisdk.sec.fraud.event.EventType
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlin.concurrent.timer
 
 class VerifiedViewModel(
+    private val keyri: Keyri,
+    private val repository: KeyriDemoRepository,
     private val dataStore: DataStore<KeyriProfiles>,
 ) : ViewModel() {
 
     private val _loading = MutableStateFlow(true)
+    private val _errorMessage = MutableStateFlow<String?>(null)
+    private val _currentProfile = MutableStateFlow<KeyriProfile?>(null)
     val loading = _loading.asStateFlow()
+    val errorMessage = _errorMessage.asStateFlow()
+    val currentProfile = _currentProfile.asStateFlow()
 
-    fun saveBiometricAuth(
-        currentProfile: String,
-        onDone: () -> Unit,
-    ) {
-        viewModelScope.launch(Dispatchers.IO) {
+    private val throwableScope = Dispatchers.IO +
+            CoroutineExceptionHandler { _, throwable ->
+                _errorMessage.value = throwable.message
+
+                timer(initialDelay = 1_000L, period = 1_000L) {
+                    _errorMessage.value = null
+                }
+            }
+
+    fun saveBiometricAuth(customToken: String) {
+        viewModelScope.launch(throwableScope) {
+            val currentProfileEmail = repository.authWithToken(customToken)
+
             dataStore.updateData { keyriProfiles ->
                 val mappedProfiles =
                     keyriProfiles.profiles.map {
-                        if (currentProfile == it.name) {
-                            it.copy(biometricAuthEnabled = true)
+                        if (currentProfileEmail == it.name) {
+                            val mappedProfile = it.copy(
+                                customToken = customToken,
+                                isVerified = true,
+                                biometricAuthEnabled = true
+                            )
+
+                            _currentProfile.value = mappedProfile
+
+                            mappedProfile
                         } else {
                             it
                         }
                     }
 
                 keyriProfiles
-                    .copy(currentProfile = currentProfile, profiles = mappedProfiles)
+                    .copy(currentProfile = currentProfileEmail, profiles = mappedProfiles)
                     .apply {
-                        withContext(Dispatchers.Main) {
-                            onDone()
+                        if (keyri.getAssociationKey(currentProfileEmail).getOrNull() == null) {
+                            keyri.generateAssociationKey(currentProfileEmail)
                         }
+
+                        keyri.sendEvent(currentProfileEmail, EventType.login(), true)
+
+                        _loading.value = true
                     }
             }
         }
     }
-
-    // TODO: Do this after opening screen
-    //    fun sendEvent(
-//        name: String?,
-//        email: String?,
-//        number: String?,
-//        onSuccess: () -> Unit,
-//    ) {
-//        if (email == null) return
-//
-//        viewModelScope.launch(throwableScope) {
-//            if (keyri.getAssociationKey(email).getOrThrow() == null) {
-//                keyri.generateAssociationKey(email)
-//            }
-//
-//            keyri.sendEvent(email, EventType.signup(), true)
-//
-//            dataStore.updateData {
-//                val mappedProfiles =
-//                    if (it.profiles.any { profile -> profile.email == email }) {
-//                        it.profiles
-//                    } else {
-//                        it.profiles + KeyriProfile(name, email, number, false)
-//                    }
-//
-//                it.copy(profiles = mappedProfiles)
-//            }
-//
-//            withContext(Dispatchers.Main) {
-//                onSuccess()
-//            }
-//        }
-//    }
 }

@@ -116,9 +116,12 @@ class MainActivity : FragmentActivity() {
                             }
 
                             composable(
-                                "${Routes.VerifyScreen.name}?email={email}&number={number}&isVerify={isVerify}",
+                                "${Routes.VerifyScreen.name}?name={name}&email={email}&number={number}&isVerify={isVerify}",
                                 arguments =
                                 listOf(
+                                    navArgument("name") {
+                                        type = NavType.StringType
+                                    },
                                     navArgument("email") {
                                         type = NavType.StringType
                                         nullable = true
@@ -132,6 +135,7 @@ class MainActivity : FragmentActivity() {
                                     },
                                 ),
                             ) { backStackEntry ->
+                                val name = backStackEntry.arguments?.getString("name")
                                 val email = backStackEntry.arguments?.getString("email")
                                 val number =
                                     backStackEntry.arguments
@@ -143,6 +147,7 @@ class MainActivity : FragmentActivity() {
                                 VerifyScreen(
                                     navController = navController,
                                     isVerify = isVerify,
+                                    name = name,
                                     email = email,
                                     number = number,
                                     onShowSnackbar = {
