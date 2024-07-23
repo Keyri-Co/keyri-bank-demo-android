@@ -51,17 +51,17 @@ class MainActivity : FragmentActivity() {
 
                 Scaffold(
                     modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.onPrimary)
-                        .imePadding(),
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.onPrimary)
+                            .imePadding(),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                 ) { innerPadding ->
                     Box(
                         modifier =
-                        Modifier
-                            .padding(innerPadding)
-                            .padding(50.dp),
+                            Modifier
+                                .padding(innerPadding)
+                                .padding(50.dp),
                     ) {
                         NavHost(
                             navController = navController,
@@ -82,19 +82,19 @@ class MainActivity : FragmentActivity() {
                             composable(
                                 "${Routes.VerifiedScreen.name}?customToken={customToken}}",
                                 arguments =
-                                listOf(
-                                    navArgument("customToken") {
-                                        type = NavType.StringType
-                                        nullable = false
-                                    },
-                                ),
+                                    listOf(
+                                        navArgument("customToken") {
+                                            type = NavType.StringType
+                                            nullable = false
+                                        },
+                                    ),
                                 deepLinks =
-                                listOf(
-                                    navDeepLink {
-                                        uriPattern =
-                                            "https://android-full-example.keyri.com/{customToken}"
-                                    },
-                                ),
+                                    listOf(
+                                        navDeepLink {
+                                            uriPattern =
+                                                "https://android-full-example.keyri.com/{customToken}"
+                                        },
+                                    ),
                             ) { backStackEntry ->
                                 val customToken =
                                     backStackEntry.arguments?.getString("customToken")
@@ -118,22 +118,22 @@ class MainActivity : FragmentActivity() {
                             composable(
                                 "${Routes.VerifyScreen.name}?name={name}&email={email}&number={number}&isVerify={isVerify}",
                                 arguments =
-                                listOf(
-                                    navArgument("name") {
-                                        type = NavType.StringType
-                                    },
-                                    navArgument("email") {
-                                        type = NavType.StringType
-                                        nullable = true
-                                    },
-                                    navArgument("number") {
-                                        type = NavType.StringType
-                                        nullable = true
-                                    },
-                                    navArgument("isVerify") {
-                                        type = NavType.BoolType
-                                    },
-                                ),
+                                    listOf(
+                                        navArgument("name") {
+                                            type = NavType.StringType
+                                        },
+                                        navArgument("email") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("number") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("isVerify") {
+                                            type = NavType.BoolType
+                                        },
+                                    ),
                             ) { backStackEntry ->
                                 val name = backStackEntry.arguments?.getString("name")
                                 val email = backStackEntry.arguments?.getString("email")
@@ -145,7 +145,6 @@ class MainActivity : FragmentActivity() {
                                     backStackEntry.arguments?.getBoolean("isVerify") ?: true
 
                                 VerifyScreen(
-                                    navController = navController,
                                     isVerify = isVerify,
                                     name = name,
                                     email = email,
@@ -173,11 +172,11 @@ class MainActivity : FragmentActivity() {
                             composable(
                                 "${Routes.PaymentResultScreen.name}?success={success}",
                                 arguments =
-                                listOf(
-                                    navArgument("success") {
-                                        type = NavType.BoolType
-                                    },
-                                ),
+                                    listOf(
+                                        navArgument("success") {
+                                            type = NavType.BoolType
+                                        },
+                                    ),
                             ) { backStackEntry ->
                                 val success =
                                     backStackEntry.arguments?.getBoolean("success") ?: false

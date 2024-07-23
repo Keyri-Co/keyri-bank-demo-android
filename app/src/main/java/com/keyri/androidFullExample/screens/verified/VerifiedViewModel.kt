@@ -20,7 +20,6 @@ class VerifiedViewModel(
     private val repository: KeyriDemoRepository,
     private val dataStore: DataStore<KeyriProfiles>,
 ) : ViewModel() {
-
     private val _loading = MutableStateFlow(true)
     private val _errorMessage = MutableStateFlow<String?>(null)
     private val _currentProfile = MutableStateFlow<KeyriProfile?>(null)
@@ -28,7 +27,8 @@ class VerifiedViewModel(
     val errorMessage = _errorMessage.asStateFlow()
     val currentProfile = _currentProfile.asStateFlow()
 
-    private val throwableScope = Dispatchers.IO +
+    private val throwableScope =
+        Dispatchers.IO +
             CoroutineExceptionHandler { _, throwable ->
                 _errorMessage.value = throwable.message
 
@@ -45,11 +45,12 @@ class VerifiedViewModel(
                 val mappedProfiles =
                     keyriProfiles.profiles.map {
                         if (currentProfileEmail == it.name) {
-                            val mappedProfile = it.copy(
-                                customToken = customToken,
-                                isVerified = true,
-                                biometricAuthEnabled = true
-                            )
+                            val mappedProfile =
+                                it.copy(
+                                    customToken = customToken,
+                                    isVerified = true,
+                                    biometricAuthEnabled = true,
+                                )
 
                             _currentProfile.value = mappedProfile
 

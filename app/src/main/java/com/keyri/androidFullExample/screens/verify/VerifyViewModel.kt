@@ -22,7 +22,8 @@ class VerifyViewModel(
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage = _errorMessage.asStateFlow()
 
-    private val throwableScope = Dispatchers.IO +
+    private val throwableScope =
+        Dispatchers.IO +
             CoroutineExceptionHandler { _, throwable ->
                 _errorMessage.value = throwable.message
 
@@ -36,7 +37,7 @@ class VerifyViewModel(
         name: String,
         email: String,
         phone: String?,
-        onSuccess: (SmsLoginResponse) -> Unit
+        onSuccess: (SmsLoginResponse) -> Unit,
     ) {
         viewModelScope.launch(throwableScope) {
             val result = repository.userRegister(isVerify, name, email, phone)
@@ -71,7 +72,7 @@ class VerifyViewModel(
         name: String,
         email: String,
         number: String,
-        onSuccess: (SmsLoginResponse) -> Unit
+        onSuccess: (SmsLoginResponse) -> Unit,
     ) {
         viewModelScope.launch(throwableScope) {
             val result = repository.smsLogin(isVerify, email, number)
@@ -88,14 +89,14 @@ class VerifyViewModel(
         name: String,
         email: String,
         phone: String?,
-        isVerify: Boolean
+        isVerify: Boolean,
     ) {
         dataStore.updateData { keyriProfiles ->
             val newProfile = KeyriProfile(name, email, phone, isVerify, false, null, false)
 
             keyriProfiles.copy(
                 currentProfile = email,
-                profiles = keyriProfiles.profiles + newProfile
+                profiles = keyriProfiles.profiles + newProfile,
             )
         }
     }

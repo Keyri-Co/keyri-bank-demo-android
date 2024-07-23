@@ -66,50 +66,50 @@ fun VerifiedScreen(
 
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 80.dp)
-                    .align(Alignment.CenterHorizontally),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 80.dp)
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text =
-                buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                        append(currentProfile.value?.email)
-                    }
-
-                    if (currentProfile.value?.phone != null) {
-                        append(" and ")
-
+                    buildAnnotatedString {
                         withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                            append(currentProfile.value?.phone)
+                            append(currentProfile.value?.email)
                         }
-                    }
 
-                    if (currentProfile.value?.isVerify == true) {
-                        append(" verified")
-                    } else {
-                        append(" confirmed")
-                    }
-                },
+                        if (currentProfile.value?.phone != null) {
+                            append(" and ")
+
+                            withStyle(style = SpanStyle(color = verifiedTextColor)) {
+                                append(currentProfile.value?.phone)
+                            }
+                        }
+
+                        if (currentProfile.value?.isVerify == true) {
+                            append(" verified")
+                        } else {
+                            append(" confirmed")
+                        }
+                    },
                 style = MaterialTheme.typography.headlineSmall,
                 color = textColor,
             )
 
             KeyriIcon(
                 modifier =
-                Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 40.dp),
+                    Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
                 iconResId = R.drawable.ic_done,
                 iconTint = verifiedTextColor,
             )
 
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 40.dp)
-                    .align(Alignment.CenterHorizontally),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp)
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "Passwordless credential created",
                 style = MaterialTheme.typography.headlineSmall,
@@ -118,9 +118,9 @@ fun VerifiedScreen(
 
             KeyriIcon(
                 modifier =
-                Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 40.dp),
+                    Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
                 iconResId = R.drawable.ic_key,
                 iconTint = verifiedTextColor,
                 iconSizeFraction = 0.5F,
@@ -141,9 +141,9 @@ fun VerifiedScreen(
 
             KeyriButton(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 40.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp),
                 text = "Set up biometric authentication",
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
             ) {

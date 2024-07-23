@@ -26,7 +26,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,7 +36,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
 import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.data.VerifyType
 import com.keyri.androidFullExample.theme.primaryDisabled
@@ -48,20 +46,16 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun VerifyScreen(
     viewModel: VerifyViewModel = koinViewModel(),
-    navController: NavHostController,
     isVerify: Boolean,
     name: String? = null,
     email: String? = null,
     number: String? = null,
     onShowSnackbar: (String) -> Unit,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     var verifyType by remember { mutableStateOf<VerifyType?>(null) }
     var smsAddress by remember { mutableStateOf<String?>(null) }
     var smsText by remember { mutableStateOf<String?>(null) }
-//    var showVerifyNumberChooser by remember { mutableStateOf(false) }
     val context = LocalContext.current
-//    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val error = viewModel.errorMessage.collectAsState()
 
     if (error.value != null) {
@@ -70,62 +64,78 @@ fun VerifyScreen(
         }
     }
 
+    @Suppress("Deprecation")
     val sendSmsPermissionState =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
-                val smsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    context.getSystemService(SmsManager::class.java)
-                } else {
-                    SmsManager.getDefault()
-                }
+                val smsManager =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        context.getSystemService(SmsManager::class.java)
+                    } else {
+                        SmsManager.getDefault()
+                    }
 
                 val intentAction = "SMS-sent"
                 val sentIntent = Intent(intentAction)
 
-                val sentPI = PendingIntent.getBroadcast(
-                    context, 0, sentIntent, PendingIntent.FLAG_IMMUTABLE
-                )
+                val sentPI =
+                    PendingIntent.getBroadcast(
+                        context,
+                        0,
+                        sentIntent,
+                        PendingIntent.FLAG_IMMUTABLE,
+                    )
 
-                context.registerReceiver(object : BroadcastReceiver() {
-                    override fun onReceive(context: Context?, intent: Intent?) {
-                        val message = when (resultCode) {
-                            Activity.RESULT_OK -> "SMS sent"
-                            SmsManager.RESULT_ERROR_NO_SERVICE -> "No service"
-                            SmsManager.RESULT_ERROR_NULL_PDU -> "Null PDU"
-                            SmsManager.RESULT_ERROR_RADIO_OFF -> "Radio off"
-                            else -> "Unable to send SMS"
+                context.registerReceiver(
+                    object : BroadcastReceiver() {
+                        override fun onReceive(
+                            context: Context?,
+                            intent: Intent?,
+                        ) {
+                            val message =
+                                when (resultCode) {
+                                    Activity.RESULT_OK -> "SMS sent"
+                                    SmsManager.RESULT_ERROR_NO_SERVICE -> "No service"
+                                    SmsManager.RESULT_ERROR_NULL_PDU -> "Null PDU"
+                                    SmsManager.RESULT_ERROR_RADIO_OFF -> "Radio off"
+                                    else -> "Unable to send SMS"
+                                }
+
+                            onShowSnackbar(message)
                         }
-
-                        onShowSnackbar(message)
-                    }
-                }, IntentFilter(intentAction))
+                    },
+                    IntentFilter(intentAction),
+                )
 
                 smsManager.sendTextMessage(smsAddress, null, smsText, sentPI, null)
                 onShowSnackbar("SMS was sent")
             } else {
                 try {
-                    val sendIntent = Intent(Intent.ACTION_SENDTO).apply {
-                        data = Uri.parse("smsto:$smsAddress")
-                        putExtra("sms_body", smsText)
-                    }
+                    val sendIntent =
+                        Intent(Intent.ACTION_SENDTO).apply {
+                            data = Uri.parse("smsto:$smsAddress")
+                            putExtra("sms_body", smsText)
+                        }
 
                     context.startActivity(sendIntent)
                 } catch (e: ActivityNotFoundException) {
-                    Toast.makeText(
-                        context,
-                        "There is no SMS app installed.",
-                        Toast.LENGTH_SHORT,
-                    ).show()
+                    Toast
+                        .makeText(
+                            context,
+                            "There is no SMS app installed.",
+                            Toast.LENGTH_SHORT,
+                        ).show()
                 }
             }
         }
 
     Column {
         Text(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Help us ${if (isVerify) "verify" else "confirm"} your identity",
             style = MaterialTheme.typography.headlineSmall,
@@ -134,17 +144,19 @@ fun VerifyScreen(
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Bottom) {
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Option 1:")
-                    }
+                text =
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Option 1:")
+                        }
 
-                    append(" We'll send you an email magic link. It expires 15 minutes after you request it.")
-                },
+                        append(" We'll send you an email magic link. It expires 15 minutes after you request it.")
+                    },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -161,7 +173,11 @@ fun VerifyScreen(
                     if (verifyType == null) {
                         verifyType = VerifyType.EMAIL
 
-                        viewModel.emailLogin(isVerify, requireNotNull(name), requireNotNull(email)) {
+                        viewModel.emailLogin(
+                            isVerify,
+                            requireNotNull(name),
+                            requireNotNull(email),
+                        ) {
                             try {
                                 val intent = Intent(Intent.ACTION_MAIN)
 
@@ -183,18 +199,20 @@ fun VerifyScreen(
             )
 
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 40.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Option 2:")
-                    }
+                text =
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Option 2:")
+                        }
 
-                    append(" You'll send an auto populated message through messaging service.")
-                },
+                        append(" You'll send an auto populated message through messaging service.")
+                    },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -216,12 +234,10 @@ fun VerifyScreen(
                             isVerify,
                             requireNotNull(name),
                             requireNotNull(email),
-                            requireNotNull(number)
+                            requireNotNull(number),
                         ) {
                             smsAddress = it.smsUrl.sendTo
                             smsText = it.smsUrl.confirmationMessage
-                            // TODO: Add impl
-                            // showVerifyNumberChooser = true
 
                             sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
                         }
@@ -229,59 +245,21 @@ fun VerifyScreen(
                 },
             )
 
-            // TODO: If user clicks on verify and we see installed Telegram or WhatsApp -> show simple chooser with 3 options (if only sms - no need to show option)
-//            if (showVerifyNumberChooser) {
-//                val list = mutableListOf(ModalListItem(null, "Verify with sending SMS"))
-//
-//                try {
-//                    context.packageManager.getPackageInfo("org.telegram.messenger", 0)
-//
-//                    list.add(ModalListItem(R.drawable.ic_telegram, "Verify with Telegram app"))
-//                } catch (_: PackageManager.NameNotFoundException) {
-//                }
-//
-//                Can't find Whatsapp here
-//                try {
-//                    val packageManager = context.packageManager
-//                    val i = Intent(Intent.ACTION_VIEW)
-//
-//                    val url = "https://api.whatsapp.com/send?phone=dummy&text=hey"
-//                    i.setPackage("com.whatsapp")
-//                    i.setData(Uri.parse(url))
-//
-//                    if (i.resolveActivity(packageManager) != null) {
-//                        ModalListItem(R.drawable.ic_whatsapp, "Verify with Whatsapp app")
-//                    }
-//
-//                    context.packageManager.getPackageInfo("com.whatsapp", 0)
-//
-//                    ModalListItem(R.drawable.ic_whatsapp, "Verify with Whatsapp app")
-//                } catch (_: PackageManager.NameNotFoundException) {
-//                }
-//
-//                ListModalBottomSheet(
-//                    sheetState = sheetState,
-//                    "Choose how to verify your number?",
-//                    list,
-//                    {
-//                    }) {
-//
-//                }
-//            }
-
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 40.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Option 3:")
-                    }
+                text =
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Option 3:")
+                        }
 
-                    append(" You'll send an auto populated message and then receive an email magic link.")
-                },
+                        append(" You'll send an auto populated message and then receive an email magic link.")
+                    },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -303,7 +281,7 @@ fun VerifyScreen(
                             isVerify,
                             requireNotNull(name),
                             requireNotNull(email),
-                            requireNotNull(number)
+                            requireNotNull(number),
                         ) {
                             smsAddress = it.smsUrl.sendTo
                             smsText = it.smsUrl.confirmationMessage

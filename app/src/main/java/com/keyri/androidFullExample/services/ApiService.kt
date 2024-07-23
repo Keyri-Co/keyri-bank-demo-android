@@ -11,7 +11,6 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface ApiService {
-
     @POST("email-login")
     suspend fun emailLogin(
         @Body request: EmailLoginRequest,
