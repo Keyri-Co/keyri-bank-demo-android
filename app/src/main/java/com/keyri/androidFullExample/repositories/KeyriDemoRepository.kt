@@ -4,6 +4,7 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.keyri.androidFullExample.services.ApiService
+import com.keyri.androidFullExample.services.RiskApiService
 import com.keyri.androidFullExample.services.entities.requests.CryptoLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.CryptoRegisterRequest
 import com.keyri.androidFullExample.services.entities.requests.DecryptRiskRequest
@@ -11,6 +12,7 @@ import com.keyri.androidFullExample.services.entities.requests.EmailLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.UserInformationResponse
 import com.keyri.androidFullExample.services.entities.requests.UserRegisterRequest
+import com.keyri.androidFullExample.services.entities.responses.DecryptRiskResponse
 import com.keyri.androidFullExample.services.entities.responses.KeyriResponse
 import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
 import com.keyri.androidFullExample.services.makeApiCall
@@ -26,6 +28,7 @@ import retrofit2.Response
 
 class KeyriDemoRepository(
     private val apiService: ApiService,
+    private val riskApiService: RiskApiService,
 ) {
     suspend fun cryptoRegister(
         email: String,
@@ -44,10 +47,10 @@ class KeyriDemoRepository(
             apiService.cryptoLogin(CryptoLoginRequest(email, data, signatureB64))
         }.getOrThrow().customToken
 
-    suspend fun decryptRisk(encryptedEventString: String): String =
+    suspend fun decryptRisk(encryptedEventString: String): DecryptRiskResponse =
         makeApiCall {
-            apiService.decryptRisk(DecryptRiskRequest(encryptedEventString))
-        }.getOrThrow().customToken
+            riskApiService.decryptRisk(DecryptRiskRequest(encryptedEventString))
+        }.getOrThrow()
 
     suspend fun emailLogin(
         isVerify: Boolean,

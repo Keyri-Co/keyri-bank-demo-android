@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.repositories.KeyriDemoRepository
 import com.keyri.androidFullExample.services.provideApiService
+import com.keyri.androidFullExample.services.provideRiskApiService
 import com.keyri.androidFullExample.utils.keyriProfilesDataStore
 import com.keyrico.keyrisdk.Keyri
 import com.keyrico.keyrisdk.config.KeyriDetectionsConfig
@@ -14,11 +15,13 @@ val appModule =
     module {
         single { getKeyriProfilesDataStore(get()) }
         single { getKeyri(get()) }
-        single { KeyriDemoRepository(get()) }
+        single { KeyriDemoRepository(get(), get()) }
         single { provideApiService() }
+        single { provideRiskApiService() }
     }
 
-private fun getKeyriProfilesDataStore(context: Context): DataStore<KeyriProfiles> = context.keyriProfilesDataStore
+private fun getKeyriProfilesDataStore(context: Context): DataStore<KeyriProfiles> =
+    context.keyriProfilesDataStore
 
 private fun getKeyri(context: Context): Keyri =
     Keyri(

@@ -84,5 +84,26 @@ fun provideApiService(): ApiService {
         .create(ApiService::class.java)
 }
 
+fun provideRiskApiService(): RiskApiService {
+    val okHttpClientBuilder = OkHttpClient.Builder()
+
+    okHttpClientBuilder
+        .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+        .readTimeout(TIMEOUT, TimeUnit.SECONDS)
+
+    HttpLoggingInterceptor()
+        .apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }.let(okHttpClientBuilder::addInterceptor)
+
+    return Retrofit
+        .Builder()
+        .baseUrl("https://keyri-firebase-passkeys.vercel.app")
+        .addConverterFactory(ConverterFactory())
+        .client(okHttpClientBuilder.build())
+        .build()
+        .create(RiskApiService::class.java)
+}
+
 private const val TIMEOUT = 15L
 private const val KEYRI_API_ERROR = "Keyri API error"

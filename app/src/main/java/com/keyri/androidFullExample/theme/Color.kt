@@ -10,3 +10,4 @@ val textColor = Color(0xFF595959)
 
 val verifiedTextColor = Color(0xFF03A564)
 val warningTextColor = Color(0xFFF5704C)
+val denyTextColor = Color(0xFFEF4D52)
