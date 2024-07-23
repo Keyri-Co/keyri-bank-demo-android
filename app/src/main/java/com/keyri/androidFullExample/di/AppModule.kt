@@ -24,8 +24,8 @@ private fun getKeyri(context: Context): Keyri =
     Keyri(
         context,
         "Ekrdi04LFJSRraLObtJpUap6fkh45fwi",
+        "QjBbOrlRALdlebpAuhjtNIJJzgL4vkIF",
         "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEzteySVilYBihc6V67mN084ajGYlBOqXr6JmZ2A26Z6iW/9G8EYxPxfPRgzADrcZUHAcCuXfnv3alDvwYoGaFg==",
-        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgDSsMLClY0b0s4LdbXSujp//2kE2kkKDCVoUq0d+z0jmhRANCAAQTO17JJWKVgGKFzpXruY3TzhqMZiUE6pevomZnYDbpnqJb/0bwRjE/F89GDMAOtxlQcBwK5d+e/dqUO/BigZoW",
         KeyriDetectionsConfig(
             blockEmulatorDetection = true,
             blockRootDetection = true,

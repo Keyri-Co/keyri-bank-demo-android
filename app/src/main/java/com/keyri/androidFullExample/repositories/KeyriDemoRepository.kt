@@ -127,25 +127,27 @@ class KeyriDemoRepository(
             }
 
         return callbackFlow {
-            var callback: ((T) -> Unit)? = { trySend(it) }
+            var callback: ((Result<T>) -> Unit)? = { trySend(it) }
 
             authTask.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     CoroutineScope(Dispatchers.IO).launch {
                         makeApiCall {
                             block()
-                        }.getOrThrow().let {
-                            callback?.invoke(it)
+                        }.onSuccess {
+                            callback?.invoke(Result.success(it))
+                        }.onFailure {
+                            callback?.invoke(Result.failure(it))
                         }
                     }
                 } else {
                     task.exception?.let {
-                        throw it
+                        callback?.invoke(Result.failure(it))
                     }
                 }
             }
 
             awaitClose { callback = null }
-        }.first()
+        }.first().getOrThrow()
     }
 }

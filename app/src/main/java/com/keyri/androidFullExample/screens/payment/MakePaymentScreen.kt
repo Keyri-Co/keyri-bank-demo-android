@@ -37,6 +37,8 @@ fun MakePayment(
     var amount by remember { mutableFloatStateOf(0.0F) }
     var recipientInfo by remember { mutableStateOf("") }
 
+    // TODO: Fix here (actual data)
+
     Column {
         Text(
             modifier =

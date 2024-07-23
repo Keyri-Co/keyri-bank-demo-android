@@ -48,6 +48,8 @@ fun MainScreen(
         }
     }
 
+    // TODO: Fix here (actual data)
+
     if (loading.value) {
         Box(modifier = Modifier.fillMaxWidth()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

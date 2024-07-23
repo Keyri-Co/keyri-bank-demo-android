@@ -20,7 +20,7 @@ import java.io.OutputStream
 
 fun CharSequence.isValidEmail() = !isNullOrEmpty() && Patterns.EMAIL_ADDRESS.matcher(this).matches()
 
-fun CharSequence.isValidPhoneNumber() = !isNullOrEmpty() && startsWith("+1") && length == 11
+fun CharSequence.isValidPhoneNumber() = !isNullOrEmpty() && startsWith("+1") && length == 12
 
 fun Context.getActivity(): FragmentActivity? {
     var currentContext = this

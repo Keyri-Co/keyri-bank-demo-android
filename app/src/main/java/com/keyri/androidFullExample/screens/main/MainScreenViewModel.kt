@@ -1,6 +1,5 @@
 package com.keyri.androidFullExample.screens.main
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,7 +30,6 @@ class MainScreenViewModel(
     val errorMessage = _errorMessage.asStateFlow()
 
     private val throwableScope =
-        Dispatchers.IO +
             CoroutineExceptionHandler { _, throwable ->
                 _errorMessage.value = throwable.message
 
@@ -45,7 +43,7 @@ class MainScreenViewModel(
     }
 
     fun logout(callback: () -> Unit) {
-        viewModelScope.launch(throwableScope) {
+        viewModelScope.launch(Dispatchers.IO +throwableScope) {
             dataStore.updateData { keyriProfiles ->
                 keyriProfiles.copy(currentProfile = null).apply {
                     withContext(Dispatchers.Main) {
@@ -57,26 +55,18 @@ class MainScreenViewModel(
     }
 
     private fun getRiskDetails() {
-        // TODO: Remove logs
-        Log.e("getting profile", "ok")
-
-        viewModelScope.launch(throwableScope) {
+        viewModelScope.launch(Dispatchers.IO +throwableScope) {
             dataStore.data.collectLatest { keyriProfiles ->
                 _currentProfile.value = keyriProfiles.currentProfile
+
+                keyriProfiles.currentProfile?.let {
+                    val eventResult = keyri.sendEvent(it, EventType.login(), true).getOrThrow()
+
+                    repository.decryptRisk(Gson().toJson(eventResult))
+
+                    _loading.value = false
+                }
             }
-
-            // TODO: Remove logs
-            Log.e("currentProfile", currentProfile.value.toString())
-
-            currentProfile.value?.let {
-                val eventResult = keyri.sendEvent(it, EventType.login(), true).getOrThrow()
-
-                repository.decryptRisk(Gson().toJson(eventResult))
-
-                _loading.value = false
-            }
-
-            _loading.value = false
         }
     }
 }

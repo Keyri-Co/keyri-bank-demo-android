@@ -41,19 +41,18 @@ fun SignupScreen(
 
     Column {
         Text(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 80.dp)
-                    .align(Alignment.CenterHorizontally),
+            modifier = Modifier
+                .padding(top = 80.dp)
+                .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Provide your details below",
             style = MaterialTheme.typography.headlineSmall,
             color = textColor,
         )
 
-        Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
+        Column(modifier = Modifier.fillMaxWidth().weight(1F), verticalArrangement = Arrangement.Center) {
             KeyriTextField(
+                modifier = Modifier.fillMaxWidth(),
                 value = inputState.value.name,
                 placeholder = {
                     Text(text = "Name", color = textFieldUnfocusedColor)
@@ -63,7 +62,7 @@ fun SignupScreen(
             )
 
             KeyriTextField(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
                 value = inputState.value.email,
                 placeholder = {
                     Text(
@@ -77,47 +76,48 @@ fun SignupScreen(
 
             KeyriTextField(
                 modifier =
-                    Modifier
-                        .padding(top = 20.dp)
-                        .onFocusChanged {
-                            isMobileTextFieldFocused = it.isFocused
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp)
+                    .onFocusChanged {
+                        isMobileTextFieldFocused = it.isFocused
 
-                            val newText =
-                                if (isMobileTextFieldFocused &&
-                                    inputState.value.mobile.text
-                                        .isEmpty()
-                                ) {
-                                    PHONE_PREFIX
-                                } else if (!isMobileTextFieldFocused &&
-                                    (inputState.value.mobile.text == PHONE_PREFIX || inputState.value.mobile.text == "")
-                                ) {
-                                    ""
-                                } else {
-                                    inputState.value.mobile.text
-                                }
+                        val newText =
+                            if (isMobileTextFieldFocused &&
+                                inputState.value.mobile.text
+                                    .isEmpty()
+                            ) {
+                                PHONE_PREFIX
+                            } else if (!isMobileTextFieldFocused &&
+                                (inputState.value.mobile.text == PHONE_PREFIX || inputState.value.mobile.text == "")
+                            ) {
+                                ""
+                            } else {
+                                inputState.value.mobile.text
+                            }
 
-                            viewModel.updateMobile(
-                                inputState.value.mobile.copy(
-                                    text = newText,
-                                    selection = TextRange(newText.length),
-                                ),
-                            )
-                        },
-                value =
-                    if (inputState.value.mobile.text
-                            .isEmpty()
-                    ) {
-                        inputState.value.mobile.copy(
-                            text = "",
+                        viewModel.updateMobile(
+                            inputState.value.mobile.copy(
+                                text = newText,
+                                selection = TextRange(newText.length),
+                            ),
                         )
-                    } else if (inputState.value.mobile.text.startsWith(
-                            PHONE_PREFIX,
-                        )
-                    ) {
-                        inputState.value.mobile
-                    } else {
-                        inputState.value.mobile.copy(text = PHONE_PREFIX + inputState.value.mobile.text)
                     },
+                value =
+                if (inputState.value.mobile.text
+                        .isEmpty()
+                ) {
+                    inputState.value.mobile.copy(
+                        text = "",
+                    )
+                } else if (inputState.value.mobile.text.startsWith(
+                        PHONE_PREFIX,
+                    )
+                ) {
+                    inputState.value.mobile
+                } else {
+                    inputState.value.mobile.copy(text = PHONE_PREFIX + inputState.value.mobile.text)
+                },
                 placeholder = {
                     Text(
                         text = "+1 (---) --- - ----",
@@ -129,7 +129,7 @@ fun SignupScreen(
                     val newMobile =
                         if (!it.text.startsWith(PHONE_PREFIX)) {
                             TextFieldValue("")
-                        } else if (it.text.length > 11) {
+                        } else if (it.text.length > 12) {
                             inputState.value.mobile
                         } else {
                             it
@@ -141,7 +141,9 @@ fun SignupScreen(
         }
 
         KeyriButton(
-            modifier = Modifier.padding(top = 28.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 28.dp),
             enabled = viewModel.validateInputs(),
             disabledTextColor = primaryDisabled,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),

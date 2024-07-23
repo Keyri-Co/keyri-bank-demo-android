@@ -14,9 +14,7 @@ class MessagingService : FirebaseMessagingService() {
         super.onMessageReceived(message)
         val customToken = message.data["customToken"]
 
-        // TODO: Remove logs
+        // TODO: Add impl send on sms-login step, update data and verify user
         Log.e("Token", customToken.toString())
-
-// TODO: Add impl send on sms-login step, update data and verify user
     }
 }

@@ -76,10 +76,10 @@ fun WelcomeScreen(
         Column {
             Text(
                 modifier =
-                    Modifier
-                        .padding(top = 80.dp)
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                Modifier
+                    .padding(top = 80.dp)
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = if (keyriAccounts.value.profiles.isEmpty()) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
                 style = MaterialTheme.typography.headlineLarge,
@@ -88,47 +88,47 @@ fun WelcomeScreen(
 
             Box(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1F),
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1F),
             ) {
                 Image(
                     modifier =
-                        Modifier
-                            .size(130.dp, 62.dp)
-                            .align(Alignment.Center)
-                            .combinedClickable(
-                                onClick = {},
-                                onLongClick = {
-                                    viewModel.removeAllAccounts {
-                                        viewModel.checkKeyriAccounts()
+                    Modifier
+                        .size(130.dp, 62.dp)
+                        .align(Alignment.Center)
+                        .combinedClickable(
+                            onClick = {},
+                            onLongClick = {
+                                viewModel.removeAllAccounts {
+                                    viewModel.checkKeyriAccounts()
 
-                                        @Suppress("Deprecation")
+                                    @Suppress("Deprecation")
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        val effect =
+                                            VibrationEffect.createOneShot(
+                                                100,
+                                                VibrationEffect.DEFAULT_AMPLITUDE,
+                                            )
+
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            val effect =
-                                                VibrationEffect.createOneShot(
-                                                    100,
-                                                    VibrationEffect.DEFAULT_AMPLITUDE,
-                                                )
-
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                                val vibratorManager =
-                                                    context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-                                                val vibrator = vibratorManager?.defaultVibrator
-
-                                                vibrator?.cancel()
-                                                vibrator?.vibrate(effect)
-                                            }
-                                        } else {
-                                            val vibrator =
-                                                context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                                            val vibratorManager =
+                                                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                                            val vibrator = vibratorManager?.defaultVibrator
 
                                             vibrator?.cancel()
-                                            vibrator?.vibrate(100)
+                                            vibrator?.vibrate(effect)
                                         }
+                                    } else {
+                                        val vibrator =
+                                            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+
+                                        vibrator?.cancel()
+                                        vibrator?.vibrate(100)
                                     }
-                                },
-                            ),
+                                }
+                            },
+                        ),
                     contentScale = ContentScale.Fit,
                     painter = painterResource(id = R.drawable.ic_tabby_charcoal),
                     contentDescription = null,
@@ -137,7 +137,9 @@ fun WelcomeScreen(
 
             val containerColors =
                 if (keyriAccounts.value.profiles.isEmpty()) {
-                    MaterialTheme.colorScheme.onPrimary to MaterialTheme.colorScheme.primary.copy(alpha = 0.04F)
+                    MaterialTheme.colorScheme.onPrimary to MaterialTheme.colorScheme.primary.copy(
+                        alpha = 0.04F
+                    )
                 } else {
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.04F) to MaterialTheme.colorScheme.onPrimary
                 }
@@ -172,9 +174,9 @@ fun WelcomeScreen(
         val promptInfo =
             if (keyriAccounts.value.profiles.size == 1) {
                 "Use Biometric to login as" to
-                    keyriAccounts.value.profiles
-                        .firstOrNull()
-                        ?.email
+                        keyriAccounts.value.profiles
+                            .firstOrNull()
+                            ?.email
             } else {
                 "Use Biometric to login" to null
             }
@@ -187,15 +189,19 @@ fun WelcomeScreen(
                 {},
                 { showBiometricPrompt = false },
             ) {
-                viewModel.setCurrentProfile(
-                    clickedAccount ?: keyriAccounts.value.profiles
-                        .firstOrNull()
-                        ?.email,
-                )
+                val currentAccount = clickedAccount ?: keyriAccounts.value.profiles
+                    .firstOrNull()
+                    ?.email
 
-                navController.navigateWithPopUp(Routes.MainScreen.name, Routes.WelcomeScreen.name)
-                showBiometricPrompt = false
-                blockBiometricPrompt = true
+                viewModel.setCurrentProfile(currentAccount)
+                viewModel.cryptoLogin(requireNotNull(currentAccount)) {
+                    navController.navigateWithPopUp(
+                        Routes.MainScreen.name,
+                        Routes.WelcomeScreen.name
+                    )
+                    showBiometricPrompt = false
+                    blockBiometricPrompt = true
+                }
             }
         }
 
@@ -203,7 +209,12 @@ fun WelcomeScreen(
             ListModalBottomSheet(
                 sheetState = sheetState,
                 title = "Choose an account\nto continue to Keyri Bank",
-                keyriAccounts.value.profiles.map { ModalListItem(iconRes = R.drawable.ic_tabby_charcoal, text = it.email) },
+                keyriAccounts.value.profiles.map {
+                    ModalListItem(
+                        iconRes = R.drawable.ic_tabby_charcoal,
+                        text = it.email
+                    )
+                },
                 onListItemClicked = {
                     showBiometricPrompt = true
                     showAccountsList = false

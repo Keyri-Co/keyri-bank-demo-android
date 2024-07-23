@@ -24,7 +24,7 @@ interface ApiService {
         @Body request: CryptoLoginRequest,
     ): Response<KeyriResponse>
 
-    @POST("decrypt-risk")
+    @POST("risk-decrypt")
     suspend fun decryptRisk(
         @Body request: DecryptRiskRequest,
     ): Response<KeyriResponse>

@@ -35,9 +35,7 @@ suspend fun <T : Any> makeApiCall(call: suspend () -> Response<T>): Result<T> {
             val responseJson = Gson().toJson(response.body())
             val json = JSONObject(responseJson)
 
-            if (json.has("message")) {
-                Result.failure(AuthorizationException(json.getString("message")))
-            } else if (json.has("error")) {
+            if (json.has("error")) {
                 json.getJSONObject("error").takeIf { it.has("message") }?.let {
                     val message = it.getString("message") ?: KEYRI_API_ERROR
                     val exception = KeyriApiException(message)

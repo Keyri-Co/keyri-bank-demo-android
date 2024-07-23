@@ -23,14 +23,13 @@ class VerifyViewModel(
     val errorMessage = _errorMessage.asStateFlow()
 
     private val throwableScope =
-        Dispatchers.IO +
-            CoroutineExceptionHandler { _, throwable ->
-                _errorMessage.value = throwable.message
+        CoroutineExceptionHandler { _, throwable ->
+            _errorMessage.value = throwable.message
 
-                timer(initialDelay = 1_000L, period = 1_000L) {
-                    _errorMessage.value = null
-                }
+            timer(initialDelay = 1_000L, period = 1_000L) {
+                _errorMessage.value = null
             }
+        }
 
     fun userRegister(
         isVerify: Boolean,
@@ -39,7 +38,7 @@ class VerifyViewModel(
         phone: String?,
         onSuccess: (SmsLoginResponse) -> Unit,
     ) {
-        viewModelScope.launch(throwableScope) {
+        viewModelScope.launch(Dispatchers.IO + throwableScope) {
             val result = repository.userRegister(isVerify, name, email, phone)
 
             createEmptyKeyriAccount(name, email, phone, isVerify)
@@ -56,7 +55,7 @@ class VerifyViewModel(
         email: String,
         onSuccess: () -> Unit,
     ) {
-        viewModelScope.launch(throwableScope) {
+        viewModelScope.launch(Dispatchers.IO + throwableScope) {
             repository.emailLogin(isVerify, email)
 
             createEmptyKeyriAccount(name, email, null, isVerify)
@@ -74,7 +73,7 @@ class VerifyViewModel(
         number: String,
         onSuccess: (SmsLoginResponse) -> Unit,
     ) {
-        viewModelScope.launch(throwableScope) {
+        viewModelScope.launch(Dispatchers.IO + throwableScope) {
             val result = repository.smsLogin(isVerify, email, number)
 
             createEmptyKeyriAccount(name, email, null, isVerify)

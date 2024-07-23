@@ -27,7 +27,6 @@ class VerifiedViewModel(
     val currentProfile = _currentProfile.asStateFlow()
 
     private val throwableScope =
-        Dispatchers.IO +
             CoroutineExceptionHandler { _, throwable ->
                 _errorMessage.value = throwable.message
 
@@ -37,7 +36,7 @@ class VerifiedViewModel(
             }
 
     fun saveBiometricAuth(customToken: String) {
-        viewModelScope.launch(throwableScope) {
+        viewModelScope.launch(Dispatchers.IO +throwableScope) {
             val currentProfileEmail = repository.authWithToken(customToken)
 
             dataStore.updateData { keyriProfiles ->
