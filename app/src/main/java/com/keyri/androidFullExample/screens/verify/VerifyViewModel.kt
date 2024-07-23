@@ -1,16 +1,12 @@
 package com.keyri.androidFullExample.screens.verify
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
-import com.keyri.androidFullExample.data.KeyriProfile
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.repositories.KeyriDemoRepository
+import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
 import com.keyrico.keyrisdk.Keyri
-import com.keyrico.keyrisdk.sec.fraud.event.EventType
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,22 +64,29 @@ class VerifyViewModel(
 //        }
 //    }
 
-    fun userRegister(isVerify: Boolean, name: String, email: String, phone: String?, onSuccess: () -> Unit) {
+    fun userRegister(
+        isVerify: Boolean,
+        name: String,
+        email: String,
+        phone: String?,
+        onSuccess: (SmsLoginResponse) -> Unit
+    ) {
         viewModelScope.launch(throwableScope) {
-            repository.userRegister(isVerify, name, email, phone)
+            val result = repository.userRegister(isVerify, name, email, phone)
 
             withContext(Dispatchers.Main) {
-                onSuccess()
+                onSuccess(result)
             }
         }
     }
 
     fun emailLogin(
+        isVerify: Boolean,
         email: String,
         onSuccess: () -> Unit,
     ) {
         viewModelScope.launch(throwableScope) {
-            repository.emailLogin(email)
+            repository.emailLogin(isVerify, email)
 
             withContext(Dispatchers.Main) {
                 onSuccess()
@@ -91,12 +94,17 @@ class VerifyViewModel(
         }
     }
 
-    fun smsLogin(number: String, onSuccess: () -> Unit) {
+    fun smsLogin(
+        isVerify: Boolean,
+        email: String,
+        number: String,
+        onSuccess: (SmsLoginResponse) -> Unit
+    ) {
         viewModelScope.launch(throwableScope) {
-            repository.smsLogin(number)
+            val result = repository.smsLogin(isVerify, email, number)
 
             withContext(Dispatchers.Main) {
-                onSuccess()
+                onSuccess(result)
             }
         }
     }

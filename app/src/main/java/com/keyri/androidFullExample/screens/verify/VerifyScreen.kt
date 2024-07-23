@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -33,20 +32,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.data.VerifyType
-import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.primaryDisabled
 import com.keyri.androidFullExample.theme.textColor
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import kotlin.concurrent.timer
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VerifyScreen(
     viewModel: VerifyViewModel = koinViewModel(),
@@ -59,9 +51,11 @@ fun VerifyScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     var verifyType by remember { mutableStateOf<VerifyType?>(null) }
+    var smsAddress by remember { mutableStateOf<String?>(null) }
+    var smsText by remember { mutableStateOf<String?>(null) }
 //    var showVerifyNumberChooser by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+//    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val error = viewModel.errorMessage.collectAsState()
 
     if (error.value != null) {
@@ -72,36 +66,31 @@ fun VerifyScreen(
 
     val sendSmsPermissionState =
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            // TODO: Change recipient and sms body
-            val smsAddress = "+380960874951"
-            val smsText = "sms message 1"
-
             if (isGranted) {
-                val smsManager =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        context.getSystemService(SmsManager::class.java)
-                    } else {
-                        SmsManager.getDefault()
-                    }
+                val smsManager = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    context.getSystemService(SmsManager::class.java)
+                } else {
+                    SmsManager.getDefault()
+                }
 
+                // TODO: Need to notify user sms sending status? -> if sent - notify user and continue loading
+                // TODO: If SMS wasn't sent - Show toast with error message and stop loader
                 smsManager.sendTextMessage(smsAddress, null, smsText, null, null)
                 onShowSnackbar("SMS was sent")
             } else {
                 try {
-                    val sendIntent =
-                        Intent(Intent.ACTION_SENDTO).apply {
-                            data = Uri.parse("smsto:$smsAddress")
-                            putExtra("sms_body", smsText)
-                        }
+                    val sendIntent = Intent(Intent.ACTION_SENDTO).apply {
+                        data = Uri.parse("smsto:$smsAddress")
+                        putExtra("sms_body", smsText)
+                    }
 
                     context.startActivity(sendIntent)
                 } catch (e: ActivityNotFoundException) {
-                    Toast
-                        .makeText(
-                            context,
-                            "There is no SMS app installed.",
-                            Toast.LENGTH_SHORT,
-                        ).show()
+                    Toast.makeText(
+                        context,
+                        "There is no SMS app installed.",
+                        Toast.LENGTH_SHORT,
+                    ).show()
                 }
             }
         }
@@ -127,8 +116,7 @@ fun VerifyScreen(
         // TODO: 5. Event: after login or signup or on purchase screen
 
         Text(
-            modifier =
-            Modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 80.dp)
                 .align(Alignment.CenterHorizontally),
@@ -140,13 +128,11 @@ fun VerifyScreen(
 
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Bottom) {
             Text(
-                modifier =
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
-                text =
-                buildAnnotatedString {
+                text = buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("Option 1:")
                     }
@@ -166,66 +152,37 @@ fun VerifyScreen(
                 text = "${if (isVerify) "Verify" else "Confirm"} email",
                 progress = verifyType == VerifyType.EMAIL,
                 onClick = {
-                    email?.let {
-                        viewModel.userRegister(isVerify, name ?: "name", email, number) {
+                    if (verifyType == null) {
+                        verifyType = VerifyType.EMAIL
 
+                        viewModel.emailLogin(isVerify, requireNotNull(email)) {
+                            try {
+                                val intent = Intent(Intent.ACTION_MAIN)
+
+                                intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+                                context.startActivity(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "There is no email client app installed.",
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                            }
                         }
-
-                        // TODO: Uncomment
-//                        viewModel.emailLogin(it) {
-//                            try {
-//                                val intent = Intent(Intent.ACTION_MAIN)
-//
-//                                intent.addCategory(Intent.CATEGORY_APP_EMAIL)
-//                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-//
-//                                context.startActivity(intent)
-//                            } catch (e: ActivityNotFoundException) {
-//                                Toast
-//                                    .makeText(
-//                                        context,
-//                                        "There is no email client installed.",
-//                                        Toast.LENGTH_SHORT,
-//                                    ).show()
-//                            }
-//                        }
-
-//                        if (isVerify) {
-//                            viewModel.cryptoRegister(it) {
-//
-//                            }
-//                        } else {
-//                            viewModel.cryptoLogin(it) {
-//
-//                            }
-//                        }
                     }
-
-                    // TODO: Do this after verify
-//                    if (verifyType == null) {
-//                        verifyType = VerifyType.EMAIL
-//                        startEventTimer(
-//                            coroutineScope,
-//                            isVerify,
-//                            viewModel,
-//                            name,
-//                            email,
-//                            number,
-//                            navController
-//                        )
-//                    }
                 },
             )
 
             Text(
-                modifier =
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
-                text =
-                buildAnnotatedString {
+                text = buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("Option 2:")
                     }
@@ -235,8 +192,6 @@ fun VerifyScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
-
-            // TODO: If user clicks on verify and we see installed Telegram or WhatsApp -> show simple chooser with 3 options (if only sms - no need to show option)
 
             KeyriButton(
                 modifier = Modifier.padding(top = 20.dp),
@@ -248,28 +203,26 @@ fun VerifyScreen(
                 progress = verifyType == VerifyType.NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} phone number",
                 onClick = {
-//                    showVerifyNumberChooser = true
+                    if (verifyType == null) {
+                        verifyType = VerifyType.NUMBER
 
-                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+                        viewModel.smsLogin(
+                            isVerify,
+                            requireNotNull(email),
+                            requireNotNull(number)
+                        ) {
+                            smsAddress = it.smsUrl.sendTo
+                            smsText = it.smsUrl.confirmationMessage
+                            // TODO: Add impl
+                            // showVerifyNumberChooser = true
 
-                    // TODO: Need to notify user sms sending status? -> if sent - notify user and continue loading
-                    // TODO: If SMS wasn't sent - Show toast with error message and stop loader
-
-                    // TODO: Do this after verify
-//                    if (verifyType == null) {
-//                        verifyType = VerifyType.NUMBER
-//                        startEventTimer(
-//                            coroutineScope,
-//                            isVerify,
-//                            viewModel,
-//                            name,
-//                            email,
-//                            number,
-//                            navController
-//                        )
-//                    }
+                            sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+                        }
+                    }
                 },
             )
+
+            // TODO: If user clicks on verify and we see installed Telegram or WhatsApp -> show simple chooser with 3 options (if only sms - no need to show option)
 
 //            if (showVerifyNumberChooser) {
 //                val list = mutableListOf(ModalListItem(null, "Verify with sending SMS"))
@@ -311,14 +264,12 @@ fun VerifyScreen(
 //            }
 
             Text(
-                modifier =
-                Modifier
+                modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
-                text =
-                buildAnnotatedString {
+                text = buildAnnotatedString {
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                         append("Option 3:")
                     }
@@ -339,66 +290,39 @@ fun VerifyScreen(
                 progress = verifyType == VerifyType.EMAIL_NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
-                    try {
-                        val intent = Intent(Intent.ACTION_MAIN)
+                    if (verifyType == null) {
+                        verifyType = VerifyType.EMAIL_NUMBER
 
-                        intent.addCategory(Intent.CATEGORY_APP_EMAIL)
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                        viewModel.userRegister(
+                            isVerify,
+                            requireNotNull(name),
+                            requireNotNull(email),
+                            requireNotNull(number)
+                        ) {
+                            smsAddress = it.smsUrl.sendTo
+                            smsText = it.smsUrl.confirmationMessage
 
-                        context.startActivity(intent)
-                    } catch (e: ActivityNotFoundException) {
-                        Toast
-                            .makeText(
-                                context,
-                                "There is no email client installed.",
-                                Toast.LENGTH_SHORT,
-                            ).show()
+                            try {
+                                val intent = Intent(Intent.ACTION_MAIN)
+
+                                intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+                                context.startActivity(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                Toast
+                                    .makeText(
+                                        context,
+                                        "There is no email client installed.",
+                                        Toast.LENGTH_SHORT,
+                                    ).show()
+                            }
+
+                            sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+                        }
                     }
-
-                    sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
-
-                    // TODO: Do this after verify
-//                    if (verifyType == null) {
-//                        verifyType = VerifyType.EMAIL_NUMBER
-//                        startEventTimer(
-//                            coroutineScope,
-//                            isVerify,
-//                            viewModel,
-//                            name,
-//                            email,
-//                            number,
-//                            navController
-//                        )
-//                    }
                 },
             )
-        }
-    }
-}
-
-private fun startEventTimer(
-    coroutineScope: CoroutineScope,
-    isVerify: Boolean,
-    viewModel: VerifyViewModel,
-    name: String?,
-    email: String?,
-    number: String?,
-    navController: NavController,
-) {
-    coroutineScope.launch(Dispatchers.IO) {
-        timer(initialDelay = 2_000L, period = 1_000L) {
-            if (isVerify) {
-                cancel()
-                // TODO: Uncomment
-//                viewModel.sendEvent(name, email, number) {
-//                    navController.navigate("${Routes.VerifiedScreen.name}?email=$email&number=$number&isVerified=true")
-//                }
-            } else {
-                cancel()
-                coroutineScope.launch(Dispatchers.Main) {
-                    navController.navigate(Routes.LoginScreen.name)
-                }
-            }
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.keyri.androidFullExample.repositories
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
@@ -10,13 +11,16 @@ import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRe
 import com.keyri.androidFullExample.services.entities.requests.UserInformationResponse
 import com.keyri.androidFullExample.services.entities.requests.UserRegisterRequest
 import com.keyri.androidFullExample.services.entities.responses.KeyriResponse
+import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
 import com.keyri.androidFullExample.services.makeApiCall
+import com.keyri.androidFullExample.utils.PHONE_PREFIX
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import retrofit2.Response
 
 class KeyriDemoRepository(
     private val apiService: ApiService,
@@ -24,18 +28,39 @@ class KeyriDemoRepository(
 ) {
     // TODO: Save tokens to database?
 
-    suspend fun emailLogin(email: String): KeyriResponse =
-        makeApiCall { apiService.emailLogin(EmailLoginRequest(email)) }.getOrThrow()
+    suspend fun emailLogin(isVerify: Boolean, email: String): KeyriResponse {
+        return authWithFirebaseAndDoRequest(isVerify, email) {
+            apiService.emailLogin(EmailLoginRequest(email))
+        }
+    }
 
-    suspend fun smsLogin(number: String): KeyriResponse =
-        makeApiCall { apiService.smsLogin(ReverseSmsLoginRequest(number)) }.getOrThrow()
+    suspend fun smsLogin(isVerify: Boolean, email: String, number: String): SmsLoginResponse {
+        return authWithFirebaseAndDoRequest(isVerify, email) {
+            apiService.smsLogin(ReverseSmsLoginRequest(number.removePrefix(PHONE_PREFIX)))
+        }
+    }
 
     suspend fun userRegister(
         isVerify: Boolean,
         name: String,
         email: String,
         number: String?,
-    ): KeyriResponse {
+    ): SmsLoginResponse {
+        return authWithFirebaseAndDoRequest(isVerify, email) {
+            apiService.userRegister(UserRegisterRequest(name, email, number?.removePrefix(PHONE_PREFIX)))
+        }
+    }
+
+    suspend fun getUserInformation(email: String): UserInformationResponse = makeApiCall {
+        apiService.getUserInformation(EmailLoginRequest(email))
+    }.getOrThrow()
+
+
+    private suspend fun <T : Any> authWithFirebaseAndDoRequest(
+        isVerify: Boolean,
+        email: String,
+        block: suspend () -> Response<T>
+    ): T {
         val auth = Firebase.auth
 
         val hardcodedPassword = "HARDCODED_Pa$\$word"
@@ -47,25 +72,24 @@ class KeyriDemoRepository(
         }
 
         return callbackFlow {
-            var callback: ((KeyriResponse) -> Unit)? = { trySend(it) }
+            var callback: ((T) -> Unit)? = { trySend(it) }
 
             authTask.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     CoroutineScope(Dispatchers.IO).launch {
                         makeApiCall {
-                            apiService.userRegister(UserRegisterRequest(name, email, number))
+                            block()
                         }.getOrThrow().let {
                             callback?.invoke(it)
                         }
                     }
+                } else {
+                    // TODO: Show error if something wrong? Maybe throw
+                    Log.e("Keyri Demo error", task.exception?.message.toString())
                 }
             }
 
             awaitClose { callback = null }
         }.first()
     }
-
-    suspend fun getUserInformation(email: String): UserInformationResponse = makeApiCall {
-        apiService.getUserInformation(EmailLoginRequest(email))
-    }.getOrThrow()
 }

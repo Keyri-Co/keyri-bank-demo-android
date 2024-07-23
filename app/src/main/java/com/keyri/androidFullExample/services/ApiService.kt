@@ -5,21 +5,12 @@ import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRe
 import com.keyri.androidFullExample.services.entities.requests.UserInformationResponse
 import com.keyri.androidFullExample.services.entities.requests.UserRegisterRequest
 import com.keyri.androidFullExample.services.entities.responses.KeyriResponse
+import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface ApiService {
-    // TODO: Not need for now, uncomment later
-//    @POST("crypto-register")
-//    suspend fun cryptoRegister(
-//        @Body request: CryptoRegisterRequest,
-//    ): Response<KeyriResponse>
-//
-//    @POST("crypto-login")
-//    suspend fun cryptoLogin(
-//        @Body request: CryptoLoginRequest,
-//    ): Response<KeyriResponse>
 
     @POST("email-login")
     suspend fun emailLogin(
@@ -29,12 +20,12 @@ interface ApiService {
     @POST("sms-login")
     suspend fun smsLogin(
         @Body request: ReverseSmsLoginRequest,
-    ): Response<KeyriResponse>
+    ): Response<SmsLoginResponse>
 
     @POST("user-register")
     suspend fun userRegister(
         @Body request: UserRegisterRequest,
-    ): Response<KeyriResponse>
+    ): Response<SmsLoginResponse>
 
     @POST("get-user-information")
     suspend fun getUserInformation(

@@ -28,6 +28,7 @@ import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.primaryDisabled
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.theme.textFieldUnfocusedColor
+import com.keyri.androidFullExample.utils.PHONE_PREFIX
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -35,7 +36,6 @@ fun SignupScreen(
     viewModel: SignupViewModel = koinViewModel(),
     navController: NavHostController,
 ) {
-    val prefix = "+1"
     val inputState = viewModel.signupState.collectAsState()
     var isMobileTextFieldFocused by remember { mutableStateOf(false) }
 
@@ -87,9 +87,9 @@ fun SignupScreen(
                                     inputState.value.mobile.text
                                         .isEmpty()
                                 ) {
-                                    prefix
+                                    PHONE_PREFIX
                                 } else if (!isMobileTextFieldFocused &&
-                                    (inputState.value.mobile.text == prefix || inputState.value.mobile.text == "")
+                                    (inputState.value.mobile.text == PHONE_PREFIX || inputState.value.mobile.text == "")
                                 ) {
                                     ""
                                 } else {
@@ -111,12 +111,12 @@ fun SignupScreen(
                             text = "",
                         )
                     } else if (inputState.value.mobile.text.startsWith(
-                            prefix,
+                            PHONE_PREFIX,
                         )
                     ) {
                         inputState.value.mobile
                     } else {
-                        inputState.value.mobile.copy(text = prefix + inputState.value.mobile.text)
+                        inputState.value.mobile.copy(text = PHONE_PREFIX + inputState.value.mobile.text)
                     },
                 placeholder = {
                     Text(
@@ -127,7 +127,7 @@ fun SignupScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 onValueChange = {
                     val newMobile =
-                        if (!it.text.startsWith(prefix)) {
+                        if (!it.text.startsWith(PHONE_PREFIX)) {
                             TextFieldValue("")
                         } else if (it.text.length > 11) {
                             inputState.value.mobile
