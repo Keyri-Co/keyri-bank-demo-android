@@ -106,10 +106,10 @@ class MainActivity : FragmentActivity() {
                                 // TODO: Remove logs
                                 Log.e("CUS TOKEN", customToken)
 
-                                // TODO: Show loader while processing deeplink
+                                // TODO: Show loader while processing deeplink (need to center it)
+                                // TODO: Auth with FB custom token
                                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
 
-                                // TODO: Change and uncomment
 //                                VerifiedScreen(
 //                                    navController = navController,
 //                                    isVerified = isVerified,

@@ -1,8 +1,14 @@
 package com.keyri.androidFullExample.screens.verify
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.PendingIntent
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.Uri
 import android.os.Build
 import android.telephony.SmsManager
@@ -13,7 +19,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +44,7 @@ import com.keyri.androidFullExample.theme.primaryDisabled
 import com.keyri.androidFullExample.theme.textColor
 import org.koin.androidx.compose.koinViewModel
 
+@SuppressLint("UnspecifiedRegisterReceiverFlag")
 @Composable
 fun VerifyScreen(
     viewModel: VerifyViewModel = koinViewModel(),
@@ -73,9 +79,28 @@ fun VerifyScreen(
                     SmsManager.getDefault()
                 }
 
-                // TODO: Need to notify user sms sending status? -> if sent - notify user and continue loading
-                // TODO: If SMS wasn't sent - Show toast with error message and stop loader
-                smsManager.sendTextMessage(smsAddress, null, smsText, null, null)
+                val intentAction = "SMS-sent"
+                val sentIntent = Intent(intentAction)
+
+                val sentPI = PendingIntent.getBroadcast(
+                    context, 0, sentIntent, PendingIntent.FLAG_IMMUTABLE
+                )
+
+                context.registerReceiver(object : BroadcastReceiver() {
+                    override fun onReceive(context: Context?, intent: Intent?) {
+                        val message = when (resultCode) {
+                            Activity.RESULT_OK -> "SMS sent"
+                            SmsManager.RESULT_ERROR_NO_SERVICE -> "No service"
+                            SmsManager.RESULT_ERROR_NULL_PDU -> "Null PDU"
+                            SmsManager.RESULT_ERROR_RADIO_OFF -> "Radio off"
+                            else -> "Unable to send SMS"
+                        }
+
+                        onShowSnackbar(message)
+                    }
+                }, IntentFilter(intentAction))
+
+                smsManager.sendTextMessage(smsAddress, null, smsText, sentPI, null)
                 onShowSnackbar("SMS was sent")
             } else {
                 try {
