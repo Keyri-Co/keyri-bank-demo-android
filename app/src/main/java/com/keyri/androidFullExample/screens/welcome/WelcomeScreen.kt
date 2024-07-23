@@ -135,7 +135,7 @@ fun WelcomeScreen(
                                 },
                             ),
                     contentScale = ContentScale.Fit,
-                    painter = painterResource(id = R.drawable.ic_keyri_icon_full),
+                    painter = painterResource(id = R.drawable.ic_tabby_charcoal),
                     contentDescription = null,
                 )
             }
@@ -159,7 +159,7 @@ fun WelcomeScreen(
                     } else if (keyriAccounts.value.profiles.size > 1) {
                         showAccountsList = true
                     } else {
-                        navController.navigate("${Routes.VerifyScreen.name}?email=null&number=null&isVerify=false")
+                        navController.navigate("${Routes.VerifyScreen.name}?name=null?email=null&number=null&isVerify=false")
                     }
                 },
             )
@@ -208,7 +208,7 @@ fun WelcomeScreen(
             ListModalBottomSheet(
                 sheetState = sheetState,
                 title = "Choose an account\nto continue to Keyri Bank",
-                keyriAccounts.value.profiles.map { ModalListItem(iconRes = R.drawable.ic_keyri_logo, text = it.email) },
+                keyriAccounts.value.profiles.map { ModalListItem(iconRes = R.drawable.ic_tabby_charcoal, text = it.email) },
                 onListItemClicked = {
                     showBiometricPrompt = true
                     showAccountsList = false

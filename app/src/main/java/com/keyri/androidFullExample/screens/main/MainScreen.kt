@@ -1,9 +1,11 @@
 package com.keyri.androidFullExample.screens.main
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,16 +43,22 @@ fun MainScreen(
     val currentProfile = viewModel.currentProfile.collectAsState()
     val riskSignals by remember { mutableStateOf(listOf("VPN")) }
     val openAlertDialog = remember { mutableStateOf(false) }
+    val loading = viewModel.loading.collectAsState()
 
-    Column {
-        Text(
-            modifier =
+    if (loading.value) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    } else {
+        Column {
+            Text(
+                modifier =
                 Modifier
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally)
                     .padding(top = 40.dp),
-            textAlign = TextAlign.Center,
-            text =
+                textAlign = TextAlign.Center,
+                text =
                 buildAnnotatedString {
                     append("Authenticated as\n")
 
@@ -58,18 +66,18 @@ fun MainScreen(
                         append(currentProfile.value)
                     }
                 },
-            style = MaterialTheme.typography.headlineSmall,
-            color = textColor,
-        )
+                style = MaterialTheme.typography.headlineSmall,
+                color = textColor,
+            )
 
-        Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
-            Text(
-                modifier =
+            Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
+                Text(
+                    modifier =
                     Modifier
                         .fillMaxWidth()
                         .align(Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
-                text =
+                    textAlign = TextAlign.Center,
+                    text =
                     buildAnnotatedString {
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append("Summary risk determination:\n")
@@ -79,19 +87,19 @@ fun MainScreen(
                             append("Warn")
                         }
                     },
-                style = MaterialTheme.typography.headlineSmall,
-                color = textColor,
-            )
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = textColor,
+                )
 
-            if (riskSignals.isNotEmpty()) {
-                Text(
-                    modifier =
+                if (riskSignals.isNotEmpty()) {
+                    Text(
+                        modifier =
                         Modifier
                             .fillMaxWidth()
                             .align(Alignment.CenterHorizontally)
                             .padding(top = 30.dp),
-                    textAlign = TextAlign.Center,
-                    text =
+                        textAlign = TextAlign.Center,
+                        text =
                         buildAnnotatedString {
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                 append("Fraud risk signals:\n")
@@ -107,19 +115,19 @@ fun MainScreen(
                                 }
                             }
                         },
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = textColor,
-                )
-            }
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = textColor,
+                    )
+                }
 
-            Text(
-                modifier =
+                Text(
+                    modifier =
                     Modifier
                         .fillMaxWidth()
                         .align(Alignment.CenterHorizontally)
                         .padding(top = 20.dp),
-                textAlign = TextAlign.Center,
-                text =
+                    textAlign = TextAlign.Center,
+                    text =
                     buildAnnotatedString {
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                             append("Device info:\n")
@@ -133,27 +141,27 @@ fun MainScreen(
                             append("Location: New York City, NY, US")
                         }
                     },
-                style = MaterialTheme.typography.headlineSmall,
-                color = textColor,
-            )
-        }
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = textColor,
+                )
+            }
 
-        if (openAlertDialog.value) {
-            KeyriAlertDialog(
-                onDismissRequest = { openAlertDialog.value = false },
-                onConfirmation = {
-                    openAlertDialog.value = false
+            if (openAlertDialog.value) {
+                KeyriAlertDialog(
+                    onDismissRequest = { openAlertDialog.value = false },
+                    onConfirmation = {
+                        openAlertDialog.value = false
 
-                    viewModel.logout {
-                        navController.navigate(Routes.WelcomeScreen.name) {
-                            popUpTo(Routes.MainScreen.name) {
-                                inclusive = true
+                        viewModel.logout {
+                            navController.navigate(Routes.WelcomeScreen.name) {
+                                popUpTo(Routes.MainScreen.name) {
+                                    inclusive = true
+                                }
                             }
                         }
-                    }
-                },
-                dialogTitle = "Log out?",
-                dialogText =
+                    },
+                    dialogTitle = "Log out?",
+                    dialogText =
                     buildAnnotatedString {
                         append("Are you sure you want to log out from ")
 
@@ -163,24 +171,25 @@ fun MainScreen(
 
                         append("?")
                     },
+                )
+            }
+
+            KeyriButton(
+                text = "Make payment",
+                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
+                onClick = {
+                    navController.navigate(Routes.MakePaymentScreen.name)
+                },
+            )
+
+            KeyriButton(
+                Modifier.padding(top = 28.dp),
+                containerColor = MaterialTheme.colorScheme.onPrimary,
+                text = "Log out",
+                onClick = {
+                    openAlertDialog.value = true
+                },
             )
         }
-
-        KeyriButton(
-            text = "Make payment",
-            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
-            onClick = {
-                navController.navigate(Routes.MakePaymentScreen.name)
-            },
-        )
-
-        KeyriButton(
-            Modifier.padding(top = 28.dp),
-            containerColor = MaterialTheme.colorScheme.onPrimary,
-            text = "Log out",
-            onClick = {
-                openAlertDialog.value = true
-            },
-        )
     }
 }

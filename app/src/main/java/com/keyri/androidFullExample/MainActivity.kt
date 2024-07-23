@@ -80,19 +80,12 @@ class MainActivity : FragmentActivity() {
                             }
 
                             composable(
-                                "${Routes.VerifiedScreen.name}?customToken={customToken}}",
-                                arguments =
-                                    listOf(
-                                        navArgument("customToken") {
-                                            type = NavType.StringType
-                                            nullable = false
-                                        },
-                                    ),
+                                "${Routes.VerifiedScreen.name}?login&customToken={customToken}}",
                                 deepLinks =
                                     listOf(
                                         navDeepLink {
                                             uriPattern =
-                                                "https://android-full-example.keyri.com/{customToken}"
+                                                "https://android-full-example.keyri.com?login&customToken={customToken}"
                                         },
                                     ),
                             ) { backStackEntry ->
@@ -121,6 +114,7 @@ class MainActivity : FragmentActivity() {
                                     listOf(
                                         navArgument("name") {
                                             type = NavType.StringType
+                                            nullable = true
                                         },
                                         navArgument("email") {
                                             type = NavType.StringType

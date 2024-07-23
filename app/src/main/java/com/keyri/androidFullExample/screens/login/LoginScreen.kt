@@ -85,7 +85,8 @@ fun LoginScreen(
             text = "Confirm",
             onClick = {
                 viewModel.sendEvent(email) {
-                    navController.navigate("${Routes.VerifiedScreen.name}?email=$email&isVerified=false")
+                    // TODO: Wrong, here show loading and wait for email and custom token
+//                    navController.navigate("${Routes.VerifiedScreen.name}?email=$email&isVerified=false")
                 }
             },
         )

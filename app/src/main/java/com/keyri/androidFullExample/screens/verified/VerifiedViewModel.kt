@@ -29,13 +29,13 @@ class VerifiedViewModel(
 
     private val throwableScope =
         Dispatchers.IO +
-            CoroutineExceptionHandler { _, throwable ->
-                _errorMessage.value = throwable.message
+                CoroutineExceptionHandler { _, throwable ->
+                    _errorMessage.value = throwable.message
 
-                timer(initialDelay = 1_000L, period = 1_000L) {
-                    _errorMessage.value = null
+                    timer(initialDelay = 1_000L, period = 1_000L) {
+                        _errorMessage.value = null
+                    }
                 }
-            }
 
     fun saveBiometricAuth(customToken: String) {
         viewModelScope.launch(throwableScope) {
@@ -63,14 +63,23 @@ class VerifiedViewModel(
                 keyriProfiles
                     .copy(currentProfile = currentProfileEmail, profiles = mappedProfiles)
                     .apply {
-                        if (keyri.getAssociationKey(currentProfileEmail).getOrNull() == null) {
-                            keyri.generateAssociationKey(currentProfileEmail)
-                        }
-
-                        keyri.sendEvent(currentProfileEmail, EventType.login(), true)
-
                         _loading.value = true
                     }
+            }
+
+            val associationKey = keyri.getAssociationKey(currentProfileEmail).getOrNull()
+                ?: keyri.generateAssociationKey(currentProfileEmail).getOrThrow()
+
+            currentProfile.value?.let { profile ->
+                if (profile.isVerify) {
+                    repository.cryptoRegister(currentProfileEmail, associationKey)
+                } else {
+                    val data = System.currentTimeMillis().toString()
+                    val signature =
+                        keyri.generateUserSignature(currentProfileEmail, data).getOrThrow()
+
+                    repository.cryptoLogin(profile.email, data, signature)
+                }
             }
         }
     }

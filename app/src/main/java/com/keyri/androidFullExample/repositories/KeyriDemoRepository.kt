@@ -4,6 +4,9 @@ import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.keyri.androidFullExample.services.ApiService
+import com.keyri.androidFullExample.services.entities.requests.CryptoLoginRequest
+import com.keyri.androidFullExample.services.entities.requests.CryptoRegisterRequest
+import com.keyri.androidFullExample.services.entities.requests.DecryptRiskRequest
 import com.keyri.androidFullExample.services.entities.requests.EmailLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.UserInformationResponse
@@ -24,6 +27,24 @@ import retrofit2.Response
 class KeyriDemoRepository(
     private val apiService: ApiService,
 ) {
+    suspend fun cryptoRegister(email: String, associationKey: String): String {
+        return makeApiCall {
+            apiService.cryptoRegister(CryptoRegisterRequest(email, associationKey))
+        }.getOrThrow().customToken
+    }
+
+    suspend fun cryptoLogin(email: String, data: String, signatureB64: String): String {
+        return makeApiCall {
+            apiService.cryptoLogin(CryptoLoginRequest(email, data, signatureB64))
+        }.getOrThrow().customToken
+    }
+
+    suspend fun decryptRisk(encryptedEventString: String): String {
+        return makeApiCall {
+            apiService.decryptRisk(DecryptRiskRequest(encryptedEventString))
+        }.getOrThrow().customToken
+    }
+
     suspend fun emailLogin(
         isVerify: Boolean,
         email: String,
@@ -49,19 +70,14 @@ class KeyriDemoRepository(
         name: String,
         email: String,
         number: String?,
-    ): SmsLoginResponse {
-        val fcmToken = Firebase.messaging.token.await()
-
-        return authWithFirebaseAndDoRequest(isVerify, email) {
-            apiService.userRegister(
-                UserRegisterRequest(
-                    name,
-                    email,
-                    number?.removePrefix(PHONE_PREFIX),
-                    fcmToken
-                ),
-            )
-        }
+    ): SmsLoginResponse = authWithFirebaseAndDoRequest(isVerify, email) {
+        apiService.userRegister(
+            UserRegisterRequest(
+                name,
+                email,
+                number?.removePrefix(PHONE_PREFIX)
+            ),
+        )
     }
 
     suspend fun getUserInformation(email: String): UserInformationResponse =
