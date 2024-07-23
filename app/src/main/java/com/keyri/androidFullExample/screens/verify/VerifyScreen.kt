@@ -230,7 +230,6 @@ fun VerifyScreen(
             )
 
             // TODO: If user clicks on verify and we see installed Telegram or WhatsApp -> show simple chooser with 3 options (if only sms - no need to show option)
-
 //            if (showVerifyNumberChooser) {
 //                val list = mutableListOf(ModalListItem(null, "Verify with sending SMS"))
 //
@@ -241,7 +240,7 @@ fun VerifyScreen(
 //                } catch (_: PackageManager.NameNotFoundException) {
 //                }
 //
-//                // TODO: Can't find Whatsapp
+//                Can't find Whatsapp here
 //                try {
 //                    val packageManager = context.packageManager
 //                    val i = Intent(Intent.ACTION_VIEW)
