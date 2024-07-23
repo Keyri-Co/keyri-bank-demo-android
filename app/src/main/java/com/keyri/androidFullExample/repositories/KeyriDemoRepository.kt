@@ -27,23 +27,27 @@ import retrofit2.Response
 class KeyriDemoRepository(
     private val apiService: ApiService,
 ) {
-    suspend fun cryptoRegister(email: String, associationKey: String): String {
-        return makeApiCall {
+    suspend fun cryptoRegister(
+        email: String,
+        associationKey: String,
+    ): String =
+        makeApiCall {
             apiService.cryptoRegister(CryptoRegisterRequest(email, associationKey))
         }.getOrThrow().customToken
-    }
 
-    suspend fun cryptoLogin(email: String, data: String, signatureB64: String): String {
-        return makeApiCall {
+    suspend fun cryptoLogin(
+        email: String,
+        data: String,
+        signatureB64: String,
+    ): String =
+        makeApiCall {
             apiService.cryptoLogin(CryptoLoginRequest(email, data, signatureB64))
         }.getOrThrow().customToken
-    }
 
-    suspend fun decryptRisk(encryptedEventString: String): String {
-        return makeApiCall {
+    suspend fun decryptRisk(encryptedEventString: String): String =
+        makeApiCall {
             apiService.decryptRisk(DecryptRiskRequest(encryptedEventString))
         }.getOrThrow().customToken
-    }
 
     suspend fun emailLogin(
         isVerify: Boolean,
@@ -70,15 +74,16 @@ class KeyriDemoRepository(
         name: String,
         email: String,
         number: String?,
-    ): SmsLoginResponse = authWithFirebaseAndDoRequest(isVerify, email) {
-        apiService.userRegister(
-            UserRegisterRequest(
-                name,
-                email,
-                number?.removePrefix(PHONE_PREFIX)
-            ),
-        )
-    }
+    ): SmsLoginResponse =
+        authWithFirebaseAndDoRequest(isVerify, email) {
+            apiService.userRegister(
+                UserRegisterRequest(
+                    name,
+                    email,
+                    number?.removePrefix(PHONE_PREFIX),
+                ),
+            )
+        }
 
     suspend fun getUserInformation(email: String): UserInformationResponse =
         makeApiCall {

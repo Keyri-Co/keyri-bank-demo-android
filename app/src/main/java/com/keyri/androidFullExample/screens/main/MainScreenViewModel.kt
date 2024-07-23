@@ -21,26 +21,27 @@ import kotlin.concurrent.timer
 class MainScreenViewModel(
     private val keyri: Keyri,
     private val dataStore: DataStore<KeyriProfiles>,
-    private val repository: KeyriDemoRepository
+    private val repository: KeyriDemoRepository,
 ) : ViewModel() {
     private val _loading = MutableStateFlow(true)
     private val _currentProfile = MutableStateFlow<String?>(null)
     private val _errorMessage = MutableStateFlow<String?>(null)
     val currentProfile = _currentProfile.asStateFlow()
     val loading = _loading.asStateFlow()
+    val errorMessage = _errorMessage.asStateFlow()
 
     private val throwableScope =
         Dispatchers.IO +
-                CoroutineExceptionHandler { _, throwable ->
-                    _errorMessage.value = throwable.message
+            CoroutineExceptionHandler { _, throwable ->
+                _errorMessage.value = throwable.message
 
-                    timer(initialDelay = 1_000L, period = 1_000L) {
-                        _errorMessage.value = null
-                    }
+                timer(initialDelay = 1_000L, period = 1_000L) {
+                    _errorMessage.value = null
                 }
+            }
 
     init {
-        getCurrentProfile()
+        getRiskDetails()
     }
 
     fun logout(callback: () -> Unit) {
@@ -55,20 +56,27 @@ class MainScreenViewModel(
         }
     }
 
-    fun getCurrentProfile() {
+    private fun getRiskDetails() {
+        // TODO: Remove logs
+        Log.e("getting profile", "ok")
+
         viewModelScope.launch(throwableScope) {
             dataStore.data.collectLatest { keyriProfiles ->
                 _currentProfile.value = keyriProfiles.currentProfile
             }
 
             // TODO: Remove logs
-            Log.e("CUrrent", currentProfile.value.toString())
+            Log.e("currentProfile", currentProfile.value.toString())
 
             currentProfile.value?.let {
                 val eventResult = keyri.sendEvent(it, EventType.login(), true).getOrThrow()
 
                 repository.decryptRisk(Gson().toJson(eventResult))
+
+                _loading.value = false
             }
+
+            _loading.value = false
         }
     }
 }

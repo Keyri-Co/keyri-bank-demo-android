@@ -156,7 +156,18 @@ class MainActivity : FragmentActivity() {
                             }
 
                             composable(Routes.MainScreen.name) {
-                                MainScreen(navController = navController)
+                                MainScreen(
+                                    navController = navController,
+                                    onShowSnackbar = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = it,
+                                                withDismissAction = true,
+                                                duration = SnackbarDuration.Long,
+                                            )
+                                        }
+                                    },
+                                )
                             }
 
                             composable(Routes.MakePaymentScreen.name) {

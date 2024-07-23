@@ -7,7 +7,6 @@ import com.keyri.androidFullExample.data.KeyriProfile
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.repositories.KeyriDemoRepository
 import com.keyrico.keyrisdk.Keyri
-import com.keyrico.keyrisdk.sec.fraud.event.EventType
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,13 +28,13 @@ class VerifiedViewModel(
 
     private val throwableScope =
         Dispatchers.IO +
-                CoroutineExceptionHandler { _, throwable ->
-                    _errorMessage.value = throwable.message
+            CoroutineExceptionHandler { _, throwable ->
+                _errorMessage.value = throwable.message
 
-                    timer(initialDelay = 1_000L, period = 1_000L) {
-                        _errorMessage.value = null
-                    }
+                timer(initialDelay = 1_000L, period = 1_000L) {
+                    _errorMessage.value = null
                 }
+            }
 
     fun saveBiometricAuth(customToken: String) {
         viewModelScope.launch(throwableScope) {
@@ -67,8 +66,9 @@ class VerifiedViewModel(
                     }
             }
 
-            val associationKey = keyri.getAssociationKey(currentProfileEmail).getOrNull()
-                ?: keyri.generateAssociationKey(currentProfileEmail).getOrThrow()
+            val associationKey =
+                keyri.getAssociationKey(currentProfileEmail).getOrNull()
+                    ?: keyri.generateAssociationKey(currentProfileEmail).getOrThrow()
 
             currentProfile.value?.let { profile ->
                 if (profile.isVerify) {

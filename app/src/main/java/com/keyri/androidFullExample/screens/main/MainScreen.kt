@@ -9,7 +9,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,15 +34,19 @@ import org.koin.androidx.compose.koinViewModel
 fun MainScreen(
     viewModel: MainScreenViewModel = koinViewModel(),
     navController: NavController,
+    onShowSnackbar: (String) -> Unit,
 ) {
-    SideEffect {
-        viewModel.getCurrentProfile()
-    }
-
     val currentProfile = viewModel.currentProfile.collectAsState()
     val riskSignals by remember { mutableStateOf(listOf("VPN")) }
     val openAlertDialog = remember { mutableStateOf(false) }
     val loading = viewModel.loading.collectAsState()
+    val error = viewModel.errorMessage.collectAsState()
+
+    if (error.value != null) {
+        error.value?.let {
+            onShowSnackbar(it)
+        }
+    }
 
     if (loading.value) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -53,19 +56,19 @@ fun MainScreen(
         Column {
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 40.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
                 text =
-                buildAnnotatedString {
-                    append("Authenticated as\n")
+                    buildAnnotatedString {
+                        append("Authenticated as\n")
 
-                    withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                        append(currentProfile.value)
-                    }
-                },
+                        withStyle(style = SpanStyle(color = verifiedTextColor)) {
+                            append(currentProfile.value)
+                        }
+                    },
                 style = MaterialTheme.typography.headlineSmall,
                 color = textColor,
             )
@@ -73,20 +76,20 @@ fun MainScreen(
             Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
                 Text(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally),
                     textAlign = TextAlign.Center,
                     text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Summary risk determination:\n")
-                        }
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("Summary risk determination:\n")
+                            }
 
-                        withStyle(style = SpanStyle(color = warningTextColor)) {
-                            append("Warn")
-                        }
-                    },
+                            withStyle(style = SpanStyle(color = warningTextColor)) {
+                                append("Warn")
+                            }
+                        },
                     style = MaterialTheme.typography.headlineSmall,
                     color = textColor,
                 )
@@ -94,27 +97,27 @@ fun MainScreen(
                 if (riskSignals.isNotEmpty()) {
                     Text(
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 30.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 30.dp),
                         textAlign = TextAlign.Center,
                         text =
-                        buildAnnotatedString {
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("Fraud risk signals:\n")
-                            }
+                            buildAnnotatedString {
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("Fraud risk signals:\n")
+                                }
 
-                            riskSignals.forEachIndexed { index, s ->
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                                    append(s)
+                                riskSignals.forEachIndexed { index, s ->
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                        append(s)
 
-                                    if (riskSignals.lastIndex != index) {
-                                        append(",")
+                                        if (riskSignals.lastIndex != index) {
+                                            append(",")
+                                        }
                                     }
                                 }
-                            }
-                        },
+                            },
                         style = MaterialTheme.typography.headlineSmall,
                         color = textColor,
                     )
@@ -122,25 +125,25 @@ fun MainScreen(
 
                 Text(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 20.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 20.dp),
                     textAlign = TextAlign.Center,
                     text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Device info:\n")
-                        }
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("Device info:\n")
+                            }
 
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                            append("Device id: f8bd9...6d3b\n")
-                        }
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                append("Device id: f8bd9...6d3b\n")
+                            }
 
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                            append("Location: New York City, NY, US")
-                        }
-                    },
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                append("Location: New York City, NY, US")
+                            }
+                        },
                     style = MaterialTheme.typography.headlineSmall,
                     color = textColor,
                 )
@@ -162,15 +165,15 @@ fun MainScreen(
                     },
                     dialogTitle = "Log out?",
                     dialogText =
-                    buildAnnotatedString {
-                        append("Are you sure you want to log out from ")
+                        buildAnnotatedString {
+                            append("Are you sure you want to log out from ")
 
-                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                            append(currentProfile.value)
-                        }
+                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                append(currentProfile.value)
+                            }
 
-                        append("?")
-                    },
+                            append("?")
+                        },
                 )
             }
 
