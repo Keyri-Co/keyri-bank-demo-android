@@ -1,7 +1,6 @@
 package com.keyri.androidFullExample
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -17,7 +15,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -103,28 +100,19 @@ class MainActivity : FragmentActivity() {
                                     backStackEntry.arguments?.getString("customToken")
                                         ?: throw IllegalStateException("CustomToken shouldn't be null")
 
-                                // TODO: Remove logs
-                                Log.e("CUS TOKEN", customToken)
-
-                                // TODO: Show loader while processing deeplink (need to center it)
-                                // TODO: Auth with FB custom token
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-
-//                                VerifiedScreen(
-//                                    navController = navController,
-//                                    isVerified = isVerified,
-//                                    email = email,
-//                                    number = number,
-//                                    onShowSnackbar = {
-//                                        scope.launch {
-//                                            snackbarHostState.showSnackbar(
-//                                                message = it,
-//                                                withDismissAction = true,
-//                                                duration = SnackbarDuration.Long,
-//                                            )
-//                                        }
-//                                    },
-//                                )
+                                VerifiedScreen(
+                                    navController = navController,
+                                    customToken = customToken,
+                                    onShowSnackbar = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = it,
+                                                withDismissAction = true,
+                                                duration = SnackbarDuration.Long,
+                                            )
+                                        }
+                                    },
+                                )
                             }
 
                             composable(

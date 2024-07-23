@@ -5,12 +5,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keyri.androidFullExample.data.KeyriProfiles
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class VerifiedViewModel(
     private val dataStore: DataStore<KeyriProfiles>,
 ) : ViewModel() {
+
+    private val _loading = MutableStateFlow(true)
+    val loading = _loading.asStateFlow()
+
     fun saveBiometricAuth(
         currentProfile: String,
         onDone: () -> Unit,
@@ -36,4 +42,37 @@ class VerifiedViewModel(
             }
         }
     }
+
+    // TODO: Do this after opening screen
+    //    fun sendEvent(
+//        name: String?,
+//        email: String?,
+//        number: String?,
+//        onSuccess: () -> Unit,
+//    ) {
+//        if (email == null) return
+//
+//        viewModelScope.launch(throwableScope) {
+//            if (keyri.getAssociationKey(email).getOrThrow() == null) {
+//                keyri.generateAssociationKey(email)
+//            }
+//
+//            keyri.sendEvent(email, EventType.signup(), true)
+//
+//            dataStore.updateData {
+//                val mappedProfiles =
+//                    if (it.profiles.any { profile -> profile.email == email }) {
+//                        it.profiles
+//                    } else {
+//                        it.profiles + KeyriProfile(name, email, number, false)
+//                    }
+//
+//                it.copy(profiles = mappedProfiles)
+//            }
+//
+//            withContext(Dispatchers.Main) {
+//                onSuccess()
+//            }
+//        }
+//    }
 }

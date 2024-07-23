@@ -121,25 +121,6 @@ fun VerifyScreen(
         }
 
     Column {
-        // TODO: 1. Registration: verify email
-        // TODO: Create users with email and password method https://firebase.google.com/docs/auth/android/password-auth (but password may be static)
-        // TODO: When it successful -> send user info object (from Firebase) + name, email and phone number (optional)
-        // TODO: Send on "email-login" request
-        // TODO: Get deeplink (with custom token param) -> do Firebase sign in with custom token method (on mobile)
-
-        // TODO: 2. Registration: verify phone
-        // TODO: If user provided phone number -> do "sms-login" request
-        // TODO: API should return string, send this string to specified number
-        // TODO: Custom token will be sent with FCM
-        // TODO: Do Firebase sign in with custom token method (on mobile)
-
-        // TODO: 3. Registration: email and phone
-        // TODO: do both: first email and then phone
-
-        // TODO: 4. Login: same flow as above
-
-        // TODO: 5. Event: after login or signup or on purchase screen
-
         Text(
             modifier = Modifier
                 .fillMaxWidth()

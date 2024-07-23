@@ -32,38 +32,6 @@ class VerifyViewModel(
                 }
             }
 
-//    fun sendEvent(
-//        name: String?,
-//        email: String?,
-//        number: String?,
-//        onSuccess: () -> Unit,
-//    ) {
-//        if (email == null) return
-//
-//        viewModelScope.launch(throwableScope) {
-//            if (keyri.getAssociationKey(email).getOrThrow() == null) {
-//                keyri.generateAssociationKey(email)
-//            }
-//
-//            keyri.sendEvent(email, EventType.signup(), true)
-//
-//            dataStore.updateData {
-//                val mappedProfiles =
-//                    if (it.profiles.any { profile -> profile.email == email }) {
-//                        it.profiles
-//                    } else {
-//                        it.profiles + KeyriProfile(name, email, number, false)
-//                    }
-//
-//                it.copy(profiles = mappedProfiles)
-//            }
-//
-//            withContext(Dispatchers.Main) {
-//                onSuccess()
-//            }
-//        }
-//    }
-
     fun userRegister(
         isVerify: Boolean,
         name: String,
