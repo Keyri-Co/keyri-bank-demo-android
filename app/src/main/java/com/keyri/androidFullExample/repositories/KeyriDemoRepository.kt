@@ -2,6 +2,7 @@ package com.keyri.androidFullExample.repositories
 
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import com.keyri.androidFullExample.services.ApiService
 import com.keyri.androidFullExample.services.entities.requests.EmailLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRequest
@@ -17,6 +18,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import retrofit2.Response
 
 class KeyriDemoRepository(
@@ -34,26 +36,33 @@ class KeyriDemoRepository(
         isVerify: Boolean,
         email: String,
         number: String,
-    ): SmsLoginResponse =
-        authWithFirebaseAndDoRequest(isVerify, email) {
-            apiService.smsLogin(ReverseSmsLoginRequest(number.removePrefix(PHONE_PREFIX)))
+    ): SmsLoginResponse {
+        val fcmToken = Firebase.messaging.token.await()
+
+        return authWithFirebaseAndDoRequest(isVerify, email) {
+            apiService.smsLogin(ReverseSmsLoginRequest(number.removePrefix(PHONE_PREFIX), fcmToken))
         }
+    }
 
     suspend fun userRegister(
         isVerify: Boolean,
         name: String,
         email: String,
         number: String?,
-    ): SmsLoginResponse =
-        authWithFirebaseAndDoRequest(isVerify, email) {
+    ): SmsLoginResponse {
+        val fcmToken = Firebase.messaging.token.await()
+
+        return authWithFirebaseAndDoRequest(isVerify, email) {
             apiService.userRegister(
                 UserRegisterRequest(
                     name,
                     email,
                     number?.removePrefix(PHONE_PREFIX),
+                    fcmToken
                 ),
             )
         }
+    }
 
     suspend fun getUserInformation(email: String): UserInformationResponse =
         makeApiCall {

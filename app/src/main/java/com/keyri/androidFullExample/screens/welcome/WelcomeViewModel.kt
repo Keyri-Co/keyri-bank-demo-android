@@ -60,6 +60,7 @@ class WelcomeViewModel(
                 }
 
                 withContext(Dispatchers.Main) {
+                    checkKeyriAccounts()
                     callback()
                 }
             }

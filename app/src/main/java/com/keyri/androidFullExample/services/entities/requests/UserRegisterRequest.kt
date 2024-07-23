@@ -9,4 +9,6 @@ data class UserRegisterRequest(
     val email: String,
     @SerializedName("phone")
     val phone: String?,
+    @SerializedName("fcmToken")
+    val fcmToken: String,
 )
