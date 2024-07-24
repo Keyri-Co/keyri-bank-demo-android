@@ -52,33 +52,26 @@ class KeyriDemoRepository(
             riskApiService.decryptRisk(DecryptRiskRequest(encryptedEventString))
         }.getOrThrow()
 
-    suspend fun emailLogin(
-        isVerify: Boolean,
-        email: String,
-    ): KeyriResponse =
-        authWithFirebaseAndDoRequest(isVerify, email) {
+    suspend fun emailLogin(email: String): KeyriResponse {
+        return makeApiCall {
             apiService.emailLogin(EmailLoginRequest(email))
-        }
+        }.getOrThrow()
+    }
 
-    suspend fun smsLogin(
-        isVerify: Boolean,
-        email: String,
-        number: String,
-    ): SmsLoginResponse {
+    suspend fun smsLogin(number: String): SmsLoginResponse {
         val fcmToken = Firebase.messaging.token.await()
 
-        return authWithFirebaseAndDoRequest(isVerify, email) {
+        return makeApiCall {
             apiService.smsLogin(ReverseSmsLoginRequest(number.removePrefix(PHONE_PREFIX), fcmToken))
-        }
+        }.getOrThrow()
     }
 
     suspend fun userRegister(
-        isVerify: Boolean,
         name: String,
         email: String,
         number: String?,
     ): SmsLoginResponse =
-        authWithFirebaseAndDoRequest(isVerify, email) {
+        authWithFirebaseAndDoRequest(email) {
             apiService.userRegister(
                 UserRegisterRequest(
                     name,
@@ -113,21 +106,21 @@ class KeyriDemoRepository(
             awaitClose { callback = null }
         }.first()
 
+    suspend fun authWithFirebase(email: String) {
+        val auth = Firebase.auth
+        val hardcodedPassword = "HARDCODED_Pa$\$word"
+
+        auth.signInWithEmailAndPassword(email, hardcodedPassword).await()
+    }
+
     private suspend fun <T : Any> authWithFirebaseAndDoRequest(
-        isVerify: Boolean,
         email: String,
         block: suspend () -> Response<T>,
     ): T {
         val auth = Firebase.auth
-
         val hardcodedPassword = "HARDCODED_Pa$\$word"
 
-        val authTask =
-            if (isVerify) {
-                auth.createUserWithEmailAndPassword(email, hardcodedPassword)
-            } else {
-                auth.signInWithEmailAndPassword(email, hardcodedPassword)
-            }
+        val authTask = auth.createUserWithEmailAndPassword(email, hardcodedPassword)
 
         return callbackFlow {
             var callback: ((Result<T>) -> Unit)? = { trySend(it) }

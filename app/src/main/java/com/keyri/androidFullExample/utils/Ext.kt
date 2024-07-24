@@ -70,10 +70,6 @@ fun NavHostController.navigateWithPopUp(
     }
 }
 
-fun JSONObject.getIfHas(fieldName: String): String? {
-    return takeIf { it.has(fieldName) }?.getString(fieldName)
-}
+fun JSONObject.getIfHas(fieldName: String): String? = takeIf { it.has(fieldName) }?.getString(fieldName)
 
-fun JSONObject.getIfHasDouble(fieldName: String): Double? {
-    return takeIf { it.has(fieldName) }?.getDouble(fieldName)
-}
+fun JSONObject.getIfHasDouble(fieldName: String): Double? = takeIf { it.has(fieldName) }?.getDouble(fieldName)

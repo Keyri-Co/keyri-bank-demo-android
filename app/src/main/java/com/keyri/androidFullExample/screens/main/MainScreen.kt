@@ -56,19 +56,19 @@ fun MainScreen(
         Column {
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 40.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
                 text =
-                buildAnnotatedString {
-                    append("Authenticated as\n")
+                    buildAnnotatedString {
+                        append("Authenticated as\n")
 
-                    withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                        append(currentProfile.value)
-                    }
-                },
+                        withStyle(style = SpanStyle(color = verifiedTextColor)) {
+                            append(currentProfile.value)
+                        }
+                    },
                 style = MaterialTheme.typography.headlineSmall,
                 color = textColor,
             )
@@ -76,28 +76,29 @@ fun MainScreen(
             Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
                 Text(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally),
                     textAlign = TextAlign.Center,
                     text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Summary risk determination:\n")
-                        }
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("Summary risk determination:\n")
+                            }
 
-                        val riskDetermination = riskResponse.value?.riskDetermination
+                            val riskDetermination = riskResponse.value?.riskDetermination
 
-                        val color = when (riskDetermination) {
-                            "allow" -> verifiedTextColor
-                            "warn" -> warningTextColor
-                            else -> denyTextColor
-                        }
+                            val color =
+                                when (riskDetermination) {
+                                    "allow" -> verifiedTextColor
+                                    "warn" -> warningTextColor
+                                    else -> denyTextColor
+                                }
 
-                        withStyle(style = SpanStyle(color = color)) {
-                            append(riskDetermination)
-                        }
-                    },
+                            withStyle(style = SpanStyle(color = color)) {
+                                append(riskDetermination)
+                            }
+                        },
                     style = MaterialTheme.typography.headlineSmall,
                     color = textColor,
                 )
@@ -105,27 +106,27 @@ fun MainScreen(
                 if (riskResponse.value?.signals?.isNotEmpty() == true) {
                     Text(
                         modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 30.dp),
+                            Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.CenterHorizontally)
+                                .padding(top = 30.dp),
                         textAlign = TextAlign.Center,
                         text =
-                        buildAnnotatedString {
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("Fraud risk signals:\n")
-                            }
+                            buildAnnotatedString {
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append("Fraud risk signals:\n")
+                                }
 
-                            riskResponse.value?.signals?.forEachIndexed { index, s ->
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                                    append(s)
+                                riskResponse.value?.signals?.forEachIndexed { index, s ->
+                                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                        append(s)
 
-                                    if (riskResponse.value?.signals?.lastIndex != index) {
-                                        append(",")
+                                        if (riskResponse.value?.signals?.lastIndex != index) {
+                                            append(",")
+                                        }
                                     }
                                 }
-                            }
-                        },
+                            },
                         style = MaterialTheme.typography.headlineSmall,
                         color = textColor,
                     )
@@ -133,27 +134,29 @@ fun MainScreen(
 
                 Text(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 20.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 20.dp),
                     textAlign = TextAlign.Center,
                     text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Device info:\n")
-                        }
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("Device info:\n")
+                            }
 
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                            append("Device id: ${riskResponse.value?.fingerprintId}\n")
-                        }
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                append("Device id: ${riskResponse.value?.fingerprintId}\n")
+                            }
 
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                            val location = riskResponse.value?.location
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                val location = riskResponse.value?.location
 
-                            append("Location: ${location?.city} ${location?.regionCode} ${location?.countryCode} ${location?.continentCode}")
-                        }
-                    },
+                                append(
+                                    "Location: ${location?.city} ${location?.regionCode} ${location?.countryCode} ${location?.continentCode}",
+                                )
+                            }
+                        },
                     style = MaterialTheme.typography.headlineSmall,
                     color = textColor,
                 )
@@ -175,15 +178,15 @@ fun MainScreen(
                     },
                     dialogTitle = "Log out?",
                     dialogText =
-                    buildAnnotatedString {
-                        append("Are you sure you want to log out from ")
+                        buildAnnotatedString {
+                            append("Are you sure you want to log out from ")
 
-                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                            append(currentProfile.value)
-                        }
+                            withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                append(currentProfile.value)
+                            }
 
-                        append("?")
-                    },
+                            append("?")
+                        },
                 )
             }
 

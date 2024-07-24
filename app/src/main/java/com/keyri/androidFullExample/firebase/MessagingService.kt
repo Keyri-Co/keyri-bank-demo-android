@@ -7,6 +7,7 @@ import android.content.Intent
 import android.media.RingtoneManager
 import android.util.Log
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.keyri.androidFullExample.MainActivity
@@ -26,13 +27,15 @@ class MessagingService : FirebaseMessagingService() {
     }
 
     private fun showLocalNotification(customToken: String?) {
-        val intent = Intent(this, MainActivity::class.java)
-
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-        intent.putExtra("customToken", customToken)
+        val deepLinkIntent = Intent(
+            Intent.ACTION_VIEW,
+            "https://android-full-example.keyri.com/login&customToken=$customToken".toUri(),
+            this,
+            MainActivity::class.java
+        )
 
         val pendingIntent =
-            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(this, 0, deepLinkIntent, PendingIntent.FLAG_UPDATE_CURRENT)
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notificationManager =
@@ -42,19 +45,22 @@ class MessagingService : FirebaseMessagingService() {
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             } else {
-                @Suppress("deprecation") NotificationCompat.Builder(this)
+                @Suppress("deprecation")
+                NotificationCompat.Builder(this)
             }
 
-        notificationBuilder.setAutoCancel(true)
+        notificationBuilder
+            .setAutoCancel(true)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setContentIntent(pendingIntent)
             .setContentTitle("Keyri demo")
             .setContentText("Tap to login")
             .setSound(defaultSoundUri)
 
-        val notificationId = System.currentTimeMillis().hashCode()
-
-        notificationManager.notify(notificationId, notificationBuilder.build())
+        notificationManager.notify(
+            System.currentTimeMillis().hashCode(),
+            notificationBuilder.build()
+        )
     }
 
     companion object {

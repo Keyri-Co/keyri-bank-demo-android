@@ -175,7 +175,7 @@ fun VerifyScreen(
                 text = "${if (isVerify) "Verify" else "Confirm"} email",
                 progress = verifyType == VerifyType.EMAIL,
                 onClick = {
-                    if (verifyType == null) {
+                    if (verifyType == null || verifyType == VerifyType.NUMBER) {
                         verifyType = VerifyType.EMAIL
 
                         if (isVerify) {
@@ -236,7 +236,7 @@ fun VerifyScreen(
                 progress = verifyType == VerifyType.NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} phone number",
                 onClick = {
-                    if (verifyType == null) {
+                    if (verifyType == null || verifyType == VerifyType.EMAIL) {
                         verifyType = VerifyType.NUMBER
 
                         viewModel.smsLogin(
@@ -286,7 +286,7 @@ fun VerifyScreen(
                     if (verifyType == null) {
                         verifyType = VerifyType.EMAIL_NUMBER
 
-                        viewModel.userRegister(
+                        viewModel.smsAndEmailLogin(
                             isVerify,
                             requireNotNull(name),
                             requireNotNull(email),

@@ -18,7 +18,7 @@ import kotlin.concurrent.timer
 class WelcomeViewModel(
     private val dataStore: DataStore<KeyriProfiles>,
     private val keyri: Keyri,
-    private val repository: KeyriDemoRepository
+    private val repository: KeyriDemoRepository,
 ) : ViewModel() {
     private val _keyriAccounts = MutableStateFlow(KeyriProfiles(null, emptyList()))
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -63,7 +63,10 @@ class WelcomeViewModel(
         }
     }
 
-    fun cryptoLogin(currentProfile: String, onResult: () -> Unit) {
+    fun cryptoLogin(
+        currentProfile: String,
+        onResult: () -> Unit,
+    ) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
             val data = System.currentTimeMillis().toString()
             val signature = keyri.generateUserSignature(currentProfile, data).getOrThrow()

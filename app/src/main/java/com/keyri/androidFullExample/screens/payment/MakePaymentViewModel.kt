@@ -51,18 +51,19 @@ class MakePaymentViewModel(
             dataStore.data
                 .mapNotNull { it.currentProfile }
                 .collectLatest { email ->
-                    val eventResult = keyri.sendEvent(
-                        email,
-                        EventType.withdrawal(
-                            metadata =
-                            JSONObject().apply {
-                                put("recipient", recipient)
-                                put("amount", amount)
-                            },
-                        ),
-                        true,
-                    ).getOrThrow()
-
+                    val eventResult =
+                        keyri
+                            .sendEvent(
+                                email,
+                                EventType.withdrawal(
+                                    metadata =
+                                        JSONObject().apply {
+                                            put("recipient", recipient)
+                                            put("amount", amount)
+                                        },
+                                ),
+                                true,
+                            ).getOrThrow()
 
                     val stringifiedResult =
                         repository.decryptRisk(Gson().toJson(eventResult)).riskResponse

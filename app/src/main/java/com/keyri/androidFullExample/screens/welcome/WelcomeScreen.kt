@@ -61,7 +61,7 @@ fun WelcomeScreen(
     var clickedAccount by remember { mutableStateOf<String?>(null) }
     var blockBiometricPrompt by remember { mutableStateOf(false) }
 
-    if (!blockBiometricPrompt && keyriAccounts.value.currentProfile != null && !needAuth) {
+    if (!blockBiometricPrompt && keyriAccounts.value.currentProfile != null && keyriAccounts.value.profiles.firstOrNull { it.email == keyriAccounts.value.currentProfile }?.isVerified == true && !needAuth) {
         BiometricAuth(
             LocalContext.current,
             "Use Biometric to login as",
@@ -137,9 +137,10 @@ fun WelcomeScreen(
 
             val containerColors =
                 if (keyriAccounts.value.profiles.isEmpty()) {
-                    MaterialTheme.colorScheme.onPrimary to MaterialTheme.colorScheme.primary.copy(
-                        alpha = 0.04F
-                    )
+                    MaterialTheme.colorScheme.onPrimary to
+                            MaterialTheme.colorScheme.primary.copy(
+                                alpha = 0.04F,
+                            )
                 } else {
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.04F) to MaterialTheme.colorScheme.onPrimary
                 }
@@ -189,9 +190,10 @@ fun WelcomeScreen(
                 {},
                 { showBiometricPrompt = false },
             ) {
-                val currentAccount = clickedAccount ?: keyriAccounts.value.profiles
-                    .firstOrNull()
-                    ?.email
+                val currentAccount =
+                    clickedAccount ?: keyriAccounts.value.profiles
+                        .firstOrNull()
+                        ?.email
 
                 viewModel.cryptoLogin(requireNotNull(currentAccount)) {
                     showBiometricPrompt = false
@@ -201,7 +203,7 @@ fun WelcomeScreen(
 
                     navController.navigateWithPopUp(
                         Routes.MainScreen.name,
-                        Routes.WelcomeScreen.name
+                        Routes.WelcomeScreen.name,
                     )
                 }
             }
@@ -214,7 +216,7 @@ fun WelcomeScreen(
                 keyriAccounts.value.profiles.map {
                     ModalListItem(
                         iconRes = R.drawable.ic_tabby_charcoal,
-                        text = it.email
+                        text = it.email,
                     )
                 },
                 onListItemClicked = {

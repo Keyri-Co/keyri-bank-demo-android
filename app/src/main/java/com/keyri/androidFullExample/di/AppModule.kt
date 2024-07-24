@@ -20,8 +20,7 @@ val appModule =
         single { provideRiskApiService() }
     }
 
-private fun getKeyriProfilesDataStore(context: Context): DataStore<KeyriProfiles> =
-    context.keyriProfilesDataStore
+private fun getKeyriProfilesDataStore(context: Context): DataStore<KeyriProfiles> = context.keyriProfilesDataStore
 
 private fun getKeyri(context: Context): Keyri =
     Keyri(

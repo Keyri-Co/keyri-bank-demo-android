@@ -2,12 +2,10 @@ package com.keyri.androidFullExample.services
 
 import com.keyri.androidFullExample.services.entities.requests.CryptoLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.CryptoRegisterRequest
-import com.keyri.androidFullExample.services.entities.requests.DecryptRiskRequest
 import com.keyri.androidFullExample.services.entities.requests.EmailLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.UserInformationResponse
 import com.keyri.androidFullExample.services.entities.requests.UserRegisterRequest
-import com.keyri.androidFullExample.services.entities.responses.DecryptRiskResponse
 import com.keyri.androidFullExample.services.entities.responses.KeyriResponse
 import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
 import retrofit2.Response

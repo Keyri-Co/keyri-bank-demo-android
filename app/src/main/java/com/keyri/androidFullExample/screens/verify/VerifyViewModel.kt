@@ -31,24 +31,6 @@ class VerifyViewModel(
             }
         }
 
-    fun userRegister(
-        isVerify: Boolean,
-        name: String,
-        email: String,
-        phone: String?,
-        onSuccess: (SmsLoginResponse) -> Unit,
-    ) {
-        viewModelScope.launch(Dispatchers.IO + throwableScope) {
-            val result = repository.userRegister(isVerify, name, email, phone)
-
-            createEmptyKeyriAccount(name, email, phone, isVerify)
-
-            withContext(Dispatchers.Main) {
-                onSuccess(result)
-            }
-        }
-    }
-
     fun emailLogin(
         isVerify: Boolean,
         name: String,
@@ -56,9 +38,8 @@ class VerifyViewModel(
         onSuccess: () -> Unit,
     ) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
-            repository.emailLogin(isVerify, email)
-
-            createEmptyKeyriAccount(name, email, null, isVerify)
+            userRegister(isVerify, name, email, null)
+            repository.emailLogin(email)
 
             withContext(Dispatchers.Main) {
                 onSuccess()
@@ -74,14 +55,48 @@ class VerifyViewModel(
         onSuccess: (SmsLoginResponse) -> Unit,
     ) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
-            val result = repository.smsLogin(isVerify, email, number)
+            userRegister(isVerify, name, email, number)
 
-            createEmptyKeyriAccount(name, email, null, isVerify)
+            val result = repository.smsLogin(number)
 
             withContext(Dispatchers.Main) {
                 onSuccess(result)
             }
         }
+    }
+
+    fun smsAndEmailLogin(
+        isVerify: Boolean,
+        name: String,
+        email: String,
+        phone: String,
+        onSuccess: (SmsLoginResponse) -> Unit,
+    ) {
+        viewModelScope.launch(Dispatchers.IO + throwableScope) {
+            userRegister(isVerify, name, email, phone)
+            repository.emailLogin(email)
+
+            val result = repository.smsLogin(phone)
+
+            withContext(Dispatchers.Main) {
+                onSuccess(result)
+            }
+        }
+    }
+
+    private suspend fun userRegister(
+        isVerify: Boolean,
+        name: String,
+        email: String,
+        phone: String?,
+    ) {
+        if (isVerify) {
+            repository.userRegister(name, email, phone)
+        } else {
+            repository.authWithFirebase(email)
+        }
+
+        createEmptyKeyriAccount(name, email, phone, isVerify)
     }
 
     private suspend fun createEmptyKeyriAccount(

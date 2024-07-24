@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONObject
 
 class PaymentResultViewModel : ViewModel() {
-
     private val _riskResponse = MutableStateFlow<RiskResponse?>(null)
     val riskResponse = _riskResponse.asStateFlow()
 
@@ -26,19 +25,21 @@ class PaymentResultViewModel : ViewModel() {
 
         val locationObj = JSONObject(obj.getString("location"))
 
-        _riskResponse.value = RiskResponse(
-            signals = signalsMutable,
-            location = LocationResponse(
-                city = locationObj.getIfHas("city"),
-                regionCode = locationObj.getIfHas("region_code"),
-                countryCode = locationObj.getIfHas("country_code"),
-                continentCode = locationObj.getIfHas("continent_code"),
-                latitude = locationObj.getIfHasDouble("latitude"),
-                longitude = locationObj.getIfHasDouble("longitude"),
-                ipTimezoneName = locationObj.getIfHas("ip_timezone_name"),
-            ),
-            fingerprintId = obj.getIfHas("fingerprintId"),
-            riskDetermination = obj.getIfHas("riskDetermination")
-        )
+        _riskResponse.value =
+            RiskResponse(
+                signals = signalsMutable,
+                location =
+                    LocationResponse(
+                        city = locationObj.getIfHas("city"),
+                        regionCode = locationObj.getIfHas("region_code"),
+                        countryCode = locationObj.getIfHas("country_code"),
+                        continentCode = locationObj.getIfHas("continent_code"),
+                        latitude = locationObj.getIfHasDouble("latitude"),
+                        longitude = locationObj.getIfHasDouble("longitude"),
+                        ipTimezoneName = locationObj.getIfHas("ip_timezone_name"),
+                    ),
+                fingerprintId = obj.getIfHas("fingerprintId"),
+                riskDetermination = obj.getIfHas("riskDetermination"),
+            )
     }
 }

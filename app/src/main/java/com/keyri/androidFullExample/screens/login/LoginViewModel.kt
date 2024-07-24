@@ -20,22 +20,23 @@ class LoginViewModel(
     val errorMessage = _errorMessage.asStateFlow()
 
     private val throwableScope =
-                CoroutineExceptionHandler { _, throwable ->
-                    _errorMessage.value = throwable.message
+        CoroutineExceptionHandler { _, throwable ->
+            _errorMessage.value = throwable.message
 
-                    timer(initialDelay = 1_000L, period = 1_000L) {
-                        _errorMessage.value = null
-                    }
-                }
+            timer(initialDelay = 1_000L, period = 1_000L) {
+                _errorMessage.value = null
+            }
+        }
 
     fun emailLogin(
         email: String,
         onSuccess: () -> Unit,
     ) {
-        viewModelScope.launch(Dispatchers.IO +throwableScope) {
+        viewModelScope.launch(Dispatchers.IO + throwableScope) {
             _loading.value = true
 
-            repository.emailLogin(false, email)
+            repository.authWithFirebase(email)
+            repository.emailLogin(email)
 
             withContext(Dispatchers.Main) {
                 onSuccess()

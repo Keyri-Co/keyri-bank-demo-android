@@ -56,10 +56,10 @@ fun MakePayment(
     Column {
         Text(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Make payment",
             style = MaterialTheme.typography.headlineSmall,
@@ -69,9 +69,9 @@ fun MakePayment(
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "Enter dollar amount",
                 style = MaterialTheme.typography.bodySmall,
@@ -80,9 +80,9 @@ fun MakePayment(
 
             KeyriTextField(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 5.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 5.dp),
                 value = amount.takeIf { it != 0F }?.toString() ?: "",
                 placeholder = {
                     Text(
@@ -96,10 +96,10 @@ fun MakePayment(
 
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-                    .align(Alignment.CenterHorizontally),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "Enter recipient information",
                 style = MaterialTheme.typography.bodySmall,
@@ -128,7 +128,7 @@ fun MakePayment(
 
                 navController.navigateWithPopUp(
                     "${Routes.PaymentResultScreen.name}?riskResult=${riskResult.value}",
-                    Routes.MakePaymentScreen.name
+                    Routes.MakePaymentScreen.name,
                 )
             }
         }
@@ -151,13 +151,13 @@ fun MakePayment(
 
         Text(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 28.dp)
-                .align(Alignment.CenterHorizontally)
-                .clickable {
-                    navController.popBackStack()
-                },
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 28.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .clickable {
+                        navController.popBackStack()
+                    },
             textAlign = TextAlign.Center,
             text = "Cancel",
             style = MaterialTheme.typography.headlineSmall,

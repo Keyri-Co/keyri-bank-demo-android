@@ -27,32 +27,39 @@ class VerifiedViewModel(
     val currentProfile = _currentProfile.asStateFlow()
 
     private val throwableScope =
-            CoroutineExceptionHandler { _, throwable ->
-                _errorMessage.value = throwable.message
+        CoroutineExceptionHandler { _, throwable ->
+            _errorMessage.value = throwable.message
 
-                timer(initialDelay = 1_000L, period = 1_000L) {
-                    _errorMessage.value = null
-                }
+            timer(initialDelay = 1_000L, period = 1_000L) {
+                _errorMessage.value = null
             }
+        }
+
+    // TODO: Can't see crypto-auth logs on login (with one account)
+    // TODO: Fix sending in-app sms
 
     fun saveBiometricAuth(customToken: String) {
-        viewModelScope.launch(Dispatchers.IO +throwableScope) {
+        viewModelScope.launch(Dispatchers.IO + throwableScope) {
             val currentProfileEmail = repository.authWithToken(customToken)
+
+            // TODO: 0. Auth with firebase
+            // TODO: 1. Check current profile
+            // TODO: 2. If current profile is null - get
+
+            // TODO: If no Keyri and DataStore profiles on device -> create new one? and call getUserInformation()
+            // This repository.getUserInformation(currentProfileEmail)
 
             dataStore.updateData { keyriProfiles ->
                 val mappedProfiles =
                     keyriProfiles.profiles.map {
-                        if (currentProfileEmail == it.name) {
-                            val mappedProfile =
-                                it.copy(
-                                    customToken = customToken,
-                                    isVerified = true,
-                                    biometricAuthEnabled = true,
-                                )
-
-                            _currentProfile.value = mappedProfile
-
-                            mappedProfile
+                        if (currentProfileEmail == it.email) {
+                            it.copy(
+                                customToken = customToken,
+                                isVerified = true,
+                                biometricAuthEnabled = true,
+                            ).apply {
+                                _currentProfile.value = it
+                            }
                         } else {
                             it
                         }
@@ -60,16 +67,13 @@ class VerifiedViewModel(
 
                 keyriProfiles
                     .copy(currentProfile = currentProfileEmail, profiles = mappedProfiles)
-                    .apply {
-                        _loading.value = true
-                    }
             }
 
             val associationKey =
                 keyri.getAssociationKey(currentProfileEmail).getOrNull()
                     ?: keyri.generateAssociationKey(currentProfileEmail).getOrThrow()
 
-            currentProfile.value?.let { profile ->
+            _currentProfile.value?.let { profile ->
                 if (profile.isVerify) {
                     repository.cryptoRegister(currentProfileEmail, associationKey)
                 } else {
@@ -80,6 +84,8 @@ class VerifiedViewModel(
                     repository.cryptoLogin(profile.email, data, signature)
                 }
             }
+
+            _loading.value = false
         }
     }
 }

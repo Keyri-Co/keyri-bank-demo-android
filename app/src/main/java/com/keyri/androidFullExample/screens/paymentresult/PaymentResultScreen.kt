@@ -42,14 +42,20 @@ fun PaymentResult(
 
     Column {
         val mainText =
-            if (riskResponse.value?.riskDetermination != "deny") "Payment processing confirmed with biometrics and passwordless credential" else "Payment denied"
+            if (riskResponse.value?.riskDetermination !=
+                "deny"
+            ) {
+                "Payment processing confirmed with biometrics and passwordless credential"
+            } else {
+                "Payment denied"
+            }
 
         Text(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = mainText,
             style = MaterialTheme.typography.headlineSmall,
@@ -58,9 +64,9 @@ fun PaymentResult(
 
         KeyriIcon(
             modifier =
-            Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(top = 40.dp),
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
             iconResId = if (riskResponse.value?.riskDetermination != "deny") R.drawable.ic_done else R.drawable.ic_denial,
             iconTint = if (riskResponse.value?.riskDetermination != "deny") verifiedTextColor else warningTextColor,
         )
@@ -68,28 +74,29 @@ fun PaymentResult(
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text =
-                buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Summary risk determination:\n")
-                    }
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Summary risk determination:\n")
+                        }
 
-                    val riskDetermination = riskResponse.value?.riskDetermination
+                        val riskDetermination = riskResponse.value?.riskDetermination
 
-                    val color = when (riskDetermination) {
-                        "allow" -> verifiedTextColor
-                        "warn" -> warningTextColor
-                        else -> denyTextColor
-                    }
+                        val color =
+                            when (riskDetermination) {
+                                "allow" -> verifiedTextColor
+                                "warn" -> warningTextColor
+                                else -> denyTextColor
+                            }
 
-                    withStyle(style = SpanStyle(color = color)) {
-                        append(riskDetermination)
-                    }
-                },
+                        withStyle(style = SpanStyle(color = color)) {
+                            append(riskDetermination)
+                        }
+                    },
                 style = MaterialTheme.typography.headlineSmall,
                 color = textColor,
             )
@@ -97,27 +104,27 @@ fun PaymentResult(
             if (riskResponse.value?.signals?.isNotEmpty() == true) {
                 Text(
                     modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 30.dp),
+                        Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterHorizontally)
+                            .padding(top = 30.dp),
                     textAlign = TextAlign.Center,
                     text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Fraud risk signals:\n")
-                        }
+                        buildAnnotatedString {
+                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("Fraud risk signals:\n")
+                            }
 
-                        riskResponse.value?.signals?.forEachIndexed { index, s ->
-                            withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                                append(s)
+                            riskResponse.value?.signals?.forEachIndexed { index, s ->
+                                withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                                    append(s)
 
-                                if (riskResponse.value?.signals?.lastIndex != index) {
-                                    append(",")
+                                    if (riskResponse.value?.signals?.lastIndex != index) {
+                                        append(",")
+                                    }
                                 }
                             }
-                        }
-                    },
+                        },
                     style = MaterialTheme.typography.headlineSmall,
                     color = textColor,
                 )
@@ -125,27 +132,29 @@ fun PaymentResult(
 
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 20.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 20.dp),
                 textAlign = TextAlign.Center,
                 text =
-                buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Device info:\n")
-                    }
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Device info:\n")
+                        }
 
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                        append("Device id: ${riskResponse.value?.fingerprintId}\n")
-                    }
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                            append("Device id: ${riskResponse.value?.fingerprintId}\n")
+                        }
 
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                        val location = riskResponse.value?.location
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
+                            val location = riskResponse.value?.location
 
-                        append("Location: ${location?.city} ${location?.regionCode} ${location?.countryCode} ${location?.continentCode}")
-                    }
-                },
+                            append(
+                                "Location: ${location?.city} ${location?.regionCode} ${location?.countryCode} ${location?.continentCode}",
+                            )
+                        }
+                    },
                 style = MaterialTheme.typography.headlineSmall,
                 color = textColor,
             )
@@ -159,7 +168,7 @@ fun PaymentResult(
                 onClick = {
                     navController.popBackStack(
                         route = Routes.MainScreen.name,
-                        inclusive = false
+                        inclusive = false,
                     )
                 },
             )
@@ -171,7 +180,7 @@ fun PaymentResult(
                 onClick = {
                     navController.popBackStack(
                         route = Routes.MainScreen.name,
-                        inclusive = false
+                        inclusive = false,
                     )
                 },
             )
