@@ -24,10 +24,12 @@ class MakePaymentViewModel(
     private val dataStore: DataStore<KeyriProfiles>,
     private val repository: KeyriDemoRepository,
 ) : ViewModel() {
-    private val _loading = MutableStateFlow(true)
+    private val _loading = MutableStateFlow(false)
     private val _errorMessage = MutableStateFlow<String?>(null)
+    private val _riskResult = MutableStateFlow<String?>(null)
     val loading = _loading.asStateFlow()
     val errorMessage = _errorMessage.asStateFlow()
+    val riskResult = _riskResult.asStateFlow()
 
     private val throwableScope =
         CoroutineExceptionHandler { _, throwable ->
@@ -41,8 +43,10 @@ class MakePaymentViewModel(
     fun performMakePaymentEvent(
         recipient: String,
         amount: Float,
-        result: (Boolean) -> Unit,
+        result: () -> Unit,
     ) {
+        _loading.value = true
+
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
             dataStore.data
                 .mapNotNull { it.currentProfile }
@@ -59,14 +63,16 @@ class MakePaymentViewModel(
                         true,
                     ).getOrThrow()
 
-                   val decryptResult = repository.decryptRisk(Gson().toJson(eventResult))
 
-                    _loading.value = false
+                    val stringifiedResult =
+                        repository.decryptRisk(Gson().toJson(eventResult)).riskResponse
 
                     withContext(Dispatchers.Main) {
-                        // TODO: Fix
-//                        result(decryptResult)
+                        _riskResult.value = stringifiedResult
+                        result()
                     }
+
+                    _loading.value = false
                 }
         }
     }

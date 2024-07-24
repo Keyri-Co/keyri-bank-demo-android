@@ -26,7 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.keyri.androidFullExample.routes.Routes
-import com.keyri.androidFullExample.screens.PaymentResult
+import com.keyri.androidFullExample.screens.paymentresult.PaymentResult
 import com.keyri.androidFullExample.screens.login.LoginScreen
 import com.keyri.androidFullExample.screens.main.MainScreen
 import com.keyri.androidFullExample.screens.payment.MakePayment
@@ -183,24 +183,36 @@ class MainActivity : FragmentActivity() {
                             }
 
                             composable(Routes.MakePaymentScreen.name) {
-                                MakePayment(navController = navController)
+                                MakePayment(
+                                    navController = navController,
+                                    onShowSnackbar = {
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                message = it,
+                                                withDismissAction = true,
+                                                duration = SnackbarDuration.Long,
+                                            )
+                                        }
+                                    },
+                                )
                             }
 
                             composable(
-                                "${Routes.PaymentResultScreen.name}?success={success}",
+                                "${Routes.PaymentResultScreen.name}?riskResult={riskResult}",
                                 arguments =
                                 listOf(
-                                    navArgument("success") {
-                                        type = NavType.BoolType
+                                    navArgument("riskResult") {
+                                        type = NavType.StringType
                                     },
                                 ),
                             ) { backStackEntry ->
-                                val success =
-                                    backStackEntry.arguments?.getBoolean("success") ?: false
+                                val riskResult =
+                                    backStackEntry.arguments?.getString("riskResult")
+                                        ?: throw IllegalArgumentException("riskResult shouldn't be null")
 
                                 PaymentResult(
                                     navController = navController,
-                                    success,
+                                    riskResult = riskResult,
                                 )
                             }
                         }

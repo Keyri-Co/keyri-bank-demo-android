@@ -193,14 +193,16 @@ fun WelcomeScreen(
                     .firstOrNull()
                     ?.email
 
-                viewModel.setCurrentProfile(currentAccount)
                 viewModel.cryptoLogin(requireNotNull(currentAccount)) {
+                    showBiometricPrompt = false
+                    blockBiometricPrompt = true
+
+                    viewModel.setCurrentProfile(currentAccount)
+
                     navController.navigateWithPopUp(
                         Routes.MainScreen.name,
                         Routes.WelcomeScreen.name
                     )
-                    showBiometricPrompt = false
-                    blockBiometricPrompt = true
                 }
             }
         }

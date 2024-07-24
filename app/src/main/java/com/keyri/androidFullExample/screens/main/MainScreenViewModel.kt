@@ -1,16 +1,15 @@
 package com.keyri.androidFullExample.screens.main
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
-import com.google.gson.stream.JsonReader
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.repositories.KeyriDemoRepository
 import com.keyri.androidFullExample.services.entities.responses.LocationResponse
 import com.keyri.androidFullExample.services.entities.responses.RiskResponse
+import com.keyri.androidFullExample.utils.getIfHas
+import com.keyri.androidFullExample.utils.getIfHasDouble
 import com.keyrico.keyrisdk.Keyri
 import com.keyrico.keyrisdk.sec.fraud.event.EventType
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -21,10 +20,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.io.StringReader
 import kotlin.concurrent.timer
-import kotlin.math.sign
-
 
 class MainScreenViewModel(
     private val keyri: Keyri,
@@ -34,12 +30,10 @@ class MainScreenViewModel(
     private val _loading = MutableStateFlow(true)
     private val _currentProfile = MutableStateFlow<String?>(null)
     private val _errorMessage = MutableStateFlow<String?>(null)
-    private val _decryptRisk = MutableStateFlow<LocationResponse?>(null)
     private val _riskResponse = MutableStateFlow<RiskResponse?>(null)
     val currentProfile = _currentProfile.asStateFlow()
     val loading = _loading.asStateFlow()
     val errorMessage = _errorMessage.asStateFlow()
-    val decryptRisk = _decryptRisk.asStateFlow()
     val riskResponse = _riskResponse.asStateFlow()
 
     private val throwableScope =
@@ -110,13 +104,5 @@ class MainScreenViewModel(
                 }
             }
         }
-    }
-
-    private fun JSONObject.getIfHas(fieldName: String): String? {
-        return takeIf { it.has(fieldName) }?.getString(fieldName)
-    }
-
-    private fun JSONObject.getIfHasDouble(fieldName: String): Double? {
-        return takeIf { it.has(fieldName) }?.getDouble(fieldName)
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -16,36 +17,49 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.keyri.androidFullExample.composables.BiometricAuth
 import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.composables.KeyriTextField
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.primaryDisabled
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.theme.textFieldUnfocusedColor
+import com.keyri.androidFullExample.utils.navigateWithPopUp
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun MakePayment(
     viewModel: MakePaymentViewModel = koinViewModel(),
     navController: NavHostController,
+    onShowSnackbar: (String) -> Unit,
 ) {
     var amount by remember { mutableFloatStateOf(0.0F) }
     var recipientInfo by remember { mutableStateOf("") }
+    var showBiometricPrompt by remember { mutableStateOf(false) }
+    val loading = viewModel.loading.collectAsState()
+    val error = viewModel.errorMessage.collectAsState()
+    val riskResult = viewModel.riskResult.collectAsState()
+    val context = LocalContext.current
 
-    // TODO: Fix here (actual data)
+    if (error.value != null) {
+        error.value?.let {
+            onShowSnackbar(it)
+        }
+    }
 
     Column {
         Text(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 80.dp)
-                    .align(Alignment.CenterHorizontally),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 80.dp)
+                .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Make payment",
             style = MaterialTheme.typography.headlineSmall,
@@ -55,9 +69,9 @@ fun MakePayment(
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "Enter dollar amount",
                 style = MaterialTheme.typography.bodySmall,
@@ -66,9 +80,9 @@ fun MakePayment(
 
             KeyriTextField(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 5.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 5.dp),
                 value = amount.takeIf { it != 0F }?.toString() ?: "",
                 placeholder = {
                     Text(
@@ -82,10 +96,10 @@ fun MakePayment(
 
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp)
-                        .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp)
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "Enter recipient information",
                 style = MaterialTheme.typography.bodySmall,
@@ -106,6 +120,19 @@ fun MakePayment(
             )
         }
 
+        if (showBiometricPrompt) {
+            BiometricAuth(context, "Set up Biometric authentication", null, {
+                onShowSnackbar(it)
+            }, { showBiometricPrompt = false }) {
+                showBiometricPrompt = false
+
+                navController.navigateWithPopUp(
+                    "${Routes.PaymentResultScreen.name}?riskResult=${riskResult.value}",
+                    Routes.MakePaymentScreen.name
+                )
+            }
+        }
+
         KeyriButton(
             modifier = Modifier.padding(top = 28.dp),
             enabled = amount > 0F && recipientInfo.isNotEmpty(),
@@ -114,22 +141,23 @@ fun MakePayment(
             disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
             disabledBorderColor = primaryDisabled,
             text = "Confirm",
+            progress = loading.value,
             onClick = {
-                viewModel.performMakePaymentEvent(recipientInfo, amount) { success ->
-                    navController.navigate("${Routes.PaymentResultScreen.name}?success=$success")
+                viewModel.performMakePaymentEvent(recipientInfo, amount) {
+                    showBiometricPrompt = true
                 }
             },
         )
 
         Text(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 28.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .clickable {
-                        navController.popBackStack()
-                    },
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 28.dp)
+                .align(Alignment.CenterHorizontally)
+                .clickable {
+                    navController.popBackStack()
+                },
             textAlign = TextAlign.Center,
             text = "Cancel",
             style = MaterialTheme.typography.headlineSmall,

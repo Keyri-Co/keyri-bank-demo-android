@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import org.json.JSONObject
 import java.io.InputStream
 import java.io.OutputStream
 
@@ -67,4 +68,12 @@ fun NavHostController.navigateWithPopUp(
             inclusive = true
         }
     }
+}
+
+fun JSONObject.getIfHas(fieldName: String): String? {
+    return takeIf { it.has(fieldName) }?.getString(fieldName)
+}
+
+fun JSONObject.getIfHasDouble(fieldName: String): Double? {
+    return takeIf { it.has(fieldName) }?.getDouble(fieldName)
 }

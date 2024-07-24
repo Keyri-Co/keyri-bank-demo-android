@@ -66,11 +66,13 @@ class WelcomeViewModel(
     fun cryptoLogin(currentProfile: String, onResult: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
             val data = System.currentTimeMillis().toString()
-            val signature =
-                keyri.generateUserSignature(currentProfile, data).getOrThrow()
+            val signature = keyri.generateUserSignature(currentProfile, data).getOrThrow()
 
             repository.cryptoLogin(currentProfile, data, signature)
-            onResult()
+
+            withContext(Dispatchers.Main) {
+                onResult()
+            }
         }
     }
 
@@ -85,8 +87,9 @@ class WelcomeViewModel(
                     keyriProfiles.copy(currentProfile = null, profiles = listOf())
                 }
 
+                checkKeyriAccounts()
+
                 withContext(Dispatchers.Main) {
-                    checkKeyriAccounts()
                     callback()
                 }
             }
