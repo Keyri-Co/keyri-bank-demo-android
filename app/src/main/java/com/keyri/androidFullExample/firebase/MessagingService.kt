@@ -35,7 +35,7 @@ class MessagingService : FirebaseMessagingService() {
         )
 
         val pendingIntent =
-            PendingIntent.getActivity(this, 0, deepLinkIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getActivity(this, 0, deepLinkIntent, PendingIntent.FLAG_IMMUTABLE )
         val defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
         val notificationManager =
