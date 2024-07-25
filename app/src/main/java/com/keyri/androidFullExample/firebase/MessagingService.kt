@@ -12,6 +12,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.keyri.androidFullExample.MainActivity
 import com.keyri.androidFullExample.R
+import com.keyri.androidFullExample.utils.NOTIFICATION_CHANNEL_ID
 
 class MessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
@@ -61,9 +62,5 @@ class MessagingService : FirebaseMessagingService() {
             System.currentTimeMillis().hashCode(),
             notificationBuilder.build()
         )
-    }
-
-    companion object {
-        private const val NOTIFICATION_CHANNEL_ID = "ChannelReservation"
     }
 }

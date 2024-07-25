@@ -74,7 +74,7 @@ fun VerifyScreen(
         rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
             if (isGranted) {
                 val smsManager =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                         context.getSystemService(SmsManager::class.java)
                     } else {
                         SmsManager.getDefault()
@@ -91,26 +91,49 @@ fun VerifyScreen(
                         PendingIntent.FLAG_IMMUTABLE,
                     )
 
-                context.registerReceiver(
-                    object : BroadcastReceiver() {
-                        override fun onReceive(
-                            context: Context?,
-                            intent: Intent?,
-                        ) {
-                            val message =
-                                when (resultCode) {
-                                    Activity.RESULT_OK -> "SMS sent"
-                                    SmsManager.RESULT_ERROR_NO_SERVICE -> "No service"
-                                    SmsManager.RESULT_ERROR_NULL_PDU -> "Null PDU"
-                                    SmsManager.RESULT_ERROR_RADIO_OFF -> "Radio off"
-                                    else -> "Unable to send SMS"
-                                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    context.registerReceiver(
+                        object : BroadcastReceiver() {
+                            override fun onReceive(
+                                context: Context?,
+                                intent: Intent?,
+                            ) {
+                                val message =
+                                    when (resultCode) {
+                                        Activity.RESULT_OK -> "SMS sent"
+                                        SmsManager.RESULT_ERROR_NO_SERVICE -> "No service"
+                                        SmsManager.RESULT_ERROR_NULL_PDU -> "Null PDU"
+                                        SmsManager.RESULT_ERROR_RADIO_OFF -> "Radio off"
+                                        else -> "Unable to send SMS"
+                                    }
 
-                            onShowSnackbar(message)
-                        }
-                    },
-                    IntentFilter(intentAction),
-                )
+                                onShowSnackbar(message)
+                            }
+                        },
+                        IntentFilter(intentAction), Context.RECEIVER_NOT_EXPORTED,
+                    )
+                } else {
+                    context.registerReceiver(
+                        object : BroadcastReceiver() {
+                            override fun onReceive(
+                                context: Context?,
+                                intent: Intent?,
+                            ) {
+                                val message =
+                                    when (resultCode) {
+                                        Activity.RESULT_OK -> "SMS sent"
+                                        SmsManager.RESULT_ERROR_NO_SERVICE -> "No service"
+                                        SmsManager.RESULT_ERROR_NULL_PDU -> "Null PDU"
+                                        SmsManager.RESULT_ERROR_RADIO_OFF -> "Radio off"
+                                        else -> "Unable to send SMS"
+                                    }
+
+                                onShowSnackbar(message)
+                            }
+                        },
+                        IntentFilter(intentAction)
+                    )
+                }
 
                 smsManager.sendTextMessage(smsAddress, null, smsText, sentPI, null)
                 onShowSnackbar("SMS was sent")
