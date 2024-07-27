@@ -36,7 +36,6 @@ class VerifiedViewModel(
         }
 
     // TODO: Can't see crypto-auth logs on login (with one account)
-    // TODO: Fix sending in-app sms
 
     fun saveBiometricAuth(customToken: String) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
@@ -53,13 +52,14 @@ class VerifiedViewModel(
                 val mappedProfiles =
                     keyriProfiles.profiles.map {
                         if (currentProfileEmail == it.email) {
-                            it.copy(
-                                customToken = customToken,
-                                isVerified = true,
-                                biometricAuthEnabled = true,
-                            ).apply {
-                                _currentProfile.value = it
-                            }
+                            it
+                                .copy(
+                                    customToken = customToken,
+                                    isVerified = true,
+                                    biometricAuthEnabled = true,
+                                ).apply {
+                                    _currentProfile.value = it
+                                }
                         } else {
                             it
                         }

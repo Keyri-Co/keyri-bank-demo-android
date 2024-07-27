@@ -1,20 +1,11 @@
 package com.keyri.androidFullExample.screens.verify
 
-import android.Manifest
 import android.annotation.SuppressLint
-import android.app.Activity
-import android.app.PendingIntent
 import android.content.ActivityNotFoundException
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
-import android.os.Build
-import android.telephony.SmsManager
 import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -40,6 +31,7 @@ import androidx.navigation.NavController
 import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.data.VerifyType
 import com.keyri.androidFullExample.routes.Routes
+import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
 import com.keyri.androidFullExample.theme.primaryDisabled
 import com.keyri.androidFullExample.theme.textColor
 import org.koin.androidx.compose.koinViewModel
@@ -56,8 +48,6 @@ fun VerifyScreen(
     onShowSnackbar: (String) -> Unit,
 ) {
     var verifyType by remember { mutableStateOf<VerifyType?>(null) }
-    var smsAddress by remember { mutableStateOf<String?>(null) }
-    var smsText by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
     val error = viewModel.errorMessage.collectAsState()
 
@@ -68,94 +58,6 @@ fun VerifyScreen(
             onShowSnackbar(it)
         }
     }
-
-    @Suppress("Deprecation")
-    val sendSmsPermissionState =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            if (isGranted) {
-                val smsManager =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                        context.getSystemService(SmsManager::class.java)
-                    } else {
-                        SmsManager.getDefault()
-                    }
-
-                val intentAction = "SMS-sent"
-                val sentIntent = Intent(intentAction)
-
-                val sentPI =
-                    PendingIntent.getBroadcast(
-                        context,
-                        0,
-                        sentIntent,
-                        PendingIntent.FLAG_IMMUTABLE,
-                    )
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    context.registerReceiver(
-                        object : BroadcastReceiver() {
-                            override fun onReceive(
-                                context: Context?,
-                                intent: Intent?,
-                            ) {
-                                val message =
-                                    when (resultCode) {
-                                        Activity.RESULT_OK -> "SMS sent"
-                                        SmsManager.RESULT_ERROR_NO_SERVICE -> "No service"
-                                        SmsManager.RESULT_ERROR_NULL_PDU -> "Null PDU"
-                                        SmsManager.RESULT_ERROR_RADIO_OFF -> "Radio off"
-                                        else -> "Unable to send SMS"
-                                    }
-
-                                onShowSnackbar(message)
-                            }
-                        },
-                        IntentFilter(intentAction), Context.RECEIVER_NOT_EXPORTED,
-                    )
-                } else {
-                    context.registerReceiver(
-                        object : BroadcastReceiver() {
-                            override fun onReceive(
-                                context: Context?,
-                                intent: Intent?,
-                            ) {
-                                val message =
-                                    when (resultCode) {
-                                        Activity.RESULT_OK -> "SMS sent"
-                                        SmsManager.RESULT_ERROR_NO_SERVICE -> "No service"
-                                        SmsManager.RESULT_ERROR_NULL_PDU -> "Null PDU"
-                                        SmsManager.RESULT_ERROR_RADIO_OFF -> "Radio off"
-                                        else -> "Unable to send SMS"
-                                    }
-
-                                onShowSnackbar(message)
-                            }
-                        },
-                        IntentFilter(intentAction)
-                    )
-                }
-
-                smsManager.sendTextMessage(smsAddress, null, smsText, sentPI, null)
-                onShowSnackbar("SMS was sent")
-            } else {
-                try {
-                    val sendIntent =
-                        Intent(Intent.ACTION_SENDTO).apply {
-                            data = Uri.parse("smsto:$smsAddress")
-                            putExtra("sms_body", smsText)
-                        }
-
-                    context.startActivity(sendIntent)
-                } catch (e: ActivityNotFoundException) {
-                    Toast
-                        .makeText(
-                            context,
-                            "There is no SMS app installed.",
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                }
-            }
-        }
 
     Column {
         Text(
@@ -189,6 +91,9 @@ fun VerifyScreen(
                 color = textColor,
             )
 
+            // TODO: Check email and number verification on Vercel app
+            // TODO: Remove showing notification
+
             KeyriButton(
                 modifier = Modifier.padding(top = 20.dp),
                 disabledTextColor = primaryDisabled,
@@ -196,7 +101,7 @@ fun VerifyScreen(
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
                 text = "${if (isVerify) "Verify" else "Confirm"} email",
-                progress = verifyType == VerifyType.EMAIL,
+                progress = verifyType == VerifyType.EMAIL || verifyType == VerifyType.EMAIL_NUMBER,
                 onClick = {
                     if (verifyType == null || verifyType == VerifyType.NUMBER) {
                         verifyType = VerifyType.EMAIL
@@ -207,23 +112,11 @@ fun VerifyScreen(
                                 requireNotNull(name),
                                 requireNotNull(email),
                             ) {
-                                try {
-                                    val intent = Intent(Intent.ACTION_MAIN)
-
-                                    intent.addCategory(Intent.CATEGORY_APP_EMAIL)
-                                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                                    context.startActivity(intent)
-                                } catch (e: ActivityNotFoundException) {
-                                    Toast
-                                        .makeText(
-                                            context,
-                                            "There is no email client app installed.",
-                                            Toast.LENGTH_SHORT,
-                                        ).show()
-                                }
+                                openEmailApp(context)
                             }
                         } else {
+                            // TODO: Check is it okay?
+                            // TODO: Looks like this wrong
                             navController.navigate(Routes.LoginScreen.name)
                         }
                     }
@@ -256,7 +149,7 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                progress = verifyType == VerifyType.NUMBER,
+                progress = verifyType == VerifyType.NUMBER || verifyType == VerifyType.EMAIL_NUMBER,
                 text = "${if (isVerify) "Verify" else "Confirm"} phone number",
                 onClick = {
                     if (verifyType == null || verifyType == VerifyType.EMAIL) {
@@ -267,11 +160,8 @@ fun VerifyScreen(
                             requireNotNull(name),
                             requireNotNull(email),
                             requireNotNull(number),
-                        ) {
-                            smsAddress = it.smsUrl.sendTo
-                            smsText = it.smsUrl.confirmationMessage
-
-                            sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+                        ) { response ->
+                            openSmsApp(response, context)
                         }
                     }
                 },
@@ -303,7 +193,7 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                progress = verifyType == VerifyType.EMAIL_NUMBER,
+                progress = verifyType != null,
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
                     if (verifyType == null) {
@@ -314,31 +204,50 @@ fun VerifyScreen(
                             requireNotNull(name),
                             requireNotNull(email),
                             requireNotNull(number),
-                        ) {
-                            smsAddress = it.smsUrl.sendTo
-                            smsText = it.smsUrl.confirmationMessage
-
-                            try {
-                                val intent = Intent(Intent.ACTION_MAIN)
-
-                                intent.addCategory(Intent.CATEGORY_APP_EMAIL)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                                context.startActivity(intent)
-                            } catch (e: ActivityNotFoundException) {
-                                Toast
-                                    .makeText(
-                                        context,
-                                        "There is no email client installed.",
-                                        Toast.LENGTH_SHORT,
-                                    ).show()
-                            }
-
-                            sendSmsPermissionState.launch(Manifest.permission.SEND_SMS)
+                        ) { response ->
+                            openEmailApp(context)
+                            openSmsApp(response, context)
                         }
                     }
                 },
             )
         }
+    }
+}
+
+private fun openEmailApp(context: Context) {
+    try {
+        val intent = Intent(Intent.ACTION_MAIN)
+
+        intent.addCategory(Intent.CATEGORY_APP_EMAIL)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
+        context.startActivity(intent)
+    } catch (e: ActivityNotFoundException) {
+        Toast
+            .makeText(
+                context,
+                "There is no email client installed.",
+                Toast.LENGTH_SHORT,
+            ).show()
+    }
+}
+
+private fun openSmsApp(response: SmsLoginResponse, context: Context) {
+    try {
+        val sendIntent =
+            Intent(Intent.ACTION_SENDTO).apply {
+                data = Uri.parse("smsto:${response.smsUrl.sendTo}")
+                putExtra("sms_body", response.smsUrl.confirmationMessage)
+            }
+
+        context.startActivity(sendIntent)
+    } catch (e: ActivityNotFoundException) {
+        Toast
+            .makeText(
+                context,
+                "There is no SMS app installed.",
+                Toast.LENGTH_SHORT,
+            ).show()
     }
 }

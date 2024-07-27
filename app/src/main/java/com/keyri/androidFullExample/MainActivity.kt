@@ -1,8 +1,5 @@
 package com.keyri.androidFullExample
 
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -38,7 +35,6 @@ import com.keyri.androidFullExample.screens.verified.VerifiedScreen
 import com.keyri.androidFullExample.screens.verify.VerifyScreen
 import com.keyri.androidFullExample.screens.welcome.WelcomeScreen
 import com.keyri.androidFullExample.theme.KeyriDemoTheme
-import com.keyri.androidFullExample.utils.NOTIFICATION_CHANNEL_ID
 import kotlinx.coroutines.launch
 
 class MainActivity : FragmentActivity() {
@@ -46,7 +42,6 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         installSplashScreen()
-        createNotificationChannel()
 
         setContent {
             KeyriDemoTheme {
@@ -226,23 +221,4 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-
-    private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                NOTIFICATION_CHANNEL_ID,
-                NOTIFICATION_CHANNEL_ID,
-                NotificationManager.IMPORTANCE_DEFAULT
-            )
-
-            channel.description = "$NOTIFICATION_CHANNEL_ID notification channel."
-
-            val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-            if (!notificationManager.notificationChannels.contains(channel)) {
-                notificationManager.createNotificationChannel(channel)
-            }
-        }
-    }
-
 }

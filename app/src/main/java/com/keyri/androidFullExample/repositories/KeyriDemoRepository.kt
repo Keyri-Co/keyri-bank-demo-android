@@ -52,11 +52,10 @@ class KeyriDemoRepository(
             riskApiService.decryptRisk(DecryptRiskRequest(encryptedEventString))
         }.getOrThrow()
 
-    suspend fun emailLogin(email: String): KeyriResponse {
-        return makeApiCall {
+    suspend fun emailLogin(email: String): KeyriResponse =
+        makeApiCall {
             apiService.emailLogin(EmailLoginRequest(email))
         }.getOrThrow()
-    }
 
     suspend fun smsLogin(number: String): SmsLoginResponse {
         val fcmToken = Firebase.messaging.token.await()
