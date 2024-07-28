@@ -201,6 +201,8 @@ fun WelcomeScreen(
                         .firstOrNull()
                         ?.email
 
+                // TODO: Check is logged in?
+
                 viewModel.cryptoLogin(requireNotNull(currentAccount)) {
                     showBiometricPrompt = false
                     blockBiometricPrompt = true

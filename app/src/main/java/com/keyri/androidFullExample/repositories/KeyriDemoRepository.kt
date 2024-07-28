@@ -5,11 +5,12 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.keyri.androidFullExample.services.ApiService
 import com.keyri.androidFullExample.services.RiskApiService
+import com.keyri.androidFullExample.services.TestApiService
+import com.keyri.androidFullExample.services.TestRequest
 import com.keyri.androidFullExample.services.entities.requests.CryptoLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.CryptoRegisterRequest
 import com.keyri.androidFullExample.services.entities.requests.DecryptRiskRequest
 import com.keyri.androidFullExample.services.entities.requests.EmailLoginRequest
-import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.UserInformationResponse
 import com.keyri.androidFullExample.services.entities.requests.UserRegisterRequest
 import com.keyri.androidFullExample.services.entities.responses.DecryptRiskResponse
@@ -29,6 +30,7 @@ import retrofit2.Response
 class KeyriDemoRepository(
     private val apiService: ApiService,
     private val riskApiService: RiskApiService,
+    private val testApiService: TestApiService,
 ) {
     suspend fun cryptoRegister(
         email: String,
@@ -57,13 +59,21 @@ class KeyriDemoRepository(
             apiService.emailLogin(EmailLoginRequest(email))
         }.getOrThrow()
 
-    suspend fun smsLogin(number: String): SmsLoginResponse {
+    suspend fun smsLogin(email: String) {
         val fcmToken = Firebase.messaging.token.await()
 
         return makeApiCall {
-            apiService.smsLogin(ReverseSmsLoginRequest(number.removePrefix(PHONE_PREFIX), fcmToken))
+            testApiService.test(TestRequest(email, fcmToken))
         }.getOrThrow()
     }
+
+//    suspend fun smsLogin(number: String): SmsLoginResponse {
+//        val fcmToken = Firebase.messaging.token.await()
+//
+//        return makeApiCall {
+//            apiService.smsLogin(ReverseSmsLoginRequest(number.removePrefix(PHONE_PREFIX), fcmToken))
+//        }.getOrThrow()
+//    }
 
     suspend fun userRegister(
         name: String,

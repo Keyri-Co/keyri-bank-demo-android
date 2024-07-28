@@ -49,6 +49,12 @@ fun VerifyScreen(
 ) {
     var verifyType by remember { mutableStateOf<VerifyType?>(null) }
     val context = LocalContext.current
+    val keyriProfiles = viewModel.dataStore.data.collectAsState(null)
+    val currentProfile = keyriProfiles.value?.currentProfile
+    var isEmailConfirmed =
+        keyriProfiles.value?.profiles?.firstOrNull { it.email == currentProfile }?.isEmailVerified
+    var isPhoneConfirmed =
+        keyriProfiles.value?.profiles?.firstOrNull { it.email == currentProfile }?.isPhoneVerified
     val error = viewModel.errorMessage.collectAsState()
 
     if (error.value != null) {
@@ -91,8 +97,7 @@ fun VerifyScreen(
                 color = textColor,
             )
 
-            // TODO: Check email and number verification on Vercel app
-            // TODO: Remove showing notification
+            // TODO: Set current profile on this stage
 
             KeyriButton(
                 modifier = Modifier.padding(top = 20.dp),
@@ -115,8 +120,6 @@ fun VerifyScreen(
                                 openEmailApp(context)
                             }
                         } else {
-                            // TODO: Check is it okay?
-                            // TODO: Looks like this wrong
                             navController.navigate(Routes.LoginScreen.name)
                         }
                     }

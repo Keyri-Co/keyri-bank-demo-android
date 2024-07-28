@@ -56,7 +56,6 @@ class VerifiedViewModel(
                                 .copy(
                                     customToken = customToken,
                                     isVerified = true,
-                                    biometricAuthEnabled = true,
                                 ).apply {
                                     _currentProfile.value = it
                                 }

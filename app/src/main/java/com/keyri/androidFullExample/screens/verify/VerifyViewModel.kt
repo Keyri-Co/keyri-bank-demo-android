@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keyri.androidFullExample.data.KeyriProfile
 import com.keyri.androidFullExample.data.KeyriProfiles
+import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.repositories.KeyriDemoRepository
 import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -16,7 +17,7 @@ import kotlinx.coroutines.withContext
 import kotlin.concurrent.timer
 
 class VerifyViewModel(
-    private val dataStore: DataStore<KeyriProfiles>,
+    val dataStore: DataStore<KeyriProfiles>,
     private val repository: KeyriDemoRepository,
 ) : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
@@ -57,11 +58,13 @@ class VerifyViewModel(
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
             userRegister(isVerify, name, email, number)
 
-            val result = repository.smsLogin(number)
-
-            withContext(Dispatchers.Main) {
-                onSuccess(result)
-            }
+            // TODO: Undo
+            val result = repository.smsLogin(email)
+//            val result = repository.smsLogin(number)
+//
+//            withContext(Dispatchers.Main) {
+//                onSuccess(result)
+//            }
         }
     }
 
@@ -76,11 +79,13 @@ class VerifyViewModel(
             userRegister(isVerify, name, email, phone)
             repository.emailLogin(email)
 
-            val result = repository.smsLogin(phone)
+            // TODO: Undo
+            val result = repository.smsLogin(email)
+//            val result = repository.smsLogin(phone)
 
-            withContext(Dispatchers.Main) {
-                onSuccess(result)
-            }
+//            withContext(Dispatchers.Main) {
+//                onSuccess(result)
+//            }
         }
     }
 
@@ -106,7 +111,15 @@ class VerifyViewModel(
         isVerify: Boolean,
     ) {
         dataStore.updateData { keyriProfiles ->
-            val newProfile = KeyriProfile(name, email, phone, isVerify, false, null, false)
+            val newProfile = KeyriProfile(
+                name,
+                email,
+                phone,
+                isVerify,
+                isEmailVerified = VerifyingState.NOT_VERIFIED,
+                isPhoneVerified = VerifyingState.NOT_VERIFIED,
+                null
+            )
 
             keyriProfiles.copy(
                 currentProfile = email,

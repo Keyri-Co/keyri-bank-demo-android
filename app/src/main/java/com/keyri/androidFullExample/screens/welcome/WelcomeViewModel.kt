@@ -52,7 +52,7 @@ class WelcomeViewModel(
                 val mappedProfiles =
                     keyriProfiles.profiles.map {
                         if (currentProfile == it.name) {
-                            it.copy(biometricAuthEnabled = true)
+                            it.copy(isVerified = true)
                         } else {
                             it
                         }
@@ -72,6 +72,8 @@ class WelcomeViewModel(
             val signature = keyri.generateUserSignature(currentProfile, data).getOrThrow()
 
             repository.cryptoLogin(currentProfile, data, signature)
+
+            // TODO: Firebase login after crypto login?
 
             withContext(Dispatchers.Main) {
                 onResult()

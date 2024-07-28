@@ -8,7 +8,14 @@ data class KeyriProfile(
     val email: String,
     val phone: String?,
     val isVerify: Boolean,
-    val isVerified: Boolean,
+    val isEmailVerified: VerifyingState,
+    val isPhoneVerified: VerifyingState,
     val customToken: String?,
-    val biometricAuthEnabled: Boolean,
 )
+
+@Serializable
+enum class VerifyingState {
+    NOT_VERIFIED,
+    VERIFYING,
+    VERIFIED,
+}
