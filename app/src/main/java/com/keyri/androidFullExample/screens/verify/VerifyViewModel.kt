@@ -42,11 +42,15 @@ class VerifyViewModel(
             userRegister(isVerify, name, email, null)
             repository.emailLogin(email)
 
+            updateVerifyState(email, null)
+
             withContext(Dispatchers.Main) {
                 onSuccess()
             }
         }
     }
+
+    // TODO: Undo here
 
     fun smsLogin(
         isVerify: Boolean,
@@ -58,10 +62,11 @@ class VerifyViewModel(
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
             userRegister(isVerify, name, email, number)
 
-            // TODO: Undo
             val result = repository.smsLogin(email)
 //            val result = repository.smsLogin(number)
-//
+
+            updateVerifyState(null, number)
+
 //            withContext(Dispatchers.Main) {
 //                onSuccess(result)
 //            }
@@ -79,9 +84,10 @@ class VerifyViewModel(
             userRegister(isVerify, name, email, phone)
             repository.emailLogin(email)
 
-            // TODO: Undo
             val result = repository.smsLogin(email)
 //            val result = repository.smsLogin(phone)
+
+            updateVerifyState(email, phone)
 
 //            withContext(Dispatchers.Main) {
 //                onSuccess(result)
@@ -104,6 +110,45 @@ class VerifyViewModel(
         createEmptyKeyriAccount(name, email, phone, isVerify)
     }
 
+    private suspend fun updateVerifyState(
+        email: String?,
+        phone: String?,
+    ) {
+        dataStore.updateData { keyriProfiles ->
+            val mappedProfiles =
+                keyriProfiles.profiles.map {
+                    if (keyriProfiles.currentProfile == it.email) {
+                        when {
+                            email != null && phone != null ->
+                                it.copy(
+                                    emailVerifyState = VerifyingState.VERIFYING,
+                                    phoneVerifyState = VerifyingState.VERIFYING,
+                                )
+
+                            email != null && phone == null ->
+                                it.copy(
+                                    emailVerifyState = VerifyingState.VERIFYING,
+                                )
+
+                            email == null && phone != null ->
+                                it.copy(
+                                    phoneVerifyState = VerifyingState.VERIFYING,
+                                )
+
+                            else -> it
+                        }
+                    } else {
+                        it
+                    }
+                }
+
+            keyriProfiles.copy(
+                currentProfile = email,
+                profiles = mappedProfiles,
+            )
+        }
+    }
+
     private suspend fun createEmptyKeyriAccount(
         name: String,
         email: String,
@@ -111,19 +156,41 @@ class VerifyViewModel(
         isVerify: Boolean,
     ) {
         dataStore.updateData { keyriProfiles ->
-            val newProfile = KeyriProfile(
-                name,
-                email,
-                phone,
-                isVerify,
-                isEmailVerified = VerifyingState.NOT_VERIFIED,
-                isPhoneVerified = VerifyingState.NOT_VERIFIED,
-                null
-            )
+            val mappedProfiles =
+                if (keyriProfiles.profiles.any { it.email == email }) {
+                    keyriProfiles.profiles.map {
+                        if (keyriProfiles.currentProfile == email) {
+                            it.copy(
+                                name = name,
+                                email = email,
+                                phone = phone,
+                                isVerify = isVerify,
+                                emailVerifyState = VerifyingState.NOT_VERIFIED,
+                                phoneVerifyState = VerifyingState.NOT_VERIFIED,
+                                customToken = null,
+                            )
+                        } else {
+                            it
+                        }
+                    }
+                } else {
+                    val newProfile =
+                        KeyriProfile(
+                            name,
+                            email,
+                            phone,
+                            isVerify,
+                            emailVerifyState = VerifyingState.NOT_VERIFIED,
+                            phoneVerifyState = VerifyingState.NOT_VERIFIED,
+                            null,
+                        )
+
+                    keyriProfiles.profiles + newProfile
+                }
 
             keyriProfiles.copy(
                 currentProfile = email,
-                profiles = keyriProfiles.profiles + newProfile,
+                profiles = mappedProfiles,
             )
         }
     }

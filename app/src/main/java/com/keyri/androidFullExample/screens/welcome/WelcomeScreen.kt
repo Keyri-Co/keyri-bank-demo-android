@@ -36,7 +36,9 @@ import com.keyri.androidFullExample.R
 import com.keyri.androidFullExample.composables.BiometricAuth
 import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.composables.ListModalBottomSheet
+import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.data.ModalListItem
+import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.utils.navigateWithPopUp
@@ -54,24 +56,40 @@ fun WelcomeScreen(
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
-    val keyriAccounts = viewModel.keyriAccounts.collectAsState()
+    val keyriAccounts =
+        viewModel.dataStore.data.collectAsState(initial = KeyriProfiles(null, emptyList()))
     var showAccountsList by remember { mutableStateOf(false) }
     var needAuth by remember { mutableStateOf(false) }
     var showBiometricPrompt by remember { mutableStateOf(false) }
     var clickedAccount by remember { mutableStateOf<String?>(null) }
     var blockBiometricPrompt by remember { mutableStateOf(false) }
 
-    if (!blockBiometricPrompt &&
-        keyriAccounts.value.currentProfile != null &&
-        keyriAccounts.value.profiles
-            .firstOrNull { it.email == keyriAccounts.value.currentProfile }
-            ?.isVerified == true &&
+    val currentProfile = keyriAccounts.value.currentProfile
+    val profile = keyriAccounts.value.profiles.firstOrNull { it.email == currentProfile }
+
+    // TODO: Simplify here
+
+    if (
+        currentProfile != null &&
+        profile?.emailVerifyState == VerifyingState.VERIFYING ||
+        profile?.phoneVerifyState == VerifyingState.VERIFYING
+    ) {
+        navController.navigateWithPopUp(
+            "${Routes.VerifyScreen.name}?name=${profile?.name}?email=${profile?.email}&number=${profile?.phone}&isVerify=${profile?.isVerify}",
+            Routes.WelcomeScreen.name,
+        )
+    } else if (!blockBiometricPrompt &&
+        (
+                currentProfile != null &&
+                        profile?.emailVerifyState == VerifyingState.VERIFIED &&
+                        profile.phoneVerifyState == VerifyingState.VERIFIED
+                ) &&
         !needAuth
     ) {
         BiometricAuth(
             LocalContext.current,
             "Use Biometric to login as",
-            keyriAccounts.value.currentProfile,
+            currentProfile,
             {},
             { needAuth = true },
         ) {
@@ -82,10 +100,10 @@ fun WelcomeScreen(
         Column {
             Text(
                 modifier =
-                    Modifier
-                        .padding(top = 80.dp)
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                Modifier
+                    .padding(top = 80.dp)
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = if (keyriAccounts.value.profiles.isEmpty()) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
                 style = MaterialTheme.typography.headlineLarge,
@@ -94,47 +112,45 @@ fun WelcomeScreen(
 
             Box(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .weight(1F),
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1F),
             ) {
                 Image(
                     modifier =
-                        Modifier
-                            .size(130.dp, 62.dp)
-                            .align(Alignment.Center)
-                            .combinedClickable(
-                                onClick = {},
-                                onLongClick = {
-                                    viewModel.removeAllAccounts {
-                                        viewModel.checkKeyriAccounts()
+                    Modifier
+                        .size(130.dp, 62.dp)
+                        .align(Alignment.Center)
+                        .combinedClickable(
+                            onClick = {},
+                            onLongClick = {
+                                viewModel.removeAllAccounts {
+                                    @Suppress("Deprecation")
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                        val effect =
+                                            VibrationEffect.createOneShot(
+                                                100,
+                                                VibrationEffect.DEFAULT_AMPLITUDE,
+                                            )
 
-                                        @Suppress("Deprecation")
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            val effect =
-                                                VibrationEffect.createOneShot(
-                                                    100,
-                                                    VibrationEffect.DEFAULT_AMPLITUDE,
-                                                )
-
-                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                                val vibratorManager =
-                                                    context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-                                                val vibrator = vibratorManager?.defaultVibrator
-
-                                                vibrator?.cancel()
-                                                vibrator?.vibrate(effect)
-                                            }
-                                        } else {
-                                            val vibrator =
-                                                context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                                            val vibratorManager =
+                                                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                                            val vibrator = vibratorManager?.defaultVibrator
 
                                             vibrator?.cancel()
-                                            vibrator?.vibrate(100)
+                                            vibrator?.vibrate(effect)
                                         }
+                                    } else {
+                                        val vibrator =
+                                            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+
+                                        vibrator?.cancel()
+                                        vibrator?.vibrate(100)
                                     }
-                                },
-                            ),
+                                }
+                            },
+                        ),
                     contentScale = ContentScale.Fit,
                     painter = painterResource(id = R.drawable.ic_tabby_charcoal),
                     contentDescription = null,
@@ -144,9 +160,9 @@ fun WelcomeScreen(
             val containerColors =
                 if (keyriAccounts.value.profiles.isEmpty()) {
                     MaterialTheme.colorScheme.onPrimary to
-                        MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.04F,
-                        )
+                            MaterialTheme.colorScheme.primary.copy(
+                                alpha = 0.04F,
+                            )
                 } else {
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.04F) to MaterialTheme.colorScheme.onPrimary
                 }
@@ -181,9 +197,9 @@ fun WelcomeScreen(
         val promptInfo =
             if (keyriAccounts.value.profiles.size == 1) {
                 "Use Biometric to login as" to
-                    keyriAccounts.value.profiles
-                        .firstOrNull()
-                        ?.email
+                        keyriAccounts.value.profiles
+                            .firstOrNull()
+                            ?.email
             } else {
                 "Use Biometric to login" to null
             }

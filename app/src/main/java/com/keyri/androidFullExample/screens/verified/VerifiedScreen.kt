@@ -27,6 +27,7 @@ import com.keyri.androidFullExample.R
 import com.keyri.androidFullExample.composables.BiometricAuth
 import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.data.KeyriIcon
+import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.theme.verifiedTextColor
@@ -45,15 +46,15 @@ fun VerifiedScreen(
     }
 
     val error = viewModel.errorMessage.collectAsState()
-    val currentProfile = viewModel.currentProfile.collectAsState()
+    val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, emptyList()))
+    val currentProfile = keyriProfiles.value.profiles.firstOrNull {  it.email == keyriProfiles.value.currentProfile }
+    val loading = viewModel.loading.collectAsState()
 
     if (error.value != null) {
         error.value?.let {
             onShowSnackbar(it)
         }
     }
-
-    val loading = viewModel.loading.collectAsState()
 
     if (loading.value) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -66,50 +67,50 @@ fun VerifiedScreen(
 
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 80.dp)
-                        .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text =
-                    buildAnnotatedString {
+                buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = verifiedTextColor)) {
+                        append(currentProfile?.email)
+                    }
+
+                    if (currentProfile?.phone != null) {
+                        append(" and ")
+
                         withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                            append(currentProfile.value?.email)
+                            append(currentProfile.phone)
                         }
+                    }
 
-                        if (currentProfile.value?.phone != null) {
-                            append(" and ")
-
-                            withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                                append(currentProfile.value?.phone)
-                            }
-                        }
-
-                        if (currentProfile.value?.isVerify == true) {
-                            append(" verified")
-                        } else {
-                            append(" confirmed")
-                        }
-                    },
+                    if (currentProfile?.isVerify == true) {
+                        append(" verified")
+                    } else {
+                        append(" confirmed")
+                    }
+                },
                 style = MaterialTheme.typography.headlineSmall,
                 color = textColor,
             )
 
             KeyriIcon(
                 modifier =
-                    Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 40.dp),
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
                 iconResId = R.drawable.ic_done,
                 iconTint = verifiedTextColor,
             )
 
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 40.dp)
-                        .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp)
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "Passwordless credential created",
                 style = MaterialTheme.typography.headlineSmall,
@@ -118,9 +119,9 @@ fun VerifiedScreen(
 
             KeyriIcon(
                 modifier =
-                    Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 40.dp),
+                Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
                 iconResId = R.drawable.ic_key,
                 iconTint = verifiedTextColor,
                 iconSizeFraction = 0.5F,
@@ -133,7 +134,7 @@ fun VerifiedScreen(
                     showBiometricPrompt = false
 
                     navController.navigateWithPopUp(
-                        "${Routes.MainScreen.name}?email={${currentProfile.value?.email}}",
+                        "${Routes.MainScreen.name}?email={${currentProfile?.email}}",
                         Routes.WelcomeScreen.name,
                     )
                 }
@@ -141,9 +142,9 @@ fun VerifiedScreen(
 
             KeyriButton(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 40.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 40.dp),
                 text = "Set up biometric authentication",
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
             ) {

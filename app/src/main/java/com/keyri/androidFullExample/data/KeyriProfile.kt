@@ -8,8 +8,8 @@ data class KeyriProfile(
     val email: String,
     val phone: String?,
     val isVerify: Boolean,
-    val isEmailVerified: VerifyingState,
-    val isPhoneVerified: VerifyingState,
+    val emailVerifyState: VerifyingState,
+    val phoneVerifyState: VerifyingState,
     val customToken: String?,
 )
 

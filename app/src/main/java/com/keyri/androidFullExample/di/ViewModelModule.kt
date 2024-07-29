@@ -1,5 +1,6 @@
 package com.keyri.androidFullExample.di
 
+import com.keyri.androidFullExample.MainActivityViewModel
 import com.keyri.androidFullExample.screens.login.LoginViewModel
 import com.keyri.androidFullExample.screens.main.MainScreenViewModel
 import com.keyri.androidFullExample.screens.payment.MakePaymentViewModel
@@ -21,4 +22,5 @@ val viewModelsModule =
         viewModelOf(::MakePaymentViewModel)
         viewModelOf(::SignupViewModel)
         viewModelOf(::PaymentResultViewModel)
+        viewModelOf(::MainActivityViewModel)
     }

@@ -29,7 +29,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.keyri.androidFullExample.composables.KeyriButton
+import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.data.VerifyType
+import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
 import com.keyri.androidFullExample.theme.primaryDisabled
@@ -49,13 +51,17 @@ fun VerifyScreen(
 ) {
     var verifyType by remember { mutableStateOf<VerifyType?>(null) }
     val context = LocalContext.current
-    val keyriProfiles = viewModel.dataStore.data.collectAsState(null)
-    val currentProfile = keyriProfiles.value?.currentProfile
-    var isEmailConfirmed =
-        keyriProfiles.value?.profiles?.firstOrNull { it.email == currentProfile }?.isEmailVerified
-    var isPhoneConfirmed =
-        keyriProfiles.value?.profiles?.firstOrNull { it.email == currentProfile }?.isPhoneVerified
+    val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, listOf()))
+    val currentProfile = keyriProfiles.value.currentProfile
+    val profile = keyriProfiles.value.profiles.firstOrNull { it.email == currentProfile }
+    val emailVerifyState = profile?.emailVerifyState
+    val phoneVerifyState = profile?.phoneVerifyState
     val error = viewModel.errorMessage.collectAsState()
+
+    val emailVerifying =
+        verifyType == VerifyType.EMAIL || verifyType == VerifyType.EMAIL_NUMBER || emailVerifyState == VerifyingState.VERIFYING
+    val phoneVerifying =
+        verifyType == VerifyType.NUMBER || verifyType == VerifyType.EMAIL_NUMBER || phoneVerifyState == VerifyingState.VERIFYING
 
     if (error.value != null) {
         error.value?.let {
@@ -97,8 +103,6 @@ fun VerifyScreen(
                 color = textColor,
             )
 
-            // TODO: Set current profile on this stage
-
             KeyriButton(
                 modifier = Modifier.padding(top = 20.dp),
                 disabledTextColor = primaryDisabled,
@@ -106,9 +110,9 @@ fun VerifyScreen(
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
                 text = "${if (isVerify) "Verify" else "Confirm"} email",
-                progress = verifyType == VerifyType.EMAIL || verifyType == VerifyType.EMAIL_NUMBER,
+                progress = emailVerifying,
                 onClick = {
-                    if (verifyType == null || verifyType == VerifyType.NUMBER) {
+                    if (verifyType == null && !emailVerifying) {
                         verifyType = VerifyType.EMAIL
 
                         if (isVerify) {
@@ -152,10 +156,10 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                progress = verifyType == VerifyType.NUMBER || verifyType == VerifyType.EMAIL_NUMBER,
+                progress = phoneVerifying,
                 text = "${if (isVerify) "Verify" else "Confirm"} phone number",
                 onClick = {
-                    if (verifyType == null || verifyType == VerifyType.EMAIL) {
+                    if (verifyType == null && !phoneVerifying) {
                         verifyType = VerifyType.NUMBER
 
                         viewModel.smsLogin(
@@ -196,10 +200,10 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                progress = verifyType != null,
+                progress = emailVerifying && phoneVerifying,
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
-                    if (verifyType == null) {
+                    if (verifyType == null && !emailVerifying && !phoneVerifying) {
                         verifyType = VerifyType.EMAIL_NUMBER
 
                         viewModel.smsAndEmailLogin(
@@ -236,7 +240,10 @@ private fun openEmailApp(context: Context) {
     }
 }
 
-private fun openSmsApp(response: SmsLoginResponse, context: Context) {
+private fun openSmsApp(
+    response: SmsLoginResponse,
+    context: Context,
+) {
     try {
         val sendIntent =
             Intent(Intent.ACTION_SENDTO).apply {

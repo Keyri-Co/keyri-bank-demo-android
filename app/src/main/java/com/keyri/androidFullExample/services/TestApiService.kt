@@ -6,7 +6,7 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface TestApiService {
-    @POST("api/decrypt-risk")
+    @POST("fcm-test")
     suspend fun test(
         @Body request: TestRequest,
     ): Response<Unit>

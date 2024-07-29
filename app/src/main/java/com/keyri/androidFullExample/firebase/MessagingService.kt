@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.keyri.androidFullExample.data.KeyriProfiles
+import com.keyri.androidFullExample.data.VerifyingState
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -33,13 +34,17 @@ class MessagingService : FirebaseMessagingService() {
 
         GlobalScope.launch(Dispatchers.IO + throwableScope) {
             dataStore.updateData { profiles ->
-                val mappedProfiles = profiles.profiles.map {
-                    if (it.email == profiles.currentProfile) {
-                        it.copy(isPhoneVerified = true, customToken = customToken)
-                    } else {
-                        it
+                val mappedProfiles =
+                    profiles.profiles.map {
+                        if (it.email == profiles.currentProfile) {
+                            it.copy(
+                                phoneVerifyState = VerifyingState.VERIFIED,
+                                customToken = customToken
+                            )
+                        } else {
+                            it
+                        }
                     }
-                }
 
                 profiles.copy(profiles = mappedProfiles)
             }

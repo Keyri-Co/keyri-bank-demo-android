@@ -36,6 +36,7 @@ import com.keyri.androidFullExample.screens.verify.VerifyScreen
 import com.keyri.androidFullExample.screens.welcome.WelcomeScreen
 import com.keyri.androidFullExample.theme.KeyriDemoTheme
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,20 +49,21 @@ class MainActivity : FragmentActivity() {
                 val scope = rememberCoroutineScope()
                 val navController = rememberNavController()
                 val snackbarHostState = remember { SnackbarHostState() }
+                val viewModel: MainActivityViewModel = koinViewModel()
 
                 Scaffold(
                     modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.onPrimary)
-                        .imePadding(),
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.onPrimary)
+                            .imePadding(),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                 ) { innerPadding ->
                     Box(
                         modifier =
-                        Modifier
-                            .padding(innerPadding)
-                            .padding(50.dp),
+                            Modifier
+                                .padding(innerPadding)
+                                .padding(50.dp),
                     ) {
                         NavHost(
                             navController = navController,
@@ -93,16 +95,21 @@ class MainActivity : FragmentActivity() {
                             composable(
                                 "${Routes.VerifiedScreen.name}/login&customToken={customToken}",
                                 deepLinks =
-                                listOf(
-                                    navDeepLink {
-                                        uriPattern =
-                                            "https://android-full-example.keyri.com/login&customToken={customToken}"
-                                    },
-                                ),
+                                    listOf(
+                                        navDeepLink {
+                                            uriPattern =
+                                                "https://android-full-example.keyri.com/login&customToken={customToken}"
+                                        },
+                                    ),
                             ) { backStackEntry ->
                                 val customToken =
                                     backStackEntry.arguments?.getString("customToken")
                                         ?: throw IllegalStateException("CustomToken shouldn't be null")
+
+                                // TODO: If phone != null and not verified -> open verify screen, if both or email verified - open verified
+//                                viewModel.dataStore.updateData {
+//                                    it
+//                                }
 
                                 VerifiedScreen(
                                     navController = navController,
@@ -122,23 +129,23 @@ class MainActivity : FragmentActivity() {
                             composable(
                                 "${Routes.VerifyScreen.name}?name={name}&email={email}&number={number}&isVerify={isVerify}",
                                 arguments =
-                                listOf(
-                                    navArgument("name") {
-                                        type = NavType.StringType
-                                        nullable = true
-                                    },
-                                    navArgument("email") {
-                                        type = NavType.StringType
-                                        nullable = true
-                                    },
-                                    navArgument("number") {
-                                        type = NavType.StringType
-                                        nullable = true
-                                    },
-                                    navArgument("isVerify") {
-                                        type = NavType.BoolType
-                                    },
-                                ),
+                                    listOf(
+                                        navArgument("name") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("email") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("number") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("isVerify") {
+                                            type = NavType.BoolType
+                                        },
+                                    ),
                             ) { backStackEntry ->
                                 val name = backStackEntry.arguments?.getString("name")
                                 val email = backStackEntry.arguments?.getString("email")
@@ -166,6 +173,10 @@ class MainActivity : FragmentActivity() {
                                     },
                                 )
                             }
+
+                            // TODO: If verifying state not finished -> open verify screen
+                            // TODO: If no accounts -> open confirm identity screen
+                            // TODO: Else -> if there are accounts -> crypto-login with biometry
 
                             composable(Routes.MainScreen.name) {
                                 MainScreen(
@@ -200,11 +211,11 @@ class MainActivity : FragmentActivity() {
                             composable(
                                 "${Routes.PaymentResultScreen.name}?riskResult={riskResult}",
                                 arguments =
-                                listOf(
-                                    navArgument("riskResult") {
-                                        type = NavType.StringType
-                                    },
-                                ),
+                                    listOf(
+                                        navArgument("riskResult") {
+                                            type = NavType.StringType
+                                        },
+                                    ),
                             ) { backStackEntry ->
                                 val riskResult =
                                     backStackEntry.arguments?.getString("riskResult")
