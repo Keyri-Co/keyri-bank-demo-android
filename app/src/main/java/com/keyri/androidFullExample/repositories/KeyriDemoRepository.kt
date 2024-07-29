@@ -85,25 +85,10 @@ class KeyriDemoRepository(
             apiService.getUserInformation(EmailLoginRequest(email))
         }.getOrThrow()
 
-    suspend fun authWithToken(customToken: String): String =
-        callbackFlow {
-            var callback: ((String) -> Unit)? = { trySend(it) }
-            Firebase.auth
-                .signInWithCustomToken(customToken)
-                .addOnCompleteListener { task ->
-                    if (task.isSuccessful) {
-                        task.result.user?.email?.let {
-                            callback?.invoke(it)
-                        }
-                    } else {
-                        task.exception?.let {
-                            throw it
-                        }
-                    }
-                }
-
-            awaitClose { callback = null }
-        }.first()
+    suspend fun authWithToken(customToken: String): String {
+        return Firebase.auth.signInWithCustomToken(customToken).await().user?.email
+            ?: throw Exception("Failed to authenticate with custom token")
+    }
 
     suspend fun authWithFirebase(email: String) {
         val auth = Firebase.auth
