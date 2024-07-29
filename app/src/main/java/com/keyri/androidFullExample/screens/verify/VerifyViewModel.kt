@@ -27,7 +27,7 @@ class VerifyViewModel(
         CoroutineExceptionHandler { _, throwable ->
             _errorMessage.value = throwable.message
 
-            timer(initialDelay = 1_000L, period = 1_000L) {
+            timer(initialDelay = 0L, period = 2_000L) {
                 _errorMessage.value = null
             }
         }
@@ -50,8 +50,6 @@ class VerifyViewModel(
         }
     }
 
-    // TODO: Undo here
-
     fun smsLogin(
         isVerify: Boolean,
         name: String,
@@ -62,14 +60,13 @@ class VerifyViewModel(
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
             userRegister(isVerify, name, email, number)
 
-            val result = repository.smsLogin(email)
-//            val result = repository.smsLogin(number)
+            val result = repository.smsLogin(number)
 
             updateVerifyState(null, number)
 
-//            withContext(Dispatchers.Main) {
-//                onSuccess(result)
-//            }
+            withContext(Dispatchers.Main) {
+                onSuccess(result)
+            }
         }
     }
 
@@ -84,14 +81,40 @@ class VerifyViewModel(
             userRegister(isVerify, name, email, phone)
             repository.emailLogin(email)
 
-            val result = repository.smsLogin(email)
-//            val result = repository.smsLogin(phone)
+            val result = repository.smsLogin(phone)
 
             updateVerifyState(email, phone)
 
-//            withContext(Dispatchers.Main) {
-//                onSuccess(result)
-//            }
+            withContext(Dispatchers.Main) {
+                onSuccess(result)
+            }
+        }
+    }
+
+    fun cancelVerify(onSuccess: () -> Unit) {
+        viewModelScope.launch(Dispatchers.IO + throwableScope) {
+            dataStore.updateData { keyriProfiles ->
+                val mappedProfiles =
+                    keyriProfiles.profiles.map {
+                        if (keyriProfiles.currentProfile == it.email) {
+                            it.copy(
+                                emailVerifyState = VerifyingState.NOT_VERIFIED,
+                                phoneVerifyState = VerifyingState.NOT_VERIFIED
+                            )
+                        } else {
+                            it
+                        }
+                    }
+
+                keyriProfiles.copy(
+                    currentProfile = null,
+                    profiles = mappedProfiles,
+                )
+            }
+
+            withContext(Dispatchers.Main) {
+                onSuccess()
+            }
         }
     }
 

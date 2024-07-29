@@ -2,6 +2,7 @@ package com.keyri.androidFullExample.screens.verified
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
@@ -13,6 +14,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +34,10 @@ import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.theme.verifiedTextColor
 import com.keyri.androidFullExample.utils.navigateWithPopUp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import kotlin.concurrent.timer
 
 @Composable
 fun VerifiedScreen(
@@ -45,10 +50,14 @@ fun VerifiedScreen(
         viewModel.saveBiometricAuth(customToken)
     }
 
+    val scope = rememberCoroutineScope()
     val error = viewModel.errorMessage.collectAsState()
     val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, emptyList()))
-    val currentProfile = keyriProfiles.value.profiles.firstOrNull {  it.email == keyriProfiles.value.currentProfile }
+    val currentProfile =
+        keyriProfiles.value.profiles.firstOrNull { it.email == keyriProfiles.value.currentProfile }
     val loading = viewModel.loading.collectAsState()
+    val passwordlessCredentialCreated = remember { mutableStateOf(false) }
+    val navigateToMain = remember { mutableStateOf(false) }
 
     if (error.value != null) {
         error.value?.let {
@@ -56,8 +65,15 @@ fun VerifiedScreen(
         }
     }
 
+    if (navigateToMain.value) {
+        navController.navigateWithPopUp(
+            "${Routes.MainScreen.name}?email={${currentProfile?.email}}",
+            Routes.WelcomeScreen.name,
+        )
+    }
+
     if (loading.value) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }
     } else {
@@ -105,38 +121,42 @@ fun VerifiedScreen(
                 iconTint = verifiedTextColor,
             )
 
-            Text(
-                modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 40.dp)
-                    .align(Alignment.CenterHorizontally),
-                textAlign = TextAlign.Center,
-                text = "Passwordless credential created",
-                style = MaterialTheme.typography.headlineSmall,
-                color = textColor,
-            )
+            if (passwordlessCredentialCreated.value) {
+                Text(
+                    modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp)
+                        .align(Alignment.CenterHorizontally),
+                    textAlign = TextAlign.Center,
+                    text = "Passwordless credential created",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = textColor,
+                )
 
-            KeyriIcon(
-                modifier =
-                Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 40.dp),
-                iconResId = R.drawable.ic_key,
-                iconTint = verifiedTextColor,
-                iconSizeFraction = 0.5F,
-            )
+                KeyriIcon(
+                    modifier =
+                    Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
+                    iconResId = R.drawable.ic_key,
+                    iconTint = verifiedTextColor,
+                    iconSizeFraction = 0.5F,
+                )
+            }
 
             if (showBiometricPrompt) {
                 BiometricAuth(context, "Set up Biometric authentication", null, {
                     onShowSnackbar(it)
                 }, { showBiometricPrompt = false }) {
                     showBiometricPrompt = false
+                    passwordlessCredentialCreated.value = true
 
-                    navController.navigateWithPopUp(
-                        "${Routes.MainScreen.name}?email={${currentProfile?.email}}",
-                        Routes.WelcomeScreen.name,
-                    )
+                    scope.launch(Dispatchers.IO) {
+                        timer(initialDelay = 0L, period = 2_000L) {
+                            navigateToMain.value = true
+                        }
+                    }
                 }
             }
 

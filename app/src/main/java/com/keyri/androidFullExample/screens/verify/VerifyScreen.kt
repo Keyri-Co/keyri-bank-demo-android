@@ -1,11 +1,11 @@
 package com.keyri.androidFullExample.screens.verify
 
-import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,7 +38,6 @@ import com.keyri.androidFullExample.theme.primaryDisabled
 import com.keyri.androidFullExample.theme.textColor
 import org.koin.androidx.compose.koinViewModel
 
-@SuppressLint("UnspecifiedRegisterReceiverFlag")
 @Composable
 fun VerifyScreen(
     viewModel: VerifyViewModel = koinViewModel(),
@@ -61,13 +60,25 @@ fun VerifyScreen(
     val emailVerifying =
         verifyType == VerifyType.EMAIL || verifyType == VerifyType.EMAIL_NUMBER || emailVerifyState == VerifyingState.VERIFYING
     val phoneVerifying =
-        verifyType == VerifyType.NUMBER || verifyType == VerifyType.EMAIL_NUMBER || phoneVerifyState == VerifyingState.VERIFYING
+        verifyType == VerifyType.NUMBER || verifyType == VerifyType.NUMBER || phoneVerifyState == VerifyingState.VERIFYING
 
     if (error.value != null) {
         error.value?.let {
             verifyType = null
 
             onShowSnackbar(it)
+        }
+    }
+
+    if (emailVerifying || phoneVerifying) {
+        BackHandler(true) {
+            viewModel.cancelVerify {
+                navController.navigate(Routes.WelcomeScreen.name) {
+                    popUpTo(Routes.VerifyScreen.name) {
+                        inclusive = true
+                    }
+                }
+            }
         }
     }
 

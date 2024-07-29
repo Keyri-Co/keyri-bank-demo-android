@@ -57,7 +57,15 @@ fun WelcomeScreen(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
     val keyriAccounts =
-        viewModel.dataStore.data.collectAsState(initial = KeyriProfiles(null, emptyList()))
+        viewModel.dataStore.data.collectAsState(
+            initial = KeyriProfiles(
+                null,
+                emptyList()
+            )
+        )
+
+    val filteredAccounts = keyriAccounts.value.profiles
+        .filter { it.emailVerifyState == VerifyingState.VERIFIED || (it.phone != null && it.phoneVerifyState == VerifyingState.VERIFIED) }
     var showAccountsList by remember { mutableStateOf(false) }
     var needAuth by remember { mutableStateOf(false) }
     var showBiometricPrompt by remember { mutableStateOf(false) }
@@ -105,7 +113,7 @@ fun WelcomeScreen(
                     .fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
-                text = if (keyriAccounts.value.profiles.isEmpty()) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
+                text = if (filteredAccounts.isEmpty()) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
                 style = MaterialTheme.typography.headlineLarge,
                 color = textColor,
             )
@@ -158,7 +166,7 @@ fun WelcomeScreen(
             }
 
             val containerColors =
-                if (keyriAccounts.value.profiles.isEmpty()) {
+                if (filteredAccounts.isEmpty()) {
                     MaterialTheme.colorScheme.onPrimary to
                             MaterialTheme.colorScheme.primary.copy(
                                 alpha = 0.04F,
@@ -174,9 +182,9 @@ fun WelcomeScreen(
                 onClick = {
                     if (needAuth) {
                         showBiometricPrompt = true
-                    } else if (keyriAccounts.value.profiles.size == 1) {
+                    } else if (filteredAccounts.size == 1) {
                         showBiometricPrompt = true
-                    } else if (keyriAccounts.value.profiles.size > 1) {
+                    } else if (filteredAccounts.size > 1) {
                         showAccountsList = true
                     } else {
                         navController.navigate("${Routes.VerifyScreen.name}?name=null?email=null&number=null&isVerify=false")
@@ -195,11 +203,8 @@ fun WelcomeScreen(
         }
 
         val promptInfo =
-            if (keyriAccounts.value.profiles.size == 1) {
-                "Use Biometric to login as" to
-                        keyriAccounts.value.profiles
-                            .firstOrNull()
-                            ?.email
+            if (filteredAccounts.size == 1) {
+                "Use Biometric to login as" to filteredAccounts.firstOrNull()?.email
             } else {
                 "Use Biometric to login" to null
             }
@@ -212,10 +217,7 @@ fun WelcomeScreen(
                 {},
                 { showBiometricPrompt = false },
             ) {
-                val currentAccount =
-                    clickedAccount ?: keyriAccounts.value.profiles
-                        .firstOrNull()
-                        ?.email
+                val currentAccount = clickedAccount ?: filteredAccounts.firstOrNull()?.email
 
                 // TODO: Check is logged in?
 
@@ -237,7 +239,7 @@ fun WelcomeScreen(
             ListModalBottomSheet(
                 sheetState = sheetState,
                 title = "Choose an account\nto continue to Keyri Bank",
-                keyriAccounts.value.profiles.map {
+                filteredAccounts.map {
                     ModalListItem(
                         iconRes = R.drawable.ic_tabby_charcoal,
                         text = it.email,

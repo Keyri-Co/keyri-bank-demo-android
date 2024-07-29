@@ -105,26 +105,5 @@ fun provideRiskApiService(): RiskApiService {
         .create(RiskApiService::class.java)
 }
 
-fun provideTestApiService(): TestApiService {
-    val okHttpClientBuilder = OkHttpClient.Builder()
-
-    okHttpClientBuilder
-        .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
-        .readTimeout(TIMEOUT, TimeUnit.SECONDS)
-
-    HttpLoggingInterceptor()
-        .apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }.let(okHttpClientBuilder::addInterceptor)
-
-    return Retrofit
-        .Builder()
-        .baseUrl("https://app-demo-api.keyri.com")
-        .addConverterFactory(ConverterFactory())
-        .client(okHttpClientBuilder.build())
-        .build()
-        .create(TestApiService::class.java)
-}
-
 private const val TIMEOUT = 15L
 private const val KEYRI_API_ERROR = "Keyri API error"

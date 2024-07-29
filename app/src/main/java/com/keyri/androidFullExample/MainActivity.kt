@@ -8,13 +8,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -25,6 +29,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.keyri.androidFullExample.data.KeyriProfiles
+import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.screens.login.LoginScreen
 import com.keyri.androidFullExample.screens.main.MainScreen
@@ -35,6 +41,7 @@ import com.keyri.androidFullExample.screens.verified.VerifiedScreen
 import com.keyri.androidFullExample.screens.verify.VerifyScreen
 import com.keyri.androidFullExample.screens.welcome.WelcomeScreen
 import com.keyri.androidFullExample.theme.KeyriDemoTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -59,6 +66,8 @@ class MainActivity : FragmentActivity() {
                             .imePadding(),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                 ) { innerPadding ->
+                    val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, emptyList()))
+
                     Box(
                         modifier =
                             Modifier
@@ -106,24 +115,44 @@ class MainActivity : FragmentActivity() {
                                     backStackEntry.arguments?.getString("customToken")
                                         ?: throw IllegalStateException("CustomToken shouldn't be null")
 
-                                // TODO: If phone != null and not verified -> open verify screen, if both or email verified - open verified
-//                                viewModel.dataStore.updateData {
-//                                    it
-//                                }
+                                val loading = remember { mutableStateOf(true) }
 
-                                VerifiedScreen(
-                                    navController = navController,
-                                    customToken = customToken,
-                                    onShowSnackbar = {
-                                        scope.launch {
-                                            snackbarHostState.showSnackbar(
-                                                message = it,
-                                                withDismissAction = true,
-                                                duration = SnackbarDuration.Long,
-                                            )
+                                // TODO: If phone != null and not verified -> open verify screen, if both or email verified - open verified
+                                scope.launch(Dispatchers.IO) {
+                                    viewModel.dataStore.updateData {
+                                        val mappedProfiles = it.profiles.map { profile ->
+                                            if (keyriProfiles.value.currentProfile == profile.email) {
+                                                profile.copy(emailVerifyState = VerifyingState.VERIFIED, customToken = customToken)
+                                            } else {
+                                                profile
+                                            }
                                         }
-                                    },
-                                )
+
+                                        it.copy(profiles = mappedProfiles)
+                                    }
+
+                                    loading.value = false
+                                }
+
+                                if (loading.value) {
+                                    Box(modifier = Modifier.fillMaxSize()) {
+                                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                    }
+                                } else {
+                                    VerifiedScreen(
+                                        navController = navController,
+                                        customToken = customToken,
+                                        onShowSnackbar = {
+                                            scope.launch {
+                                                snackbarHostState.showSnackbar(
+                                                    message = it,
+                                                    withDismissAction = true,
+                                                    duration = SnackbarDuration.Long,
+                                                )
+                                            }
+                                        },
+                                    )
+                                }
                             }
 
                             composable(

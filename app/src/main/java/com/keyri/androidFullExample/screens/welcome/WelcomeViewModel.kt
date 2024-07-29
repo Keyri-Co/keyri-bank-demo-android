@@ -28,7 +28,7 @@ class WelcomeViewModel(
         CoroutineExceptionHandler { _, throwable ->
             _errorMessage.value = throwable.message
 
-            timer(initialDelay = 1_000L, period = 1_000L) {
+            timer(initialDelay = 0L, period = 2_000L) {
                 _errorMessage.value = null
             }
         }
