@@ -15,8 +15,8 @@ android {
         applicationId = "com.keyri.androidFullExample"
         minSdk = 24
         targetSdk = 34
-        versionCode = 15
-        versionName = "1.15"
+        versionCode = 18
+        versionName = "1.18"
 
         vectorDrawables {
             useSupportLibrary = true
