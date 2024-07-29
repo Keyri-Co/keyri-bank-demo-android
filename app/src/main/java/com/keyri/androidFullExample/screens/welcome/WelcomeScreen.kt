@@ -58,14 +58,18 @@ fun WelcomeScreen(
     val coroutineScope = rememberCoroutineScope()
     val keyriAccounts =
         viewModel.dataStore.data.collectAsState(
-            initial = KeyriProfiles(
-                null,
-                emptyList()
-            )
+            initial =
+                KeyriProfiles(
+                    null,
+                    emptyList(),
+                ),
         )
 
-    val filteredAccounts = keyriAccounts.value.profiles
-        .filter { it.emailVerifyState == VerifyingState.VERIFIED || (it.phone != null && it.phoneVerifyState == VerifyingState.VERIFIED) }
+    val filteredAccounts =
+        keyriAccounts.value.profiles
+            .filter {
+                it.emailVerifyState == VerifyingState.VERIFIED || (it.phone != null && it.phoneVerifyState == VerifyingState.VERIFIED)
+            }
     var showAccountsList by remember { mutableStateOf(false) }
     var needAuth by remember { mutableStateOf(false) }
     var showBiometricPrompt by remember { mutableStateOf(false) }
@@ -75,23 +79,21 @@ fun WelcomeScreen(
     val currentProfile = keyriAccounts.value.currentProfile
     val profile = keyriAccounts.value.profiles.firstOrNull { it.email == currentProfile }
 
-    // TODO: Simplify here
-
     if (
         currentProfile != null &&
         profile?.emailVerifyState == VerifyingState.VERIFYING ||
         profile?.phoneVerifyState == VerifyingState.VERIFYING
     ) {
         navController.navigateWithPopUp(
-            "${Routes.VerifyScreen.name}?name=${profile?.name}?email=${profile?.email}&number=${profile?.phone}&isVerify=${profile?.isVerify}",
+            "${Routes.VerifyScreen.name}?name=${profile.name}?email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}",
             Routes.WelcomeScreen.name,
         )
     } else if (!blockBiometricPrompt &&
         (
-                currentProfile != null &&
-                        profile?.emailVerifyState == VerifyingState.VERIFIED &&
-                        profile.phoneVerifyState == VerifyingState.VERIFIED
-                ) &&
+            currentProfile != null &&
+                profile?.emailVerifyState == VerifyingState.VERIFIED &&
+                profile.phoneVerifyState == VerifyingState.VERIFIED
+        ) &&
         !needAuth
     ) {
         BiometricAuth(
@@ -108,10 +110,10 @@ fun WelcomeScreen(
         Column {
             Text(
                 modifier =
-                Modifier
-                    .padding(top = 80.dp)
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                    Modifier
+                        .padding(top = 80.dp)
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = if (filteredAccounts.isEmpty()) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
                 style = MaterialTheme.typography.headlineLarge,
@@ -120,45 +122,45 @@ fun WelcomeScreen(
 
             Box(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1F),
+                    Modifier
+                        .fillMaxWidth()
+                        .weight(1F),
             ) {
                 Image(
                     modifier =
-                    Modifier
-                        .size(130.dp, 62.dp)
-                        .align(Alignment.Center)
-                        .combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                viewModel.removeAllAccounts {
-                                    @Suppress("Deprecation")
-                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        val effect =
-                                            VibrationEffect.createOneShot(
-                                                100,
-                                                VibrationEffect.DEFAULT_AMPLITUDE,
-                                            )
-
+                        Modifier
+                            .size(130.dp, 62.dp)
+                            .align(Alignment.Center)
+                            .combinedClickable(
+                                onClick = {},
+                                onLongClick = {
+                                    viewModel.removeAllAccounts {
+                                        @Suppress("Deprecation")
                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            val vibratorManager =
-                                                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-                                            val vibrator = vibratorManager?.defaultVibrator
+                                            val effect =
+                                                VibrationEffect.createOneShot(
+                                                    100,
+                                                    VibrationEffect.DEFAULT_AMPLITUDE,
+                                                )
+
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                                val vibratorManager =
+                                                    context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                                                val vibrator = vibratorManager?.defaultVibrator
+
+                                                vibrator?.cancel()
+                                                vibrator?.vibrate(effect)
+                                            }
+                                        } else {
+                                            val vibrator =
+                                                context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
 
                                             vibrator?.cancel()
-                                            vibrator?.vibrate(effect)
+                                            vibrator?.vibrate(100)
                                         }
-                                    } else {
-                                        val vibrator =
-                                            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-
-                                        vibrator?.cancel()
-                                        vibrator?.vibrate(100)
                                     }
-                                }
-                            },
-                        ),
+                                },
+                            ),
                     contentScale = ContentScale.Fit,
                     painter = painterResource(id = R.drawable.ic_tabby_charcoal),
                     contentDescription = null,
@@ -168,9 +170,9 @@ fun WelcomeScreen(
             val containerColors =
                 if (filteredAccounts.isEmpty()) {
                     MaterialTheme.colorScheme.onPrimary to
-                            MaterialTheme.colorScheme.primary.copy(
-                                alpha = 0.04F,
-                            )
+                        MaterialTheme.colorScheme.primary.copy(
+                            alpha = 0.04F,
+                        )
                 } else {
                     MaterialTheme.colorScheme.primary.copy(alpha = 0.04F) to MaterialTheme.colorScheme.onPrimary
                 }

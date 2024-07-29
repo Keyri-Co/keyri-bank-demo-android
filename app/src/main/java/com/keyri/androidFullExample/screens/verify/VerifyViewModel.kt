@@ -1,5 +1,6 @@
 package com.keyri.androidFullExample.screens.verify
 
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -36,10 +37,11 @@ class VerifyViewModel(
         isVerify: Boolean,
         name: String,
         email: String,
+        number: String?,
         onSuccess: () -> Unit,
     ) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
-            userRegister(isVerify, name, email, null)
+            userRegister(isVerify, name, email, number)
             repository.emailLogin(email)
 
             updateVerifyState(email, null)
@@ -54,15 +56,15 @@ class VerifyViewModel(
         isVerify: Boolean,
         name: String,
         email: String,
-        number: String,
+        phone: String,
         onSuccess: (SmsLoginResponse) -> Unit,
     ) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
-            userRegister(isVerify, name, email, number)
+            userRegister(isVerify, name, email, phone)
 
-            val result = repository.smsLogin(number)
+            val result = repository.smsLogin(phone)
 
-            updateVerifyState(null, number)
+            updateVerifyState(null, phone)
 
             withContext(Dispatchers.Main) {
                 onSuccess(result)
@@ -92,6 +94,9 @@ class VerifyViewModel(
     }
 
     fun cancelVerify(onSuccess: () -> Unit) {
+        // TODO: Remove logs
+        Log.e("CANCEL VERIFY", "ok")
+
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
             dataStore.updateData { keyriProfiles ->
                 val mappedProfiles =
@@ -99,7 +104,7 @@ class VerifyViewModel(
                         if (keyriProfiles.currentProfile == it.email) {
                             it.copy(
                                 emailVerifyState = VerifyingState.NOT_VERIFIED,
-                                phoneVerifyState = VerifyingState.NOT_VERIFIED
+                                phoneVerifyState = VerifyingState.NOT_VERIFIED,
                             )
                         } else {
                             it
@@ -125,7 +130,13 @@ class VerifyViewModel(
         phone: String?,
     ) {
         if (isVerify) {
-            repository.userRegister(name, email, phone)
+            try {
+                repository.userRegister(name, email, phone)
+            } catch (e: Exception) {
+                if (e.message?.contains("The email address is already in use by another account") == true) {
+                    repository.authWithFirebase(email)
+                }
+            }
         } else {
             repository.authWithFirebase(email)
         }
@@ -165,10 +176,7 @@ class VerifyViewModel(
                     }
                 }
 
-            keyriProfiles.copy(
-                currentProfile = email,
-                profiles = mappedProfiles,
-            )
+            keyriProfiles.copy(profiles = mappedProfiles)
         }
     }
 
@@ -199,13 +207,13 @@ class VerifyViewModel(
                 } else {
                     val newProfile =
                         KeyriProfile(
-                            name,
-                            email,
-                            phone,
-                            isVerify,
+                            name = name,
+                            email = email,
+                            phone = phone,
+                            isVerify = isVerify,
                             emailVerifyState = VerifyingState.NOT_VERIFIED,
                             phoneVerifyState = VerifyingState.NOT_VERIFIED,
-                            null,
+                            customToken = null,
                         )
 
                     keyriProfiles.profiles + newProfile

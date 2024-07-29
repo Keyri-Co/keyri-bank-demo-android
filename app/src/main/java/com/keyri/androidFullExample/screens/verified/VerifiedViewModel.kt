@@ -47,7 +47,7 @@ class VerifiedViewModel(
                         if (currentProfileEmail == it.email) {
                             it.copy(
                                 customToken = customToken,
-                                emailVerifyState = VerifyingState.VERIFIED
+                                emailVerifyState = VerifyingState.VERIFIED,
                             )
                         } else {
                             it

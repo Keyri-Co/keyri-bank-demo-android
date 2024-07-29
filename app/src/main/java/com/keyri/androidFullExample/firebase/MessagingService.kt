@@ -26,8 +26,6 @@ class MessagingService : FirebaseMessagingService() {
         Log.e("Keyri Demo", "New FCM token available: $token")
     }
 
-    // TODO: Email and SMS verification flow -> first verify SMS, after receiving custom token, then trigger email flow (if not hard to implement)
-
     @OptIn(DelicateCoroutinesApi::class)
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
@@ -41,14 +39,14 @@ class MessagingService : FirebaseMessagingService() {
                         if (it.email == profiles.currentProfile) {
                             it.copy(
                                 phoneVerifyState = VerifyingState.VERIFIED,
-                                customToken = customToken
+                                customToken = customToken,
                             )
                         } else {
                             it
                         }
                     }
 
-                profiles.copy(profiles = mappedProfiles)
+                profiles.copy(currentProfile = profiles.currentProfile, profiles = mappedProfiles)
             }
         }
     }

@@ -1,6 +1,5 @@
 package com.keyri.androidFullExample.screens.welcome
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -58,11 +57,7 @@ class WelcomeViewModel(
             val data = System.currentTimeMillis().toString()
             val signature = keyri.generateUserSignature(currentProfile, data).getOrThrow()
 
-            // TODO: Firebase login after crypto login?
-
-            val response = repository.cryptoLogin(currentProfile, data, signature)
-
-            Log.e("CRYPTO LOGIN", "response: $response")
+            repository.cryptoLogin(currentProfile, data, signature)
 
             withContext(Dispatchers.Main) {
                 onResult()

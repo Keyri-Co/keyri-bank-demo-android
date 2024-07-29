@@ -60,7 +60,7 @@ fun VerifyScreen(
     val emailVerifying =
         verifyType == VerifyType.EMAIL || verifyType == VerifyType.EMAIL_NUMBER || emailVerifyState == VerifyingState.VERIFYING
     val phoneVerifying =
-        verifyType == VerifyType.NUMBER || verifyType == VerifyType.NUMBER || phoneVerifyState == VerifyingState.VERIFYING
+        verifyType == VerifyType.NUMBER || verifyType == VerifyType.EMAIL_NUMBER || phoneVerifyState == VerifyingState.VERIFYING
 
     if (error.value != null) {
         error.value?.let {
@@ -70,7 +70,7 @@ fun VerifyScreen(
         }
     }
 
-    if (emailVerifying || phoneVerifying) {
+    if (verifyType == null && (emailVerifying || phoneVerifying)) {
         BackHandler(true) {
             viewModel.cancelVerify {
                 navController.navigate(Routes.WelcomeScreen.name) {
@@ -85,10 +85,10 @@ fun VerifyScreen(
     Column {
         Text(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Help us ${if (isVerify) "verify" else "confirm"} your identity",
             style = MaterialTheme.typography.headlineSmall,
@@ -98,18 +98,18 @@ fun VerifyScreen(
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Bottom) {
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text =
-                buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Option 1:")
-                    }
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Option 1:")
+                        }
 
-                    append(" We'll send you an email magic link. It expires 15 minutes after you request it.")
-                },
+                        append(" We'll send you an email magic link. It expires 15 minutes after you request it.")
+                    },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -120,10 +120,18 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                text = "${if (isVerify) "Verify" else "Confirm"} email",
-                progress = emailVerifying,
+                enabled = emailVerifyState != VerifyingState.VERIFIED,
+                text =
+                    if (emailVerifyState ==
+                        VerifyingState.VERIFIED
+                    ) {
+                        "Email verified"
+                    } else {
+                        "${if (isVerify) "Verify" else "Confirm"} email"
+                    },
+                progress = emailVerifying && emailVerifyState != VerifyingState.VERIFIED,
                 onClick = {
-                    if (verifyType == null && !emailVerifying) {
+                    if (!emailVerifying) {
                         verifyType = VerifyType.EMAIL
 
                         if (isVerify) {
@@ -131,6 +139,7 @@ fun VerifyScreen(
                                 true,
                                 requireNotNull(name),
                                 requireNotNull(email),
+                                number,
                             ) {
                                 openEmailApp(context)
                             }
@@ -143,34 +152,41 @@ fun VerifyScreen(
 
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 40.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
                 text =
-                buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Option 2:")
-                    }
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Option 2:")
+                        }
 
-                    append(" You'll send an auto populated message through messaging service.")
-                },
+                        append(" You'll send an auto populated message through messaging service.")
+                    },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
 
             KeyriButton(
                 modifier = Modifier.padding(top = 20.dp),
-                enabled = number != null,
                 disabledTextColor = primaryDisabled,
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                progress = phoneVerifying,
-                text = "${if (isVerify) "Verify" else "Confirm"} phone number",
+                progress = phoneVerifying && phoneVerifyState != VerifyingState.VERIFIED,
+                enabled = number != null && phoneVerifyState != VerifyingState.VERIFIED,
+                text =
+                    if (phoneVerifyState ==
+                        VerifyingState.VERIFIED
+                    ) {
+                        "Phone verified"
+                    } else {
+                        "${if (isVerify) "Verify" else "Confirm"} phone number"
+                    },
                 onClick = {
-                    if (verifyType == null && !phoneVerifying) {
+                    if (!phoneVerifying) {
                         verifyType = VerifyType.NUMBER
 
                         viewModel.smsLogin(
@@ -187,34 +203,34 @@ fun VerifyScreen(
 
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .padding(top = 40.dp),
+                    Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
                 text =
-                buildAnnotatedString {
-                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                        append("Option 3:")
-                    }
+                    buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Option 3:")
+                        }
 
-                    append(" You'll send an auto populated message and then receive an email magic link.")
-                },
+                        append(" You'll send an auto populated message and then receive an email magic link.")
+                    },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
 
             KeyriButton(
                 modifier = Modifier.padding(top = 20.dp),
-                enabled = number != null,
                 disabledTextColor = primaryDisabled,
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
                 progress = emailVerifying && phoneVerifying,
+                enabled = number != null && (phoneVerifyState != VerifyingState.VERIFIED && emailVerifyState != VerifyingState.VERIFIED),
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
-                    if (verifyType == null && !emailVerifying && !phoneVerifying) {
+                    if (verifyType == null || (!emailVerifying && !phoneVerifying)) {
                         verifyType = VerifyType.EMAIL_NUMBER
 
                         viewModel.smsAndEmailLogin(

@@ -38,6 +38,8 @@ class LoginViewModel(
             repository.authWithFirebase(email)
             repository.emailLogin(email)
 
+            // TODO: Set current user, find or create keyriProfile
+
             withContext(Dispatchers.Main) {
                 onSuccess()
             }

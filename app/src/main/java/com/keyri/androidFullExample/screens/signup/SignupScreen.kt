@@ -153,11 +153,13 @@ fun SignupScreen(
             disabledBorderColor = primaryDisabled,
             text = "Continue",
             onClick = {
-                navController.navigate(
-                    "${Routes.VerifyScreen.name}?name=${inputState.value.name}&email=${inputState.value.email}&number=${
-                        inputState.value.mobile.text.takeIf { it.isNotEmpty() }
-                    }&isVerify=true",
-                )
+                viewModel.setCurrentProfileToNull {
+                    navController.navigate(
+                        "${Routes.VerifyScreen.name}?name=${inputState.value.name}&email=${inputState.value.email}&number=${
+                            inputState.value.mobile.text.takeIf { it.isNotEmpty() }
+                        }&isVerify=true",
+                    )
+                }
             },
         )
     }

@@ -14,6 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,7 +67,8 @@ class MainActivity : FragmentActivity() {
                             .imePadding(),
                     snackbarHost = { SnackbarHost(snackbarHostState) },
                 ) { innerPadding ->
-                    val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, emptyList()))
+                    val keyriProfiles =
+                        viewModel.dataStore.data.collectAsState(KeyriProfiles(null, emptyList()))
 
                     Box(
                         modifier =
@@ -118,25 +120,39 @@ class MainActivity : FragmentActivity() {
                                 val loading = remember { mutableStateOf(true) }
 
                                 // TODO: If phone != null and not verified -> open verify screen, if both or email verified - open verified
-                                scope.launch(Dispatchers.IO) {
-                                    viewModel.dataStore.updateData {
-                                        val mappedProfiles = it.profiles.map { profile ->
-                                            if (keyriProfiles.value.currentProfile == profile.email) {
-                                                profile.copy(emailVerifyState = VerifyingState.VERIFIED, customToken = customToken)
-                                            } else {
-                                                profile
-                                            }
+                                SideEffect {
+                                    scope.launch(Dispatchers.IO) {
+                                        viewModel.dataStore.updateData {
+                                            val mappedProfiles =
+                                                it.profiles.map { profile ->
+                                                    if (keyriProfiles.value.currentProfile == profile.email) {
+                                                        profile.copy(
+                                                            emailVerifyState = VerifyingState.VERIFIED,
+                                                            customToken = customToken,
+                                                        )
+                                                    } else {
+                                                        profile
+                                                    }
+                                                }
+
+                                            it.copy(
+                                                currentProfile = keyriProfiles.value.currentProfile,
+                                                profiles = mappedProfiles,
+                                            )
                                         }
 
-                                        it.copy(profiles = mappedProfiles)
+                                        loading.value = false
                                     }
-
-                                    loading.value = false
                                 }
 
                                 if (loading.value) {
                                     Box(modifier = Modifier.fillMaxSize()) {
-                                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                        CircularProgressIndicator(
+                                            modifier =
+                                                Modifier.align(
+                                                    Alignment.Center,
+                                                ),
+                                        )
                                     }
                                 } else {
                                     VerifiedScreen(
