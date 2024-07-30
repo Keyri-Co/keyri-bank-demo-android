@@ -282,6 +282,8 @@ private fun openSmsApp(
                 putExtra("sms_body", response.smsUrl.confirmationMessage)
             }
 
+        sendIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+
         context.startActivity(sendIntent)
     } catch (e: ActivityNotFoundException) {
         Toast

@@ -41,6 +41,10 @@ class WelcomeViewModel(
 
             repository.cryptoLogin(currentProfile, data, signature)
 
+            dataStore.updateData { keyriProfiles ->
+                keyriProfiles.copy(currentProfile = currentProfile)
+            }
+
             withContext(Dispatchers.Main) {
                 onResult()
             }

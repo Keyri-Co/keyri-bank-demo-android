@@ -90,12 +90,10 @@ class MainActivityViewModel(
                     profiles.profiles
                         .firstOrNull { it.email == profiles.currentProfile }
                         ?.let { profile ->
-                            if (profile.email == profiles.currentProfile) {
-                                if (profile.verifyState?.isVerificationDone() == true && profile.biometricsSet) {
-                                    screenToOpen = Routes.WelcomeScreen.name
-                                } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
-                                    screenToOpen = Routes.VerifiedScreen.name
-                                }
+                            if (profile.verifyState?.isVerificationDone() == true && profile.biometricsSet) {
+                                screenToOpen = Routes.WelcomeScreen.name
+                            } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
+                                screenToOpen = Routes.VerifiedScreen.name
                             }
                         }
 

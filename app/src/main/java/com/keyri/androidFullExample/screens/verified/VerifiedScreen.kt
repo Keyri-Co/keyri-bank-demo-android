@@ -61,7 +61,7 @@ fun VerifiedScreen(
 
     if (navigateToMain.value) {
         navController.navigateWithPopUp(
-            "${Routes.MainScreen.name}?email={${currentProfile?.email}}",
+            Routes.MainScreen.name,
             Routes.WelcomeScreen.name,
         )
     }

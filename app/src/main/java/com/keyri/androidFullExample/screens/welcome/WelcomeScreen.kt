@@ -66,7 +66,7 @@ fun WelcomeScreen(
     var showBiometricPrompt by remember { mutableStateOf(false) }
     var clickedAccount by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = filteredAccounts) {
         if (filteredAccounts.any { it.email == keyriAccounts.value.currentProfile && it.biometricsSet } && filteredAccounts.size == 1) {
             showBiometricPrompt = true
         }

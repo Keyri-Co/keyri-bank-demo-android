@@ -14,15 +14,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -55,8 +59,21 @@ class MainActivity : FragmentActivity() {
                 val viewModel: MainActivityViewModel = koinViewModel()
                 val openScreen = viewModel.openScreen.collectAsState()
 
-                LaunchedEffect(key1 = Unit) {
-                    viewModel.checkStartScreen(intent?.data)
+                val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+
+                DisposableEffect(lifecycleOwner) {
+                    val observer =
+                        LifecycleEventObserver { _, event ->
+                            if (event == Lifecycle.Event.ON_CREATE) {
+                                viewModel.checkStartScreen(intent?.data)
+                            }
+                        }
+
+                    lifecycleOwner.lifecycle.addObserver(observer)
+
+                    onDispose {
+                        lifecycleOwner.lifecycle.removeObserver(observer)
+                    }
                 }
 
                 if (openScreen.value == null) {
@@ -80,7 +97,7 @@ class MainActivity : FragmentActivity() {
                         ) {
                             NavHost(
                                 navController = navController,
-                                startDestination = openScreen.value ?: Routes.MainScreen.name,
+                                startDestination = openScreen.value ?: Routes.WelcomeScreen.name,
                             ) {
                                 composable(Routes.WelcomeScreen.name) {
                                     WelcomeScreen(navController = navController)

@@ -128,7 +128,14 @@ fun SignupScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 onValueChange = {
                     val newMobile =
-                        if (!it.text.startsWith(PHONE_PREFIX)) {
+                        if (!it.text.startsWith(PHONE_PREFIX) &&
+                            inputState.value.mobile.text
+                                .isEmpty()
+                        ) {
+                            val newText = PHONE_PREFIX + it.text
+
+                            TextFieldValue(newText, selection = TextRange(newText.length))
+                        } else if (!it.text.startsWith(PHONE_PREFIX)) {
                             TextFieldValue("")
                         } else if (it.text.length > 12) {
                             inputState.value.mobile
