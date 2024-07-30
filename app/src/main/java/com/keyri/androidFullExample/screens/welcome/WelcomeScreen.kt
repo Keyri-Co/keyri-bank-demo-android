@@ -38,7 +38,6 @@ import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.composables.ListModalBottomSheet
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.data.ModalListItem
-import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.utils.navigateWithPopUp
@@ -66,10 +65,8 @@ fun WelcomeScreen(
         )
 
     val filteredAccounts =
-        keyriAccounts.value.profiles
-            .filter {
-                it.emailVerifyState == VerifyingState.VERIFIED || (it.phone != null && it.phoneVerifyState == VerifyingState.VERIFIED)
-            }
+        keyriAccounts.value.profiles.filter { it.verifyState?.isVerificationDone() == true }
+
     var showAccountsList by remember { mutableStateOf(false) }
     var needAuth by remember { mutableStateOf(false) }
     var showBiometricPrompt by remember { mutableStateOf(false) }
@@ -77,25 +74,8 @@ fun WelcomeScreen(
     var blockBiometricPrompt by remember { mutableStateOf(false) }
 
     val currentProfile = keyriAccounts.value.currentProfile
-    val profile = keyriAccounts.value.profiles.firstOrNull { it.email == currentProfile }
 
-    if (
-        currentProfile != null &&
-        profile?.emailVerifyState == VerifyingState.VERIFYING ||
-        profile?.phoneVerifyState == VerifyingState.VERIFYING
-    ) {
-        navController.navigateWithPopUp(
-            "${Routes.VerifyScreen.name}?name=${profile.name}?email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}",
-            Routes.WelcomeScreen.name,
-        )
-    } else if (!blockBiometricPrompt &&
-        (
-            currentProfile != null &&
-                profile?.emailVerifyState == VerifyingState.VERIFIED &&
-                profile.phoneVerifyState == VerifyingState.VERIFIED
-        ) &&
-        !needAuth
-    ) {
+    if (!blockBiometricPrompt && currentProfile != null && filteredAccounts.any { it.email == currentProfile } && !needAuth) {
         BiometricAuth(
             LocalContext.current,
             "Use Biometric to login as",
@@ -221,13 +201,9 @@ fun WelcomeScreen(
             ) {
                 val currentAccount = clickedAccount ?: filteredAccounts.firstOrNull()?.email
 
-                // TODO: Check is logged in?
-
                 viewModel.cryptoLogin(requireNotNull(currentAccount)) {
                     showBiometricPrompt = false
                     blockBiometricPrompt = true
-
-                    viewModel.setCurrentProfile(currentAccount)
 
                     navController.navigateWithPopUp(
                         Routes.MainScreen.name,

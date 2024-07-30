@@ -1,6 +1,5 @@
 package com.keyri.androidFullExample.screens.verify
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -94,18 +93,12 @@ class VerifyViewModel(
     }
 
     fun cancelVerify(onSuccess: () -> Unit) {
-        // TODO: Remove logs
-        Log.e("CANCEL VERIFY", "ok")
-
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
             dataStore.updateData { keyriProfiles ->
                 val mappedProfiles =
                     keyriProfiles.profiles.map {
                         if (keyriProfiles.currentProfile == it.email) {
-                            it.copy(
-                                emailVerifyState = VerifyingState.NOT_VERIFIED,
-                                phoneVerifyState = VerifyingState.NOT_VERIFIED,
-                            )
+                            it.copy(verifyState = null)
                         } else {
                             it
                         }
@@ -153,21 +146,32 @@ class VerifyViewModel(
                 keyriProfiles.profiles.map {
                     if (keyriProfiles.currentProfile == it.email) {
                         when {
-                            email != null && phone != null ->
-                                it.copy(
-                                    emailVerifyState = VerifyingState.VERIFYING,
-                                    phoneVerifyState = VerifyingState.VERIFYING,
-                                )
+                            email != null && phone != null -> {
+                                val verifyState =
+                                    VerifyingState.EmailPhone(
+                                        emailVerified = false,
+                                        phoneVerified = false,
+                                    )
+                                verifyState.isVerifying = true
 
-                            email != null && phone == null ->
                                 it.copy(
-                                    emailVerifyState = VerifyingState.VERIFYING,
+                                    verifyState = verifyState,
                                 )
+                            }
 
-                            email == null && phone != null ->
-                                it.copy(
-                                    phoneVerifyState = VerifyingState.VERIFYING,
-                                )
+                            email != null && phone == null -> {
+                                val verifyState = VerifyingState.Email(isVerified = false)
+                                verifyState.isVerifying = true
+
+                                it.copy(verifyState = verifyState)
+                            }
+
+                            email == null && phone != null -> {
+                                val verifyState = VerifyingState.Phone(isVerified = false)
+                                verifyState.isVerifying = true
+
+                                it.copy(verifyState = verifyState)
+                            }
 
                             else -> it
                         }
@@ -196,9 +200,9 @@ class VerifyViewModel(
                                 email = email,
                                 phone = phone,
                                 isVerify = isVerify,
-                                emailVerifyState = VerifyingState.NOT_VERIFIED,
-                                phoneVerifyState = VerifyingState.NOT_VERIFIED,
+                                verifyState = null,
                                 customToken = null,
+                                biometricsSet = false,
                             )
                         } else {
                             it
@@ -211,18 +215,15 @@ class VerifyViewModel(
                             email = email,
                             phone = phone,
                             isVerify = isVerify,
-                            emailVerifyState = VerifyingState.NOT_VERIFIED,
-                            phoneVerifyState = VerifyingState.NOT_VERIFIED,
+                            verifyState = null,
                             customToken = null,
+                            biometricsSet = false,
                         )
 
                     keyriProfiles.profiles + newProfile
                 }
 
-            keyriProfiles.copy(
-                currentProfile = email,
-                profiles = mappedProfiles,
-            )
+            keyriProfiles.copy(currentProfile = email, profiles = mappedProfiles)
         }
     }
 }

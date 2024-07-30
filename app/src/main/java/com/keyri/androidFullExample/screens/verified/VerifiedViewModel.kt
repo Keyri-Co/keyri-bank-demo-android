@@ -45,9 +45,22 @@ class VerifiedViewModel(
                 val mappedProfiles =
                     keyriProfiles.profiles.map {
                         if (currentProfileEmail == it.email) {
+                            val newVerifyState =
+                                when (it.verifyState) {
+                                    is VerifyingState.Email -> VerifyingState.Email(isVerified = true)
+                                    is VerifyingState.Phone -> VerifyingState.Phone(isVerified = true)
+                                    is VerifyingState.EmailPhone ->
+                                        VerifyingState.EmailPhone(
+                                            emailVerified = true,
+                                            phoneVerified = true,
+                                        )
+                                    else -> null
+                                }
+
                             it.copy(
                                 customToken = customToken,
-                                emailVerifyState = VerifyingState.VERIFIED,
+                                verifyState = newVerifyState,
+                                biometricsSet = true,
                             )
                         } else {
                             it

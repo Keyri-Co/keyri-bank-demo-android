@@ -59,6 +59,15 @@ class KeyriDemoRepository(
             apiService.emailLogin(EmailLoginRequest(email))
         }.getOrThrow()
 
+    // TODO: This for testing
+//    suspend fun smsLogin(email: String) {
+//        val fcmToken = Firebase.messaging.token.await()
+//
+//        return makeApiCall {
+//            testApiService.test(TestRequest(email, fcmToken))
+//        }.getOrThrow()
+//    }
+
     suspend fun smsLogin(number: String): SmsLoginResponse {
         val fcmToken = Firebase.messaging.token.await()
 
@@ -87,10 +96,13 @@ class KeyriDemoRepository(
             apiService.getUserInformation(EmailLoginRequest(email))
         }.getOrThrow()
 
-    suspend fun authWithToken(customToken: String): String {
-        return Firebase.auth.signInWithCustomToken(customToken).await().user?.email
+    suspend fun authWithToken(customToken: String): String =
+        Firebase.auth
+            .signInWithCustomToken(customToken)
+            .await()
+            .user
+            ?.email
             ?: throw Exception("Failed to authenticate with custom token")
-    }
 
     suspend fun authWithFirebase(email: String) {
         val auth = Firebase.auth

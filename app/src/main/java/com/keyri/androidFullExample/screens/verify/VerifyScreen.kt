@@ -13,11 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,7 +29,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.data.KeyriProfiles
-import com.keyri.androidFullExample.data.VerifyType
 import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
@@ -48,29 +46,29 @@ fun VerifyScreen(
     number: String? = null,
     onShowSnackbar: (String) -> Unit,
 ) {
-    var verifyType by remember { mutableStateOf<VerifyType?>(null) }
     val context = LocalContext.current
     val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, listOf()))
-    val currentProfile = keyriProfiles.value.currentProfile
-    val profile = keyriProfiles.value.profiles.firstOrNull { it.email == currentProfile }
-    val emailVerifyState = profile?.emailVerifyState
-    val phoneVerifyState = profile?.phoneVerifyState
+    val profile = keyriProfiles.value.profiles.firstOrNull { it.email == keyriProfiles.value.currentProfile }
     val error = viewModel.errorMessage.collectAsState()
-
-    val emailVerifying =
-        verifyType == VerifyType.EMAIL || verifyType == VerifyType.EMAIL_NUMBER || emailVerifyState == VerifyingState.VERIFYING
-    val phoneVerifying =
-        verifyType == VerifyType.NUMBER || verifyType == VerifyType.EMAIL_NUMBER || phoneVerifyState == VerifyingState.VERIFYING
+    val verifyState = remember { mutableStateOf<VerifyingState?>(null) }
 
     if (error.value != null) {
         error.value?.let {
-            verifyType = null
-
             onShowSnackbar(it)
         }
     }
 
-    if (verifyType == null && (emailVerifying || phoneVerifying)) {
+    SideEffect {
+        if (profile?.verifyState?.isVerificationDone() == true) {
+            navController.navigate("${Routes.VerifiedScreen.name}/login&customToken={${profile.customToken}}") {
+                popUpTo(Routes.VerifyScreen.name) {
+                    inclusive = true
+                }
+            }
+        }
+    }
+
+    if (profile?.verifyState != null) {
         BackHandler(true) {
             viewModel.cancelVerify {
                 navController.navigate(Routes.WelcomeScreen.name) {
@@ -120,19 +118,21 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                enabled = emailVerifyState != VerifyingState.VERIFIED,
+                enabled =
+                    verifyState.value is VerifyingState.Email ||
+                        (profile?.verifyState == null || profile.verifyState is VerifyingState.Email),
                 text =
-                    if (emailVerifyState ==
-                        VerifyingState.VERIFIED
+                    if ((profile?.verifyState is VerifyingState.Email && profile.verifyState.isVerified) ||
+                        (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.emailVerified)
                     ) {
                         "Email verified"
                     } else {
                         "${if (isVerify) "Verify" else "Confirm"} email"
                     },
-                progress = emailVerifying && emailVerifyState != VerifyingState.VERIFIED,
+                progress = profile?.verifyState is VerifyingState.Email,
                 onClick = {
-                    if (!emailVerifying) {
-                        verifyType = VerifyType.EMAIL
+                    if (profile?.verifyState == null) {
+                        verifyState.value = VerifyingState.Email(isVerified = false)
 
                         if (isVerify) {
                             viewModel.emailLogin(
@@ -175,19 +175,21 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                progress = phoneVerifying && phoneVerifyState != VerifyingState.VERIFIED,
-                enabled = number != null && phoneVerifyState != VerifyingState.VERIFIED,
+                progress = verifyState.value is VerifyingState.Phone || (profile?.verifyState is VerifyingState.Phone),
+                enabled =
+                    (number != null || profile?.phone != null) &&
+                        (profile?.verifyState == null || profile.verifyState is VerifyingState.Phone),
                 text =
-                    if (phoneVerifyState ==
-                        VerifyingState.VERIFIED
+                    if ((profile?.verifyState is VerifyingState.Phone && profile.verifyState.isVerified) ||
+                        (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.phoneVerified)
                     ) {
                         "Phone verified"
                     } else {
                         "${if (isVerify) "Verify" else "Confirm"} phone number"
                     },
                 onClick = {
-                    if (!phoneVerifying) {
-                        verifyType = VerifyType.NUMBER
+                    if (profile?.verifyState == null) {
+                        verifyState.value = VerifyingState.Phone(isVerified = false)
 
                         viewModel.smsLogin(
                             isVerify,
@@ -226,12 +228,14 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                progress = emailVerifying && phoneVerifying,
-                enabled = number != null && (phoneVerifyState != VerifyingState.VERIFIED && emailVerifyState != VerifyingState.VERIFIED),
+                progress = verifyState.value is VerifyingState.EmailPhone || profile?.verifyState is VerifyingState.EmailPhone,
+                enabled =
+                    (number != null || profile?.phone != null) &&
+                        (profile?.verifyState == null || profile.verifyState is VerifyingState.EmailPhone),
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
-                    if (verifyType == null || (!emailVerifying && !phoneVerifying)) {
-                        verifyType = VerifyType.EMAIL_NUMBER
+                    if (profile?.verifyState == null) {
+                        verifyState.value = VerifyingState.EmailPhone(emailVerified = false, phoneVerified = false)
 
                         viewModel.smsAndEmailLogin(
                             isVerify,

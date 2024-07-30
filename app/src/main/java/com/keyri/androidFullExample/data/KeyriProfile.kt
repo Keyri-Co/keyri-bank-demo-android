@@ -8,14 +8,35 @@ data class KeyriProfile(
     val email: String,
     val phone: String?,
     val isVerify: Boolean,
-    val emailVerifyState: VerifyingState,
-    val phoneVerifyState: VerifyingState,
+    val verifyState: VerifyingState?,
     val customToken: String?,
+    val biometricsSet: Boolean,
 )
 
 @Serializable
-enum class VerifyingState {
-    NOT_VERIFIED,
-    VERIFYING,
-    VERIFIED,
+sealed class VerifyingState {
+    var isVerifying: Boolean = false
+
+    fun isVerificationDone(): Boolean =
+        when (this) {
+            is Email -> isVerified
+            is Phone -> isVerified
+            is EmailPhone -> emailVerified && phoneVerified
+        }
+
+    @Serializable
+    data class Email(
+        val isVerified: Boolean,
+    ) : VerifyingState()
+
+    @Serializable
+    data class Phone(
+        val isVerified: Boolean,
+    ) : VerifyingState()
+
+    @Serializable
+    data class EmailPhone(
+        val emailVerified: Boolean,
+        val phoneVerified: Boolean,
+    ) : VerifyingState()
 }

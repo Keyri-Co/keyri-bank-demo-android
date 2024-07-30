@@ -1,6 +1,5 @@
 package com.keyri.androidFullExample.screens.verified
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -94,9 +93,6 @@ fun VerifiedScreen(
                         withStyle(style = SpanStyle(color = verifiedTextColor)) {
                             append(currentProfile?.email)
                         }
-
-                        // TODO: Undo \
-                        Log.e("PROF 2", currentProfile.toString())
 
                         if (currentProfile?.phone != null) {
                             append(" and ")

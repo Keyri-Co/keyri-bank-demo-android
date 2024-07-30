@@ -4,7 +4,6 @@ import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.keyri.androidFullExample.data.KeyriProfiles
-import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.repositories.KeyriDemoRepository
 import com.keyrico.keyrisdk.Keyri
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -31,23 +30,6 @@ class WelcomeViewModel(
                 _errorMessage.value = null
             }
         }
-
-    fun setCurrentProfile(currentProfile: String?) {
-        viewModelScope.launch(Dispatchers.IO) {
-            dataStore.updateData { keyriProfiles ->
-                val mappedProfiles =
-                    keyriProfiles.profiles.map {
-                        if (currentProfile == it.name) {
-                            it.copy(emailVerifyState = VerifyingState.VERIFIED)
-                        } else {
-                            it
-                        }
-                    }
-
-                keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
-            }
-        }
-    }
 
     fun cryptoLogin(
         currentProfile: String,

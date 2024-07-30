@@ -37,16 +37,36 @@ class MessagingService : FirebaseMessagingService() {
                 val mappedProfiles =
                     profiles.profiles.map {
                         if (it.email == profiles.currentProfile) {
-                            it.copy(
-                                phoneVerifyState = VerifyingState.VERIFIED,
-                                customToken = customToken,
-                            )
+                            val newVerifyState =
+                                when (it.verifyState) {
+                                    is VerifyingState.Phone -> {
+                                        val newState = VerifyingState.Phone(isVerified = true)
+
+                                        newState.isVerifying = false
+
+                                        newState
+                                    }
+
+                                    is VerifyingState.EmailPhone -> {
+                                        val newState = it.verifyState.copy(phoneVerified = true)
+
+                                        if (newState.isVerificationDone()) {
+                                            newState.isVerifying = false
+                                        }
+
+                                        newState
+                                    }
+
+                                    else -> it.verifyState
+                                }
+
+                            it.copy(verifyState = newVerifyState, customToken = customToken)
                         } else {
                             it
                         }
                     }
 
-                profiles.copy(currentProfile = profiles.currentProfile, profiles = mappedProfiles)
+                profiles.copy(profiles = mappedProfiles)
             }
         }
     }
