@@ -5,7 +5,6 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.keyri.androidFullExample.services.ApiService
 import com.keyri.androidFullExample.services.RiskApiService
-import com.keyri.androidFullExample.services.TestApiService
 import com.keyri.androidFullExample.services.entities.requests.CryptoLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.CryptoRegisterRequest
 import com.keyri.androidFullExample.services.entities.requests.DecryptRiskRequest
@@ -30,7 +29,6 @@ import retrofit2.Response
 class KeyriDemoRepository(
     private val apiService: ApiService,
     private val riskApiService: RiskApiService,
-    private val testApiService: TestApiService,
 ) {
     suspend fun cryptoRegister(
         email: String,
@@ -58,15 +56,6 @@ class KeyriDemoRepository(
         makeApiCall {
             apiService.emailLogin(EmailLoginRequest(email))
         }.getOrThrow()
-
-    // TODO: This for testing
-//    suspend fun smsLogin(email: String) {
-//        val fcmToken = Firebase.messaging.token.await()
-//
-//        return makeApiCall {
-//            testApiService.test(TestRequest(email, fcmToken))
-//        }.getOrThrow()
-//    }
 
     suspend fun smsLogin(number: String): SmsLoginResponse {
         val fcmToken = Firebase.messaging.token.await()

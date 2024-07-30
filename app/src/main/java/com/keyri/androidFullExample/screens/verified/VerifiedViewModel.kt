@@ -11,6 +11,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.concurrent.timer
 
@@ -33,8 +34,18 @@ class VerifiedViewModel(
             }
         }
 
-    fun saveBiometricAuth(customToken: String) {
+    init {
+        saveBiometricAuth()
+    }
+
+    private fun saveBiometricAuth() {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
+            val allProfiles = dataStore.data.first()
+
+            val customToken =
+                allProfiles.profiles.firstOrNull { it.email == allProfiles.currentProfile }?.customToken
+                    ?: throw IllegalStateException("CustomToken shouldn't be null")
+
             var currentProfileEmail = repository.authWithToken(customToken)
 
             dataStore.updateData { keyriProfiles ->
@@ -54,6 +65,7 @@ class VerifiedViewModel(
                                             emailVerified = true,
                                             phoneVerified = true,
                                         )
+
                                     else -> null
                                 }
 

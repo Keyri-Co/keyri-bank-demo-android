@@ -14,7 +14,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -55,7 +55,7 @@ class MainActivity : FragmentActivity() {
                 val viewModel: MainActivityViewModel = koinViewModel()
                 val openScreen = viewModel.openScreen.collectAsState()
 
-                SideEffect {
+                LaunchedEffect(key1 = Unit) {
                     viewModel.checkStartScreen(intent?.data)
                 }
 
@@ -105,14 +105,9 @@ class MainActivity : FragmentActivity() {
                                     )
                                 }
 
-                                composable("${Routes.VerifiedScreen.name}/login&customToken={customToken}") { backStackEntry ->
-                                    val customToken =
-                                        backStackEntry.arguments?.getString("customToken")
-                                            ?: throw IllegalStateException("CustomToken shouldn't be null")
-
+                                composable(Routes.VerifiedScreen.name) {
                                     VerifiedScreen(
                                         navController = navController,
-                                        customToken = customToken,
                                         onShowSnackbar = {
                                             scope.launch {
                                                 snackbarHostState.showSnackbar(

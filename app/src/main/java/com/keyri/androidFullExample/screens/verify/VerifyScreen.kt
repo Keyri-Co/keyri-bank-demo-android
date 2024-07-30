@@ -48,7 +48,8 @@ fun VerifyScreen(
 ) {
     val context = LocalContext.current
     val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, listOf()))
-    val profile = keyriProfiles.value.profiles.firstOrNull { it.email == keyriProfiles.value.currentProfile }
+    val profile =
+        keyriProfiles.value.profiles.firstOrNull { it.email == keyriProfiles.value.currentProfile }
     val error = viewModel.errorMessage.collectAsState()
     val verifyState = remember { mutableStateOf<VerifyingState?>(null) }
 
@@ -60,7 +61,7 @@ fun VerifyScreen(
 
     SideEffect {
         if (profile?.verifyState?.isVerificationDone() == true) {
-            navController.navigate("${Routes.VerifiedScreen.name}/login&customToken={${profile.customToken}}") {
+            navController.navigate(Routes.VerifiedScreen.name) {
                 popUpTo(Routes.VerifyScreen.name) {
                     inclusive = true
                 }
@@ -118,9 +119,7 @@ fun VerifyScreen(
                 containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
                 disabledContainerColor = primaryDisabled.copy(alpha = 0.1F),
                 disabledBorderColor = primaryDisabled,
-                enabled =
-                    verifyState.value is VerifyingState.Email ||
-                        (profile?.verifyState == null || profile.verifyState is VerifyingState.Email),
+                enabled = profile?.verifyState == null || profile.verifyState is VerifyingState.Email,
                 text =
                     if ((profile?.verifyState is VerifyingState.Email && profile.verifyState.isVerified) ||
                         (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.emailVerified)
@@ -129,7 +128,7 @@ fun VerifyScreen(
                     } else {
                         "${if (isVerify) "Verify" else "Confirm"} email"
                     },
-                progress = profile?.verifyState is VerifyingState.Email,
+                progress = verifyState.value is VerifyingState.Email || profile?.verifyState is VerifyingState.Email,
                 onClick = {
                     if (profile?.verifyState == null) {
                         verifyState.value = VerifyingState.Email(isVerified = false)
@@ -235,7 +234,8 @@ fun VerifyScreen(
                 text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
                     if (profile?.verifyState == null) {
-                        verifyState.value = VerifyingState.EmailPhone(emailVerified = false, phoneVerified = false)
+                        verifyState.value =
+                            VerifyingState.EmailPhone(emailVerified = false, phoneVerified = false)
 
                         viewModel.smsAndEmailLogin(
                             isVerify,

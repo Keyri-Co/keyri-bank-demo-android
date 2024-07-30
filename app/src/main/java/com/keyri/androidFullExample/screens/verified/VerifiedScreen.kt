@@ -9,7 +9,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,13 +42,8 @@ import kotlin.concurrent.timer
 fun VerifiedScreen(
     viewModel: VerifiedViewModel = koinViewModel(),
     navController: NavHostController,
-    customToken: String,
     onShowSnackbar: (String) -> Unit,
 ) {
-    SideEffect {
-        viewModel.saveBiometricAuth(customToken)
-    }
-
     val scope = rememberCoroutineScope()
     val error = viewModel.errorMessage.collectAsState()
     val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, emptyList()))
