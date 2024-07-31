@@ -13,7 +13,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,14 +28,12 @@ import com.keyri.androidFullExample.composables.BiometricAuth
 import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.data.KeyriIcon
 import com.keyri.androidFullExample.data.KeyriProfiles
+import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.theme.verifiedTextColor
 import com.keyri.androidFullExample.utils.navigateWithPopUp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import kotlin.concurrent.timer
 
 @Composable
 fun VerifiedScreen(
@@ -44,26 +41,16 @@ fun VerifiedScreen(
     navController: NavHostController,
     onShowSnackbar: (String) -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     val error = viewModel.errorMessage.collectAsState()
     val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, emptyList()))
     val currentProfile =
         keyriProfiles.value.profiles.firstOrNull { it.email == keyriProfiles.value.currentProfile }
     val loading = viewModel.loading.collectAsState()
-    val passwordlessCredentialCreated = remember { mutableStateOf(false) }
-    val navigateToMain = remember { mutableStateOf(false) }
 
     if (error.value != null) {
         error.value?.let {
             onShowSnackbar(it)
         }
-    }
-
-    if (navigateToMain.value) {
-        navController.navigateWithPopUp(
-            Routes.MainScreen.name,
-            Routes.WelcomeScreen.name,
-        )
     }
 
     if (loading.value) {
@@ -84,19 +71,28 @@ fun VerifiedScreen(
                 textAlign = TextAlign.Center,
                 text =
                     buildAnnotatedString {
-                        withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                            append(currentProfile?.email)
+                        val verifiedParts = mutableListOf<String>()
+
+                        when (currentProfile?.verifyState) {
+                            is VerifyingState.Email -> verifiedParts.add(currentProfile.email)
+                            is VerifyingState.Phone -> verifiedParts.add(requireNotNull(currentProfile.phone))
+                            is VerifyingState.EmailPhone -> verifiedParts.addAll(listOf(currentProfile.email, requireNotNull(currentProfile.phone)))
+                            else -> throw IllegalStateException("Current profile verifyState shouldn't be null")
                         }
 
-                        if (currentProfile?.phone != null) {
+                        withStyle(style = SpanStyle(color = verifiedTextColor)) {
+                            append(verifiedParts.first())
+                        }
+
+                        if (verifiedParts.size > 1) {
                             append(" and ")
 
                             withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                                append(currentProfile.phone)
+                                append(verifiedParts.last())
                             }
                         }
 
-                        if (currentProfile?.isVerify == true) {
+                        if (currentProfile.isVerify) {
                             append(" verified")
                         } else {
                             append(" confirmed")
@@ -115,7 +111,6 @@ fun VerifiedScreen(
                 iconTint = verifiedTextColor,
             )
 
-            if (passwordlessCredentialCreated.value) {
                 Text(
                     modifier =
                         Modifier
@@ -137,20 +132,14 @@ fun VerifiedScreen(
                     iconTint = verifiedTextColor,
                     iconSizeFraction = 0.5F,
                 )
-            }
 
             if (showBiometricPrompt) {
                 BiometricAuth(context, "Set up Biometric authentication", null, {
                     onShowSnackbar(it)
                 }, { showBiometricPrompt = false }) {
                     showBiometricPrompt = false
-                    passwordlessCredentialCreated.value = true
 
-                    scope.launch(Dispatchers.IO) {
-                        timer(initialDelay = 0L, period = 2_000L) {
-                            navigateToMain.value = true
-                        }
-                    }
+                    navController.navigateWithPopUp(Routes.MainScreen.name, Routes.WelcomeScreen.name)
                 }
             }
 

@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -61,6 +62,9 @@ fun VerifyScreen(
 
     SideEffect {
         if (profile?.verifyState?.isVerificationDone() == true) {
+            // TODO: Remove logs
+            Log.e("VERIFY STATE DONE", "ok, $profile")
+
             navController.navigate(Routes.VerifiedScreen.name) {
                 popUpTo(Routes.VerifyScreen.name) {
                     inclusive = true
@@ -70,6 +74,9 @@ fun VerifyScreen(
     }
 
     if (profile?.verifyState != null) {
+        // TODO: Remove logs
+        Log.e("BACK HANDLER", "ok, $profile")
+
         BackHandler(true) {
             viewModel.cancelVerify {
                 navController.navigate(Routes.WelcomeScreen.name) {

@@ -1,6 +1,7 @@
 package com.keyri.androidFullExample
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -62,12 +63,14 @@ class MainActivity : FragmentActivity() {
                 val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
 
                 DisposableEffect(lifecycleOwner) {
-                    val observer =
-                        LifecycleEventObserver { _, event ->
-                            if (event == Lifecycle.Event.ON_CREATE) {
-                                viewModel.checkStartScreen(intent?.data)
-                            }
+                    val observer = LifecycleEventObserver { _, event ->
+                        if (event == Lifecycle.Event.ON_CREATE) {
+                            // TODO: Remove all logs
+                            Log.e("ON_CREATE", "ok")
+
+                            viewModel.checkStartScreen(intent?.data)
                         }
+                    }
 
                     lifecycleOwner.lifecycle.addObserver(observer)
 
@@ -83,17 +86,17 @@ class MainActivity : FragmentActivity() {
                 } else {
                     Scaffold(
                         modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .background(MaterialTheme.colorScheme.onPrimary)
-                                .imePadding(),
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.onPrimary)
+                            .imePadding(),
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                     ) { innerPadding ->
                         Box(
                             modifier =
-                                Modifier
-                                    .padding(innerPadding)
-                                    .padding(50.dp),
+                            Modifier
+                                .padding(innerPadding)
+                                .padding(50.dp),
                         ) {
                             NavHost(
                                 navController = navController,
@@ -140,23 +143,23 @@ class MainActivity : FragmentActivity() {
                                 composable(
                                     "${Routes.VerifyScreen.name}?name={name}&email={email}&number={number}&isVerify={isVerify}",
                                     arguments =
-                                        listOf(
-                                            navArgument("name") {
-                                                type = NavType.StringType
-                                                nullable = true
-                                            },
-                                            navArgument("email") {
-                                                type = NavType.StringType
-                                                nullable = true
-                                            },
-                                            navArgument("number") {
-                                                type = NavType.StringType
-                                                nullable = true
-                                            },
-                                            navArgument("isVerify") {
-                                                type = NavType.BoolType
-                                            },
-                                        ),
+                                    listOf(
+                                        navArgument("name") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("email") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("number") {
+                                            type = NavType.StringType
+                                            nullable = true
+                                        },
+                                        navArgument("isVerify") {
+                                            type = NavType.BoolType
+                                        },
+                                    ),
                                 ) { backStackEntry ->
                                     val name = backStackEntry.arguments?.getString("name")
                                     val email = backStackEntry.arguments?.getString("email")
@@ -218,11 +221,11 @@ class MainActivity : FragmentActivity() {
                                 composable(
                                     "${Routes.PaymentResultScreen.name}?riskResult={riskResult}",
                                     arguments =
-                                        listOf(
-                                            navArgument("riskResult") {
-                                                type = NavType.StringType
-                                            },
-                                        ),
+                                    listOf(
+                                        navArgument("riskResult") {
+                                            type = NavType.StringType
+                                        },
+                                    ),
                                 ) { backStackEntry ->
                                     val riskResult =
                                         backStackEntry.arguments?.getString("riskResult")

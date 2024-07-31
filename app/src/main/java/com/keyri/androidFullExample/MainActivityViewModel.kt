@@ -1,6 +1,7 @@
 package com.keyri.androidFullExample
 
 import android.net.Uri
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -90,6 +91,9 @@ class MainActivityViewModel(
                     profiles.profiles
                         .firstOrNull { it.email == profiles.currentProfile }
                         ?.let { profile ->
+                            // TODO: Remove all logs
+                            Log.e("checkStartScreen", "ok")
+
                             if (profile.verifyState?.isVerificationDone() == true && profile.biometricsSet) {
                                 screenToOpen = Routes.WelcomeScreen.name
                             } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
