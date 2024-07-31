@@ -94,10 +94,12 @@ class MainActivityViewModel(
                             // TODO: Remove all logs
                             Log.e("checkStartScreen", "ok")
 
-                            if (profile.verifyState?.isVerificationDone() == true && profile.biometricsSet) {
-                                screenToOpen = Routes.WelcomeScreen.name
+                            screenToOpen = if (profile.verifyState?.isVerificationDone() == true && profile.biometricsSet) {
+                                Routes.WelcomeScreen.name
                             } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
-                                screenToOpen = Routes.VerifiedScreen.name
+                                Routes.VerifiedScreen.name
+                            } else {
+                                Routes.VerifyScreen.name
                             }
                         }
 

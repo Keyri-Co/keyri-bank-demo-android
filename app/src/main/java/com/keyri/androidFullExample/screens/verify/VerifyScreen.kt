@@ -73,7 +73,7 @@ fun VerifyScreen(
         }
     }
 
-    if (profile?.verifyState != null) {
+    if (profile?.verifyState != null && !profile.verifyState.isVerificationDone()) {
         // TODO: Remove logs
         Log.e("BACK HANDLER", "ok, $profile")
 
