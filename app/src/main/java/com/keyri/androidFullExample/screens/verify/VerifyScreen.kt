@@ -61,7 +61,11 @@ fun VerifyScreen(
 
     SideEffect {
         if (profile?.verifyState?.isVerificationDone() == true) {
-            navController.navigate(Routes.VerifiedScreen.name)
+            navController.navigate(Routes.VerifiedScreen.name) {
+                popUpTo(Routes.VerifyScreen.name) {
+                    inclusive = true
+                }
+            }
         }
     }
 

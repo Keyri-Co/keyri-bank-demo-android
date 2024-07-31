@@ -10,7 +10,7 @@ import com.keyri.androidFullExample.routes.Routes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class MainActivityViewModel(
@@ -86,22 +86,22 @@ class MainActivityViewModel(
                         }
                     }
                 } ?: let {
-                dataStore.data.collectLatest { profiles ->
-                    profiles.profiles
-                        .firstOrNull { it.email == profiles.currentProfile }
-                        ?.let { profile ->
-                            screenToOpen =
-                                if (profile.verifyState?.isVerificationDone() == true && profile.biometricsSet) {
-                                    Routes.WelcomeScreen.name
-                                } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
-                                    Routes.VerifiedScreen.name
-                                } else {
-                                    "${Routes.VerifyScreen.name}?name=${profile.name}?email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}"
-                                }
-                        }
+                val profiles = dataStore.data.first()
 
-                    _openScreen.value = screenToOpen
-                }
+                profiles.profiles
+                    .firstOrNull { it.email == profiles.currentProfile }
+                    ?.let { profile ->
+                        screenToOpen =
+                            if (profile.verifyState?.isVerificationDone() == true && profile.biometricsSet) {
+                                Routes.WelcomeScreen.name
+                            } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
+                                Routes.VerifiedScreen.name
+                            } else {
+                                "${Routes.VerifyScreen.name}?name=${profile.name}?email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}"
+                            }
+                    }
+
+                _openScreen.value = screenToOpen
             }
         }
     }
