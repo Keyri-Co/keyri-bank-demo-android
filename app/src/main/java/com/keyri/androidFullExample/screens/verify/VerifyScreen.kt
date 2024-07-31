@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
@@ -62,21 +61,11 @@ fun VerifyScreen(
 
     SideEffect {
         if (profile?.verifyState?.isVerificationDone() == true) {
-            // TODO: Remove logs
-            Log.e("VERIFY STATE DONE", "ok, $profile")
-
-            navController.navigate(Routes.VerifiedScreen.name) {
-                popUpTo(Routes.VerifyScreen.name) {
-                    inclusive = true
-                }
-            }
+            navController.navigate(Routes.VerifiedScreen.name)
         }
     }
 
     if (profile?.verifyState != null && !profile.verifyState.isVerificationDone()) {
-        // TODO: Remove logs
-        Log.e("BACK HANDLER", "ok, $profile")
-
         BackHandler(true) {
             viewModel.cancelVerify {
                 navController.navigate(Routes.WelcomeScreen.name) {
@@ -143,9 +132,9 @@ fun VerifyScreen(
                         if (isVerify) {
                             viewModel.emailLogin(
                                 true,
-                                requireNotNull(name),
-                                requireNotNull(email),
-                                number,
+                                requireNotNull(name ?: profile?.name),
+                                requireNotNull(email ?: profile?.email),
+                                number ?: profile?.phone,
                             ) {
                                 openEmailApp(context)
                             }
@@ -199,9 +188,9 @@ fun VerifyScreen(
 
                         viewModel.smsLogin(
                             isVerify,
-                            requireNotNull(name),
-                            requireNotNull(email),
-                            requireNotNull(number),
+                            requireNotNull(name ?: profile?.name),
+                            requireNotNull(email ?: profile?.email),
+                            requireNotNull(number ?: profile?.phone),
                         ) { response ->
                             openSmsApp(response, context)
                         }
@@ -246,9 +235,9 @@ fun VerifyScreen(
 
                         viewModel.smsAndEmailLogin(
                             isVerify,
-                            requireNotNull(name),
-                            requireNotNull(email),
-                            requireNotNull(number),
+                            requireNotNull(name ?: profile?.name),
+                            requireNotNull(email ?: profile?.email),
+                            requireNotNull(number ?: profile?.phone),
                         ) { response ->
                             openEmailApp(context)
                             openSmsApp(response, context)

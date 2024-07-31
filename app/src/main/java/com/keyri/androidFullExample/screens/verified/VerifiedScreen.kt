@@ -32,7 +32,6 @@ import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.theme.verifiedTextColor
-import com.keyri.androidFullExample.utils.navigateWithPopUp
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -76,12 +75,17 @@ fun VerifiedScreen(
                         when (currentProfile?.verifyState) {
                             is VerifyingState.Email -> verifiedParts.add(currentProfile.email)
                             is VerifyingState.Phone -> verifiedParts.add(requireNotNull(currentProfile.phone))
-                            is VerifyingState.EmailPhone -> verifiedParts.addAll(listOf(currentProfile.email, requireNotNull(currentProfile.phone)))
-                            else -> throw IllegalStateException("Current profile verifyState shouldn't be null")
+                            is VerifyingState.EmailPhone ->
+                                verifiedParts.addAll(
+                                    listOf(currentProfile.email, requireNotNull(currentProfile.phone)),
+                                )
+                            else -> currentProfile?.email?.let(verifiedParts::add)
                         }
 
-                        withStyle(style = SpanStyle(color = verifiedTextColor)) {
-                            append(verifiedParts.first())
+                        if (verifiedParts.size > 0) {
+                            withStyle(style = SpanStyle(color = verifiedTextColor)) {
+                                append(verifiedParts.first())
+                            }
                         }
 
                         if (verifiedParts.size > 1) {
@@ -92,7 +96,7 @@ fun VerifiedScreen(
                             }
                         }
 
-                        if (currentProfile.isVerify) {
+                        if (currentProfile?.isVerify == true) {
                             append(" verified")
                         } else {
                             append(" confirmed")
@@ -111,27 +115,27 @@ fun VerifiedScreen(
                 iconTint = verifiedTextColor,
             )
 
-                Text(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(top = 40.dp)
-                            .align(Alignment.CenterHorizontally),
-                    textAlign = TextAlign.Center,
-                    text = "Passwordless credential created",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = textColor,
-                )
+            Text(
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 40.dp)
+                        .align(Alignment.CenterHorizontally),
+                textAlign = TextAlign.Center,
+                text = "Passwordless credential created",
+                style = MaterialTheme.typography.headlineSmall,
+                color = textColor,
+            )
 
-                KeyriIcon(
-                    modifier =
-                        Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(top = 40.dp),
-                    iconResId = R.drawable.ic_key,
-                    iconTint = verifiedTextColor,
-                    iconSizeFraction = 0.5F,
-                )
+            KeyriIcon(
+                modifier =
+                    Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 40.dp),
+                iconResId = R.drawable.ic_key,
+                iconTint = verifiedTextColor,
+                iconSizeFraction = 0.5F,
+            )
 
             if (showBiometricPrompt) {
                 BiometricAuth(context, "Set up Biometric authentication", null, {
@@ -139,7 +143,9 @@ fun VerifiedScreen(
                 }, { showBiometricPrompt = false }) {
                     showBiometricPrompt = false
 
-                    navController.navigateWithPopUp(Routes.MainScreen.name, Routes.WelcomeScreen.name)
+                    viewModel.saveBiometricAuth {
+                        navController.navigate(Routes.MainScreen.name)
+                    }
                 }
             }
 

@@ -67,7 +67,7 @@ fun WelcomeScreen(
     var clickedAccount by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(key1 = filteredAccounts) {
-        if (filteredAccounts.any { it.email == keyriAccounts.value.currentProfile && it.biometricsSet } && filteredAccounts.size == 1) {
+        if (filteredAccounts.any { it.email == keyriAccounts.value.currentProfile && it.biometricsSet }) {
             showBiometricPrompt = true
         }
     }
@@ -182,7 +182,9 @@ fun WelcomeScreen(
             {},
             { showBiometricPrompt = false },
         ) {
-            val currentAccount = clickedAccount ?: filteredAccounts.firstOrNull()?.email
+            val currentAccount =
+                filteredAccounts.firstOrNull { it.email == keyriAccounts.value.currentProfile && it.biometricsSet }?.email
+                    ?: clickedAccount ?: filteredAccounts.firstOrNull()?.email
 
             viewModel.cryptoLogin(requireNotNull(currentAccount)) {
                 showBiometricPrompt = false

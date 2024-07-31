@@ -1,7 +1,6 @@
 package com.keyri.androidFullExample
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -15,19 +14,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -60,23 +56,10 @@ class MainActivity : FragmentActivity() {
                 val viewModel: MainActivityViewModel = koinViewModel()
                 val openScreen = viewModel.openScreen.collectAsState()
 
-                val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
+                LifecycleStartEffect(Unit) {
+                    viewModel.checkStartScreen(intent?.data)
 
-                DisposableEffect(lifecycleOwner) {
-                    val observer = LifecycleEventObserver { _, event ->
-                        if (event == Lifecycle.Event.ON_CREATE) {
-                            // TODO: Remove all logs
-                            Log.e("ON_CREATE", "ok")
-
-                            viewModel.checkStartScreen(intent?.data)
-                        }
-                    }
-
-                    lifecycleOwner.lifecycle.addObserver(observer)
-
-                    onDispose {
-                        lifecycleOwner.lifecycle.removeObserver(observer)
-                    }
+                    onStopOrDispose {}
                 }
 
                 if (openScreen.value == null) {
@@ -86,17 +69,17 @@ class MainActivity : FragmentActivity() {
                 } else {
                     Scaffold(
                         modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.onPrimary)
-                            .imePadding(),
+                            Modifier
+                                .fillMaxSize()
+                                .background(MaterialTheme.colorScheme.onPrimary)
+                                .imePadding(),
                         snackbarHost = { SnackbarHost(snackbarHostState) },
                     ) { innerPadding ->
                         Box(
                             modifier =
-                            Modifier
-                                .padding(innerPadding)
-                                .padding(50.dp),
+                                Modifier
+                                    .padding(innerPadding)
+                                    .padding(50.dp),
                         ) {
                             NavHost(
                                 navController = navController,
@@ -143,23 +126,23 @@ class MainActivity : FragmentActivity() {
                                 composable(
                                     "${Routes.VerifyScreen.name}?name={name}&email={email}&number={number}&isVerify={isVerify}",
                                     arguments =
-                                    listOf(
-                                        navArgument("name") {
-                                            type = NavType.StringType
-                                            nullable = true
-                                        },
-                                        navArgument("email") {
-                                            type = NavType.StringType
-                                            nullable = true
-                                        },
-                                        navArgument("number") {
-                                            type = NavType.StringType
-                                            nullable = true
-                                        },
-                                        navArgument("isVerify") {
-                                            type = NavType.BoolType
-                                        },
-                                    ),
+                                        listOf(
+                                            navArgument("name") {
+                                                type = NavType.StringType
+                                                nullable = true
+                                            },
+                                            navArgument("email") {
+                                                type = NavType.StringType
+                                                nullable = true
+                                            },
+                                            navArgument("number") {
+                                                type = NavType.StringType
+                                                nullable = true
+                                            },
+                                            navArgument("isVerify") {
+                                                type = NavType.BoolType
+                                            },
+                                        ),
                                 ) { backStackEntry ->
                                     val name = backStackEntry.arguments?.getString("name")
                                     val email = backStackEntry.arguments?.getString("email")
@@ -221,11 +204,11 @@ class MainActivity : FragmentActivity() {
                                 composable(
                                     "${Routes.PaymentResultScreen.name}?riskResult={riskResult}",
                                     arguments =
-                                    listOf(
-                                        navArgument("riskResult") {
-                                            type = NavType.StringType
-                                        },
-                                    ),
+                                        listOf(
+                                            navArgument("riskResult") {
+                                                type = NavType.StringType
+                                            },
+                                        ),
                                 ) { backStackEntry ->
                                     val riskResult =
                                         backStackEntry.arguments?.getString("riskResult")

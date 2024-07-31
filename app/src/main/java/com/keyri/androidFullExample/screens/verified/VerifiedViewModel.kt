@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.concurrent.timer
 
 class VerifiedViewModel(
@@ -20,7 +21,7 @@ class VerifiedViewModel(
     private val keyri: Keyri,
     private val repository: KeyriDemoRepository,
 ) : ViewModel() {
-    private val _loading = MutableStateFlow(true)
+    private val _loading = MutableStateFlow(false)
     private val _errorMessage = MutableStateFlow<String?>(null)
     val loading = _loading.asStateFlow()
     val errorMessage = _errorMessage.asStateFlow()
@@ -34,12 +35,10 @@ class VerifiedViewModel(
             }
         }
 
-    init {
-        saveBiometricAuth()
-    }
-
-    private fun saveBiometricAuth() {
+    fun saveBiometricAuth(onResult: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
+            _loading.value = true
+
             val allProfiles = dataStore.data.first()
 
             val customToken =
@@ -81,25 +80,30 @@ class VerifiedViewModel(
 
                 keyriProfiles
                     .copy(currentProfile = currentProfileEmail, profiles = mappedProfiles)
+                    .apply {
+                        val associationKey =
+                            keyri.getAssociationKey(currentProfileEmail).getOrNull()
+
+                        if (associationKey != null) {
+                            val data = System.currentTimeMillis().toString()
+                            val signature =
+                                keyri.generateUserSignature(currentProfileEmail, data).getOrThrow()
+
+                            repository.cryptoLogin(currentProfileEmail, data, signature)
+                        } else {
+                            val generatedAssociationKey =
+                                keyri.generateAssociationKey(currentProfileEmail).getOrThrow()
+
+                            repository.cryptoRegister(currentProfileEmail, generatedAssociationKey)
+                        }
+
+                        _loading.value = false
+
+                        withContext(Dispatchers.Main) {
+                            onResult()
+                        }
+                    }
             }
-
-            val associationKey =
-                keyri.getAssociationKey(currentProfileEmail).getOrNull()
-
-            if (associationKey != null) {
-                val data = System.currentTimeMillis().toString()
-                val signature =
-                    keyri.generateUserSignature(currentProfileEmail, data).getOrThrow()
-
-                repository.cryptoLogin(currentProfileEmail, data, signature)
-            } else {
-                val generatedAssociationKey =
-                    keyri.generateAssociationKey(currentProfileEmail).getOrThrow()
-
-                repository.cryptoRegister(currentProfileEmail, generatedAssociationKey)
-            }
-
-            _loading.value = false
         }
     }
 }

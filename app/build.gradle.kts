@@ -15,8 +15,8 @@ android {
         applicationId = "com.keyri.androidFullExample"
         minSdk = 24
         targetSdk = 34
-        versionCode = 25
-        versionName = "1.25"
+        versionCode = 26
+        versionName = "1.26"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -83,4 +83,5 @@ dependencies {
     implementation(libs.google.gson)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.auth)
+    implementation(libs.androidx.lifecycle.runtime.compose.android)
 }
