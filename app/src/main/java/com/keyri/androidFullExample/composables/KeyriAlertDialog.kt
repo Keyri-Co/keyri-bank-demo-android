@@ -27,7 +27,7 @@ fun KeyriAlertDialog(
                     Modifier
                         .size(42.dp, 42.dp),
                 contentScale = ContentScale.Fit,
-                painter = painterResource(id = R.drawable.ic_tabby_charcoal),
+                painter = painterResource(id = R.drawable.ic_keyri_icon_full),
                 contentDescription = null,
             )
         },

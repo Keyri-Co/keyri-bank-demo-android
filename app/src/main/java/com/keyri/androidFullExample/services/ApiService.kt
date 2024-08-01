@@ -4,7 +4,6 @@ import com.keyri.androidFullExample.services.entities.requests.CryptoLoginReques
 import com.keyri.androidFullExample.services.entities.requests.CryptoRegisterRequest
 import com.keyri.androidFullExample.services.entities.requests.EmailLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRequest
-import com.keyri.androidFullExample.services.entities.requests.UserInformationResponse
 import com.keyri.androidFullExample.services.entities.requests.UserRegisterRequest
 import com.keyri.androidFullExample.services.entities.responses.KeyriResponse
 import com.keyri.androidFullExample.services.entities.responses.SmsLoginResponse
@@ -37,9 +36,4 @@ interface ApiService {
     suspend fun userRegister(
         @Body request: UserRegisterRequest,
     ): Response<SmsLoginResponse>
-
-    @POST("get-user-information")
-    suspend fun getUserInformation(
-        @Body request: EmailLoginRequest,
-    ): Response<UserInformationResponse>
 }

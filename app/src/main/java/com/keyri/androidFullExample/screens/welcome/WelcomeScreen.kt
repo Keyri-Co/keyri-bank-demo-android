@@ -100,7 +100,6 @@ fun WelcomeScreen(
                             onClick = {},
                             onLongClick = {
                                 viewModel.removeAllAccounts {
-                                    @Suppress("Deprecation")
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                                         val effect =
                                             VibrationEffect.createOneShot(
@@ -117,17 +116,19 @@ fun WelcomeScreen(
                                             vibrator?.vibrate(effect)
                                         }
                                     } else {
+                                        @Suppress("Deprecation")
                                         val vibrator =
                                             context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
 
                                         vibrator?.cancel()
+                                        @Suppress("Deprecation")
                                         vibrator?.vibrate(100)
                                     }
                                 }
                             },
                         ),
                 contentScale = ContentScale.Fit,
-                painter = painterResource(id = R.drawable.ic_tabby_charcoal),
+                painter = painterResource(id = R.drawable.ic_keyri_icon_full),
                 contentDescription = null,
             )
         }
@@ -203,7 +204,7 @@ fun WelcomeScreen(
             title = "Choose an account\nto continue to Keyri Bank",
             filteredAccounts.map {
                 ModalListItem(
-                    iconRes = R.drawable.ic_tabby_charcoal,
+                    iconRes = R.drawable.ic_keyri_logo,
                     text = it.email,
                 )
             },

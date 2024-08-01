@@ -1,7 +1,7 @@
 package com.keyri.androidFullExample
 
+import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -15,6 +15,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.util.Consumer
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.navigation.NavType
@@ -55,6 +57,16 @@ class MainActivity : FragmentActivity() {
                 val snackbarHostState = remember { SnackbarHostState() }
                 val viewModel: MainActivityViewModel = koinViewModel()
                 val openScreen = viewModel.openScreen.collectAsState()
+
+                DisposableEffect(Unit) {
+                    val listener =
+                        Consumer<Intent> {
+                            viewModel.checkStartScreen(it.data)
+                        }
+
+                    addOnNewIntentListener(listener)
+                    onDispose { removeOnNewIntentListener(listener) }
+                }
 
                 LifecycleStartEffect(Unit) {
                     viewModel.checkStartScreen(intent?.data)

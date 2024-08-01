@@ -5,13 +5,11 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import com.keyri.androidFullExample.services.ApiService
 import com.keyri.androidFullExample.services.RiskApiService
-import com.keyri.androidFullExample.services.TestApiService
 import com.keyri.androidFullExample.services.entities.requests.CryptoLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.CryptoRegisterRequest
 import com.keyri.androidFullExample.services.entities.requests.DecryptRiskRequest
 import com.keyri.androidFullExample.services.entities.requests.EmailLoginRequest
 import com.keyri.androidFullExample.services.entities.requests.ReverseSmsLoginRequest
-import com.keyri.androidFullExample.services.entities.requests.UserInformationResponse
 import com.keyri.androidFullExample.services.entities.requests.UserRegisterRequest
 import com.keyri.androidFullExample.services.entities.responses.DecryptRiskResponse
 import com.keyri.androidFullExample.services.entities.responses.KeyriResponse
@@ -30,7 +28,6 @@ import retrofit2.Response
 class KeyriDemoRepository(
     private val apiService: ApiService,
     private val riskApiService: RiskApiService,
-    private val testApiService: TestApiService,
 ) {
     suspend fun cryptoRegister(
         email: String,
@@ -81,11 +78,6 @@ class KeyriDemoRepository(
                 ),
             )
         }
-
-    suspend fun getUserInformation(email: String): UserInformationResponse =
-        makeApiCall {
-            apiService.getUserInformation(EmailLoginRequest(email))
-        }.getOrThrow()
 
     suspend fun authWithToken(customToken: String): String =
         Firebase.auth

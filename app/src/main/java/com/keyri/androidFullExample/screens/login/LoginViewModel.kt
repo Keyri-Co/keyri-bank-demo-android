@@ -42,8 +42,7 @@ class LoginViewModel(
 
             userRegister(email.split("@").first().toString(), email)
             repository.emailLogin(email)
-
-            updateVerifyState(email, null)
+            updateVerifyState()
 
             withContext(Dispatchers.Main) {
                 onSuccess()
@@ -59,46 +58,16 @@ class LoginViewModel(
         createEmptyKeyriAccount(name, email)
     }
 
-    private suspend fun updateVerifyState(
-        email: String?,
-        phone: String?,
-    ) {
+    private suspend fun updateVerifyState() {
         dataStore.updateData { keyriProfiles ->
             val mappedProfiles =
                 keyriProfiles.profiles.map {
                     if (keyriProfiles.currentProfile == it.email) {
-                        when {
-                            email != null && phone != null -> {
-                                val verifyState =
-                                    VerifyingState.EmailPhone(
-                                        emailVerified = false,
-                                        phoneVerified = false,
-                                    )
+                        val verifyState = VerifyingState.Email(isVerified = false)
 
-                                verifyState.isVerifying = true
+                        verifyState.isVerifying = true
 
-                                it.copy(
-                                    verifyState = verifyState,
-                                )
-                            }
-
-                            email != null && phone == null -> {
-                                val verifyState = VerifyingState.Email(isVerified = false)
-
-                                verifyState.isVerifying = true
-
-                                it.copy(verifyState = verifyState)
-                            }
-
-                            email == null && phone != null -> {
-                                val verifyState = VerifyingState.Phone(isVerified = false)
-                                verifyState.isVerifying = true
-
-                                it.copy(verifyState = verifyState)
-                            }
-
-                            else -> it
-                        }
+                        it.copy(verifyState = verifyState)
                     } else {
                         it
                     }

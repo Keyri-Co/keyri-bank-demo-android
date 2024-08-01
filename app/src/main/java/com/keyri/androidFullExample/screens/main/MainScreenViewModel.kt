@@ -67,7 +67,16 @@ class MainScreenViewModel(
                 _currentProfile.value = keyriProfiles.currentProfile
 
                 keyriProfiles.currentProfile?.let {
-                    val eventResult = keyri.sendEvent(it, EventType.login(), true).getOrThrow()
+                    val isVerify = keyriProfiles.profiles.firstOrNull { p -> p.email == it }?.isVerify ?: true
+
+                    val eventType =
+                        if (isVerify) {
+                            EventType.signup()
+                        } else {
+                            EventType.login()
+                        }
+
+                    val eventResult = keyri.sendEvent(it, eventType, true).getOrThrow()
 
                     val gson = Gson()
 
