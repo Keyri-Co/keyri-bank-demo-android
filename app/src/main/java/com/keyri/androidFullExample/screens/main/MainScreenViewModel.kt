@@ -67,7 +67,7 @@ class MainScreenViewModel(
                 _currentProfile.value = keyriProfiles.currentProfile
 
                 keyriProfiles.currentProfile?.let {
-                    val isVerify = keyriProfiles.profiles.firstOrNull { p -> p.email == it }?.isVerify ?: true
+                    val isVerify = keyriProfiles.profiles.first { p -> p.email == it }.isVerify
 
                     val eventType =
                         if (isVerify) {

@@ -135,7 +135,7 @@ fun VerifyScreen(
 
                         if (isVerify) {
                             viewModel.emailLogin(
-                                true,
+                                isVerify,
                                 requireNotNull(name ?: profile?.name),
                                 requireNotNull(email ?: profile?.email),
                                 number ?: profile?.phone,
