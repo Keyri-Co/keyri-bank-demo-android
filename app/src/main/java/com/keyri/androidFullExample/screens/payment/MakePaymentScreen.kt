@@ -107,7 +107,10 @@ fun MakePayment(
             )
 
             KeyriTextField(
-                modifier = Modifier.padding(top = 5.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 5.dp),
                 value = recipientInfo,
                 placeholder = {
                     Text(

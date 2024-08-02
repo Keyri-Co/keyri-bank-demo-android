@@ -123,7 +123,7 @@ fun MainScreen(
                                         append(s)
 
                                         if (riskResponse.value?.signals?.lastIndex != index) {
-                                            append(",")
+                                            append(", ")
                                         }
                                     }
                                 }

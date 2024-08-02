@@ -120,7 +120,7 @@ fun PaymentResult(
                                     append(s)
 
                                     if (riskResponse.value?.signals?.lastIndex != index) {
-                                        append(",")
+                                        append(", ")
                                     }
                                 }
                             }

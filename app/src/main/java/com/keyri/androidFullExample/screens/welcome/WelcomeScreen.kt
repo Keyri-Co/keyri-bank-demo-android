@@ -51,8 +51,17 @@ import org.koin.androidx.compose.koinViewModel
 fun WelcomeScreen(
     viewModel: WelcomeViewModel = koinViewModel(),
     navController: NavHostController,
+    onShowSnackbar: (String) -> Unit,
 ) {
     val context = LocalContext.current
+
+    val error = viewModel.errorMessage.collectAsState()
+
+    if (error.value != null) {
+        error.value?.let {
+            onShowSnackbar(it)
+        }
+    }
 
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val coroutineScope = rememberCoroutineScope()
@@ -184,8 +193,10 @@ fun WelcomeScreen(
             { showBiometricPrompt = false },
         ) {
             val currentAccount =
-                filteredAccounts.firstOrNull { it.email == keyriAccounts.value.currentProfile && it.biometricsSet }?.email
-                    ?: clickedAccount ?: filteredAccounts.firstOrNull()?.email
+                keyriAccounts.value.currentProfile
+                    ?: clickedAccount
+                    ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
+                    ?: filteredAccounts.firstOrNull()?.email
 
             viewModel.cryptoLogin(requireNotNull(currentAccount)) {
                 showBiometricPrompt = false

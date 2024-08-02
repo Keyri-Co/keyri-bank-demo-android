@@ -42,13 +42,14 @@ class WelcomeViewModel(
             repository.cryptoLogin(currentProfile, data, signature)
 
             dataStore.updateData { keyriProfiles ->
-                val mappedProfiles = keyriProfiles.profiles.map {
-                    if (it.email == currentProfile) {
-                        it.copy(isVerify = false)
-                    } else {
-                        it
+                val mappedProfiles =
+                    keyriProfiles.profiles.map {
+                        if (it.email == currentProfile) {
+                            it.copy(isVerify = false)
+                        } else {
+                            it
+                        }
                     }
-                }
 
                 keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
             }
