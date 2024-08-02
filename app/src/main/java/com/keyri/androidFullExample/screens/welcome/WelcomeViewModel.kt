@@ -42,10 +42,16 @@ class WelcomeViewModel(
         onResult: () -> Unit,
     ) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
+            // TODO: Remove Firebase logs
+            Firebase.crashlytics.log("cryptoLogin")
+
             val data = System.currentTimeMillis().toString()
             val signature = keyri.generateUserSignature(currentProfile, data).getOrThrow()
 
             repository.cryptoLogin(currentProfile, data, signature)
+
+            // TODO: Remove Firebase logs
+            Firebase.crashlytics.log("updateData")
 
             dataStore.updateData { keyriProfiles ->
                 val mappedProfiles =
@@ -57,8 +63,14 @@ class WelcomeViewModel(
                         }
                     }
 
+                // TODO: Remove Firebase logs
+                Firebase.crashlytics.log("copy")
+
                 keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
             }
+
+            // TODO: Remove Firebase logs
+            Firebase.crashlytics.log("onResult")
 
             withContext(Dispatchers.Main) {
                 onResult()
@@ -67,7 +79,7 @@ class WelcomeViewModel(
     }
 
     fun removeAllAccounts(callback: () -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO + throwableScope) {
             keyri.listUniqueAccounts().onSuccess { accounts ->
                 accounts.forEach { (name, _) ->
                     keyri.removeAssociationKey(name)
