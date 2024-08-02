@@ -1,5 +1,7 @@
 package com.keyri.androidFullExample.services
 
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.keyri.androidFullExample.converter.ConverterFactory
@@ -28,6 +30,12 @@ suspend fun <T : Any> makeApiCall(call: suspend () -> Response<T>): Result<T> {
 
             val exception = AuthorizationException(errorResponse?.message)
 
+            // TODO: Remove logs
+            Firebase.crashlytics.log("BODY: " + response.body().toString())
+            Firebase.crashlytics.log("ERROR BODY: " + response.errorBody().toString())
+
+            Firebase.crashlytics.recordException(exception)
+
             return Result.failure(exception)
         }
 
@@ -46,9 +54,12 @@ suspend fun <T : Any> makeApiCall(call: suspend () -> Response<T>): Result<T> {
                 response.body()?.let { Result.success(it) } ?: throw AuthorizationException()
             }
         } catch (exception: Exception) {
+            Firebase.crashlytics.recordException(exception)
             Result.failure(exception)
         }
     } catch (e: Exception) {
+        Firebase.crashlytics.recordException(e)
+
         val error =
             when (e) {
                 is UnknownHostException,
