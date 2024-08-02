@@ -26,17 +26,17 @@ sealed class VerifyingState {
 
     @Serializable
     data class Email(
-        val isVerified: Boolean,
+        val isVerified: Boolean = false,
     ) : VerifyingState()
 
     @Serializable
     data class Phone(
-        val isVerified: Boolean,
+        val isVerified: Boolean = false,
     ) : VerifyingState()
 
     @Serializable
     data class EmailPhone(
-        val emailVerified: Boolean,
-        val phoneVerified: Boolean,
+        val emailVerified: Boolean = false,
+        val phoneVerified: Boolean = false,
     ) : VerifyingState()
 }

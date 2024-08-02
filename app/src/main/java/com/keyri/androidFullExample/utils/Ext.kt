@@ -45,7 +45,9 @@ object KeyriProfilesSerializer : Serializer<KeyriProfiles> {
     override suspend fun readFrom(input: InputStream): KeyriProfiles =
         withContext(Dispatchers.IO) {
             try {
-                Json.decodeFromString<KeyriProfiles>(input.readBytes().decodeToString())
+                val withUnknownKeys = Json { ignoreUnknownKeys = true }
+
+                withUnknownKeys.decodeFromString<KeyriProfiles>(input.readBytes().decodeToString())
             } catch (serialization: SerializationException) {
                 throw CorruptionException("Unable to read Settings", serialization)
             }
@@ -55,7 +57,9 @@ object KeyriProfilesSerializer : Serializer<KeyriProfiles> {
         t: KeyriProfiles,
         output: OutputStream,
     ) = withContext(Dispatchers.IO) {
-        output.write(Json.encodeToString(t).encodeToByteArray())
+        val withUnknownKeys = Json { ignoreUnknownKeys = true }
+
+        output.write(withUnknownKeys.encodeToString(t).encodeToByteArray())
     }
 }
 
