@@ -3,6 +3,8 @@ package com.keyri.androidFullExample.screens.main
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.google.gson.Gson
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.repositories.KeyriDemoRepository
@@ -39,6 +41,10 @@ class MainScreenViewModel(
     private val throwableScope =
         CoroutineExceptionHandler { _, throwable ->
             _errorMessage.value = throwable.message
+
+            throwable.let { e ->
+                Firebase.crashlytics.recordException(e)
+            }
 
             timer(initialDelay = 0L, period = 2_000L) {
                 _errorMessage.value = null

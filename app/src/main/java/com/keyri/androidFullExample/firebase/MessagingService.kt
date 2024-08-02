@@ -2,6 +2,8 @@ package com.keyri.androidFullExample.firebase
 
 import android.util.Log
 import androidx.datastore.core.DataStore
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.keyri.androidFullExample.data.KeyriProfiles
@@ -18,6 +20,10 @@ class MessagingService : FirebaseMessagingService() {
 
     private val throwableScope =
         CoroutineExceptionHandler { _, throwable ->
+            throwable.let { e ->
+                Firebase.crashlytics.recordException(e)
+            }
+
             Log.e("Keyri Demo", "Error: " + throwable.message.toString())
         }
 

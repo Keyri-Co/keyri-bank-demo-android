@@ -3,6 +3,8 @@ package com.keyri.androidFullExample.screens.verify
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.keyri.androidFullExample.data.KeyriProfile
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.data.VerifyingState
@@ -26,6 +28,10 @@ class VerifyViewModel(
     private val throwableScope =
         CoroutineExceptionHandler { _, throwable ->
             _errorMessage.value = throwable.message
+
+            throwable.let { e ->
+                Firebase.crashlytics.recordException(e)
+            }
 
             timer(initialDelay = 0L, period = 2_000L) {
                 _errorMessage.value = null
