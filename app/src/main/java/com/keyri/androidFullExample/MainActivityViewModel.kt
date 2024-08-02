@@ -4,8 +4,6 @@ import android.net.Uri
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
@@ -102,9 +100,6 @@ class MainActivityViewModel(
                                 "${Routes.VerifyScreen.name}?name=${profile.name}?email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}"
                             }
                     }
-
-                // TODO: Remove Firebase logs
-                Firebase.crashlytics.log("_openScreen = $screenToOpen")
 
                 _openScreen.value = screenToOpen
             }

@@ -33,8 +33,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import com.keyri.androidFullExample.R
 import com.keyri.androidFullExample.composables.BiometricAuth
 import com.keyri.androidFullExample.composables.KeyriButton
@@ -194,17 +192,11 @@ fun WelcomeScreen(
             {},
             { showBiometricPrompt = false },
         ) {
-            // TODO: Remove Firebase logs
-            Firebase.crashlytics.log("BiometricAuth")
-
             val currentAccount =
                 keyriAccounts.value.currentProfile
                     ?: clickedAccount
                     ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
                     ?: filteredAccounts.firstOrNull()?.email
-
-            // TODO: Remove Firebase logs
-            Firebase.crashlytics.log("currentAccount")
 
             viewModel.cryptoLogin(requireNotNull(currentAccount)) {
                 showBiometricPrompt = false
