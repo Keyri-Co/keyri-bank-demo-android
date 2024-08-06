@@ -52,8 +52,9 @@ class MainActivityViewModel(
                                             }
 
                                             is VerifyingState.EmailPhone -> {
+                                                // Be careful with phoneVerified = true, need more testing this
                                                 val newState =
-                                                    it.verifyState.copy(emailVerified = true)
+                                                    it.verifyState.copy(emailVerified = true, phoneVerified = true)
 
                                                 screenToOpen =
                                                     if (newState.isVerificationDone()) {
