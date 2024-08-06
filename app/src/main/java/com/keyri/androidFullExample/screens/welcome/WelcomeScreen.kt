@@ -56,6 +56,7 @@ fun WelcomeScreen(
     val context = LocalContext.current
 
     val error = viewModel.errorMessage.collectAsState()
+    val blockBiometricPrompt = viewModel.blockBiometricPrompt.collectAsState()
 
     if (error.value != null) {
         error.value?.let {
@@ -76,7 +77,7 @@ fun WelcomeScreen(
     var clickedAccount by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(key1 = filteredAccounts) {
-        if (filteredAccounts.any { it.email == keyriAccounts.value.currentProfile && it.biometricsSet }) {
+        if (filteredAccounts.any { it.email == keyriAccounts.value.currentProfile && it.biometricsSet } && !blockBiometricPrompt.value) {
             showBiometricPrompt = true
         }
     }
@@ -220,9 +221,9 @@ fun WelcomeScreen(
                 )
             },
             onListItemClicked = {
+                clickedAccount = it.text
                 showBiometricPrompt = true
                 showAccountsList = false
-                clickedAccount = it.text
 
                 coroutineScope.launch(Dispatchers.IO) {
                     sheetState.hide()

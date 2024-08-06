@@ -9,9 +9,8 @@ import com.google.firebase.messaging.RemoteMessage
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.data.VerifyingState
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 
@@ -32,19 +31,12 @@ class MessagingService : FirebaseMessagingService() {
         Log.e("Keyri Demo", "New FCM token available: $token")
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
-        // TODO: Remove logs
-        Log.e("onMessageReceived", "message = ${message.data}")
-
         val customToken = message.data["customToken"]
 
-        // TODO: Remove logs
-        Log.e("customToken", "customToken = $customToken")
-
-        GlobalScope.launch(Dispatchers.IO + throwableScope) {
+        CoroutineScope(Dispatchers.IO + throwableScope).launch {
             dataStore.updateData { profiles ->
                 val mappedProfiles =
                     profiles.profiles.map {

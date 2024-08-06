@@ -9,11 +9,6 @@
         android:name="android.hardware.telephony"
         android:required="false" />
 
-    <queries>
-        <package android:name="org.telegram.messenger" />
-        <package android:name="com.whatsapp" />
-    </queries>
-
     <application
         android:name=".KeyriDemoApp"
         android:allowBackup="false"
@@ -58,13 +53,6 @@
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
-
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_icon"
-                android:resource="@drawable/ic_launcher_foreground" />
-            <meta-data
-                android:name="com.google.firebase.messaging.default_notification_color"
-                android:resource="@color/purple_200" />
         </service>
     </application>
 </manifest>

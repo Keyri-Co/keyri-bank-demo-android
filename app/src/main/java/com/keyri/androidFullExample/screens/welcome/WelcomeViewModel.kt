@@ -1,6 +1,5 @@
 package com.keyri.androidFullExample.screens.welcome
 
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,7 +22,9 @@ class WelcomeViewModel(
     private val repository: KeyriDemoRepository,
 ) : ViewModel() {
     private val _errorMessage = MutableStateFlow<String?>(null)
+    private val _blockBiometricPrompt = MutableStateFlow(false)
     val errorMessage = _errorMessage.asStateFlow()
+    val blockBiometricPrompt = _blockBiometricPrompt.asStateFlow()
 
     private val throwableScope =
         CoroutineExceptionHandler { _, throwable ->
@@ -46,14 +47,7 @@ class WelcomeViewModel(
             val data = System.currentTimeMillis().toString()
             val signature = keyri.generateUserSignature(currentProfile, data).getOrThrow()
 
-            // TODO: Remove logs
-            Log.e("cryptoLogin", "triggered, data = $data")
-
             repository.cryptoLogin(currentProfile, data, signature)
-
-            Log.e("cryptoLogin", "ok")
-
-            Log.e("updateData", "triggered")
 
             dataStore.updateData { keyriProfiles ->
                 val mappedProfiles =
@@ -65,10 +59,10 @@ class WelcomeViewModel(
                         }
                     }
 
+                _blockBiometricPrompt.value = true
+
                 keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
             }
-
-            Log.e("updateData", "ok")
 
             withContext(Dispatchers.Main) {
                 onResult()
