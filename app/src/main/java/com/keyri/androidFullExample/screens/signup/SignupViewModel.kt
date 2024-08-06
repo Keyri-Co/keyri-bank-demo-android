@@ -29,15 +29,21 @@ class SignupViewModel(
                 .isValidPhoneNumber()
 
     fun updateName(newName: String) {
-        _signupState.value = _signupState.value.copy(name = newName)
+        viewModelScope.launch(Dispatchers.IO) {
+            _signupState.value = _signupState.value.copy(name = newName)
+        }
     }
 
     fun updateEmail(newEmail: String) {
-        _signupState.value = _signupState.value.copy(email = newEmail)
+        viewModelScope.launch(Dispatchers.IO) {
+            _signupState.value = _signupState.value.copy(email = newEmail)
+        }
     }
 
     fun updateMobile(newMobile: TextFieldValue) {
-        _signupState.value = _signupState.value.copy(mobile = newMobile)
+        viewModelScope.launch(Dispatchers.IO) {
+            _signupState.value = _signupState.value.copy(mobile = newMobile)
+        }
     }
 
     fun setCurrentProfileToNull(onResult: () -> Unit) {

@@ -9,6 +9,8 @@ import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import com.keyri.androidFullExample.data.KeyriProfiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -47,7 +49,11 @@ object KeyriProfilesSerializer : Serializer<KeyriProfiles> {
             try {
                 val withUnknownKeys = Json { ignoreUnknownKeys = true }
 
-                withUnknownKeys.decodeFromString<KeyriProfiles>(input.readBytes().decodeToString())
+                val stringJson = input.readBytes().decodeToString()
+
+                Firebase.crashlytics.log("Decoded String: $stringJson")
+
+                withUnknownKeys.decodeFromString<KeyriProfiles>(stringJson)
             } catch (serialization: SerializationException) {
                 throw CorruptionException("Unable to read Settings", serialization)
             }
