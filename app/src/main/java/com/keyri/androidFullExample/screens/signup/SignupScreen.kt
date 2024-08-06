@@ -39,6 +39,8 @@ fun SignupScreen(
     val inputState = viewModel.signupState.collectAsState()
     var isMobileTextFieldFocused by remember { mutableStateOf(false) }
 
+    // TODO: On verify it says confirm instead verify
+
     Column {
         Text(
             modifier =
