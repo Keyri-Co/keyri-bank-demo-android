@@ -36,7 +36,13 @@ class MessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
 
+        // TODO: Remove logs
+        Log.e("onMessageReceived", "message = ${message.data}")
+
         val customToken = message.data["customToken"]
+
+        // TODO: Remove logs
+        Log.e("customToken", "customToken = $customToken")
 
         GlobalScope.launch(Dispatchers.IO + throwableScope) {
             dataStore.updateData { profiles ->

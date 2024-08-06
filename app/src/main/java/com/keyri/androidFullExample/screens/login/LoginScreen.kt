@@ -77,7 +77,7 @@ fun LoginScreen(
             )
 
             KeyriTextField(
-                modifier = Modifier.padding(top = 10.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
                 value = email,
                 placeholder = {
                     Text(

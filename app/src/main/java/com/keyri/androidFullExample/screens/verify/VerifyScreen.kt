@@ -40,7 +40,7 @@ import org.koin.androidx.compose.koinViewModel
 fun VerifyScreen(
     viewModel: VerifyViewModel = koinViewModel(),
     navController: NavController,
-    isVerify: Boolean,
+    isVerify: Boolean, // TODO: Here is issue: it creating with false!
     name: String? = null,
     email: String? = null,
     number: String? = null,
@@ -84,12 +84,12 @@ fun VerifyScreen(
     Column {
         Text(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 80.dp)
-                    .align(Alignment.CenterHorizontally),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 80.dp)
+                .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
-            text = "Help us ${if (isVerify) "verify" else "confirm"} your identity",
+            text = "Help us ${if (profile?.isVerify ?: isVerify) "verify" else "confirm"} your identity",
             style = MaterialTheme.typography.headlineSmall,
             color = textColor,
         )
@@ -97,18 +97,18 @@ fun VerifyScreen(
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Bottom) {
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Option 1:")
-                        }
+                buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Option 1:")
+                    }
 
-                        append(" We'll send you an email magic link. It expires 15 minutes after you request it.")
-                    },
+                    append(" We'll send you an email magic link. It expires 15 minutes after you request it.")
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -121,21 +121,21 @@ fun VerifyScreen(
                 disabledBorderColor = primaryDisabled,
                 enabled = profile?.verifyState == null || profile.verifyState is VerifyingState.Email,
                 text =
-                    if ((profile?.verifyState is VerifyingState.Email && profile.verifyState.isVerified) ||
-                        (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.emailVerified)
-                    ) {
-                        "Email verified"
-                    } else {
-                        "${if (isVerify) "Verify" else "Confirm"} email"
-                    },
+                if ((profile?.verifyState is VerifyingState.Email && profile.verifyState.isVerified) ||
+                    (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.emailVerified)
+                ) {
+                    "Email verified"
+                } else {
+                    "${if (profile?.isVerify ?: isVerify) "Verify" else "Confirm"} email"
+                },
                 progress = verifyState.value is VerifyingState.Email || profile?.verifyState is VerifyingState.Email,
                 onClick = {
                     if (profile?.verifyState == null) {
                         verifyState.value = VerifyingState.Email(isVerified = false)
 
-                        if (isVerify) {
+                        if (profile?.isVerify ?: isVerify) {
                             viewModel.emailLogin(
-                                isVerify,
+                                profile?.isVerify ?: isVerify,
                                 requireNotNull(name ?: profile?.name),
                                 requireNotNull(email ?: profile?.email),
                                 number ?: profile?.phone,
@@ -151,19 +151,19 @@ fun VerifyScreen(
 
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 40.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
                 text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Option 2:")
-                        }
+                buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Option 2:")
+                    }
 
-                        append(" You'll send an auto populated message through messaging service.")
-                    },
+                    append(" You'll send an auto populated message through messaging service.")
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -176,22 +176,22 @@ fun VerifyScreen(
                 disabledBorderColor = primaryDisabled,
                 progress = verifyState.value is VerifyingState.Phone || (profile?.verifyState is VerifyingState.Phone),
                 enabled =
-                    (number != null || profile?.phone != null) &&
+                (number != null || profile?.phone != null) &&
                         (profile?.verifyState == null || profile.verifyState is VerifyingState.Phone),
                 text =
-                    if ((profile?.verifyState is VerifyingState.Phone && profile.verifyState.isVerified) ||
-                        (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.phoneVerified)
-                    ) {
-                        "Phone verified"
-                    } else {
-                        "${if (isVerify) "Verify" else "Confirm"} phone number"
-                    },
+                if ((profile?.verifyState is VerifyingState.Phone && profile.verifyState.isVerified) ||
+                    (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.phoneVerified)
+                ) {
+                    "Phone verified"
+                } else {
+                    "${if (profile?.isVerify ?: isVerify) "Verify" else "Confirm"} phone number"
+                },
                 onClick = {
                     if (profile?.verifyState == null) {
                         verifyState.value = VerifyingState.Phone(isVerified = false)
 
                         viewModel.smsLogin(
-                            isVerify,
+                            profile?.isVerify ?: isVerify,
                             requireNotNull(name ?: profile?.name),
                             requireNotNull(email ?: profile?.email),
                             requireNotNull(number ?: profile?.phone),
@@ -204,19 +204,19 @@ fun VerifyScreen(
 
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                        .padding(top = 40.dp),
+                Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally)
+                    .padding(top = 40.dp),
                 textAlign = TextAlign.Center,
                 text =
-                    buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("Option 3:")
-                        }
+                buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append("Option 3:")
+                    }
 
-                        append(" You'll send an auto populated message and then receive an email magic link.")
-                    },
+                    append(" You'll send an auto populated message and then receive an email magic link.")
+                },
                 style = MaterialTheme.typography.bodySmall,
                 color = textColor,
             )
@@ -229,16 +229,16 @@ fun VerifyScreen(
                 disabledBorderColor = primaryDisabled,
                 progress = verifyState.value is VerifyingState.EmailPhone || profile?.verifyState is VerifyingState.EmailPhone,
                 enabled =
-                    (number != null || profile?.phone != null) &&
+                (number != null || profile?.phone != null) &&
                         (profile?.verifyState == null || profile.verifyState is VerifyingState.EmailPhone),
-                text = "${if (isVerify) "Verify" else "Confirm"} email + phone number",
+                text = "${if (profile?.isVerify ?: isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
                     if (profile?.verifyState == null) {
                         verifyState.value =
                             VerifyingState.EmailPhone(emailVerified = false, phoneVerified = false)
 
                         viewModel.smsAndEmailLogin(
-                            isVerify,
+                            profile?.isVerify ?: isVerify,
                             requireNotNull(name ?: profile?.name),
                             requireNotNull(email ?: profile?.email),
                             requireNotNull(number ?: profile?.phone),
