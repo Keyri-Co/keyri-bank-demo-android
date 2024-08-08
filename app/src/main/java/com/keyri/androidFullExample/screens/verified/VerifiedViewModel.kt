@@ -74,8 +74,31 @@ class VerifiedViewModel(
                                     else -> null
                                 }
 
+                            var associationKey =
+                                keyri.getAssociationKey(currentProfileEmail).getOrNull()
+
+                            if (it.associationKey == null) {
+                                if (associationKey == null) {
+                                    associationKey = keyri.generateAssociationKey(currentProfileEmail).getOrThrow()
+                                }
+
+                                repository.cryptoRegister(currentProfileEmail, associationKey)
+                            } else {
+                                if (associationKey != null) {
+                                    val data = System.currentTimeMillis().toString()
+                                    val signature = keyri.generateUserSignature(currentProfileEmail, data).getOrThrow()
+
+                                    repository.cryptoLogin(currentProfileEmail, data, signature)
+                                } else {
+                                    associationKey = keyri.generateAssociationKey(currentProfileEmail).getOrThrow()
+
+                                    repository.cryptoRegister(currentProfileEmail, associationKey)
+                                }
+                            }
+
                             it.copy(
                                 customToken = customToken,
+                                associationKey = associationKey,
                                 verifyState = newVerifyState,
                                 biometricsSet = true,
                             )
@@ -87,22 +110,6 @@ class VerifiedViewModel(
                 keyriProfiles
                     .copy(currentProfile = currentProfileEmail, profiles = mappedProfiles)
                     .apply {
-                        val associationKey =
-                            keyri.getAssociationKey(currentProfileEmail).getOrNull()
-
-                        if (associationKey != null) {
-                            val data = System.currentTimeMillis().toString()
-                            val signature =
-                                keyri.generateUserSignature(currentProfileEmail, data).getOrThrow()
-
-                            repository.cryptoLogin(currentProfileEmail, data, signature)
-                        } else {
-                            val generatedAssociationKey =
-                                keyri.generateAssociationKey(currentProfileEmail).getOrThrow()
-
-                            repository.cryptoRegister(currentProfileEmail, generatedAssociationKey)
-                        }
-
                         _loading.value = false
 
                         withContext(Dispatchers.Main) {

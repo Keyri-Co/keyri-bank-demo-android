@@ -223,6 +223,7 @@ class VerifyViewModel(
                             isVerify = isVerify,
                             verifyState = null,
                             customToken = null,
+                            associationKey = null,
                             biometricsSet = false,
                         )
 

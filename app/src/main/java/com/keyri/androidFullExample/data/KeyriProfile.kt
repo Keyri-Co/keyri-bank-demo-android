@@ -10,6 +10,7 @@ data class KeyriProfile(
     val isVerify: Boolean,
     val verifyState: VerifyingState?,
     val customToken: String?,
+    val associationKey: String?,
     val biometricsSet: Boolean,
 )
 

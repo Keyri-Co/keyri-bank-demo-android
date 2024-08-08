@@ -7,4 +7,6 @@ data class CryptoRegisterRequest(
     val email: String,
     @SerializedName("associationKey")
     val associationKey: String,
+    @SerializedName("idToken")
+    val idToken: String,
 )

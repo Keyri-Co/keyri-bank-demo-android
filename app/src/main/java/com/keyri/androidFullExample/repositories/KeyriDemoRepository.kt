@@ -32,10 +32,18 @@ class KeyriDemoRepository(
     suspend fun cryptoRegister(
         email: String,
         associationKey: String,
-    ): String =
-        makeApiCall {
-            apiService.cryptoRegister(CryptoRegisterRequest(email, associationKey))
+    ): String {
+        val idToken =
+            Firebase.auth
+                .getAccessToken(false)
+                .await()
+                .token
+                ?: throw IllegalStateException("ID token shouldn't be null")
+
+        return makeApiCall {
+            apiService.cryptoRegister(CryptoRegisterRequest(email, associationKey, idToken))
         }.getOrThrow().customToken
+    }
 
     suspend fun cryptoLogin(
         email: String,

@@ -114,6 +114,7 @@ class LoginViewModel(
                             isVerify = false,
                             verifyState = null,
                             customToken = null,
+                            associationKey = null,
                             biometricsSet = false,
                         )
 

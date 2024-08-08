@@ -9,8 +9,6 @@ import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavHostController
-import com.google.firebase.crashlytics.ktx.crashlytics
-import com.google.firebase.ktx.Firebase
 import com.keyri.androidFullExample.data.KeyriProfiles
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -37,7 +35,7 @@ fun Context.getActivity(): FragmentActivity? {
 }
 
 val Context.keyriProfilesDataStore: DataStore<KeyriProfiles> by dataStore(
-    fileName = "keyri_profiles.pb",
+    fileName = "keyri_profiles_1.pb",
     serializer = KeyriProfilesSerializer,
 )
 
@@ -50,8 +48,6 @@ object KeyriProfilesSerializer : Serializer<KeyriProfiles> {
                 val withUnknownKeys = Json { ignoreUnknownKeys = true }
 
                 val stringJson = input.readBytes().decodeToString()
-
-                Firebase.crashlytics.log("Decoded String: $stringJson")
 
                 withUnknownKeys.decodeFromString<KeyriProfiles>(stringJson)
             } catch (serialization: SerializationException) {

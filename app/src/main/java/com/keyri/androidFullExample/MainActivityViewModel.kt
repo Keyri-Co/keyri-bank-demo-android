@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
+import com.keyrico.keyrisdk.Keyri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 
 class MainActivityViewModel(
     val dataStore: DataStore<KeyriProfiles>,
+    val keyri: Keyri,
 ) : ViewModel() {
     private val _openScreen = MutableStateFlow<String?>(null)
     val openScreen = _openScreen.asStateFlow()
@@ -22,6 +24,21 @@ class MainActivityViewModel(
     fun checkStartScreen(data: Uri?) {
         viewModelScope.launch(Dispatchers.IO) {
             var screenToOpen = Routes.WelcomeScreen.name
+
+            dataStore.updateData { keyriProfiles ->
+                val actualAccounts = keyri.listUniqueAccounts().getOrThrow()
+
+                val mappedProfiles =
+                    keyriProfiles.profiles.map {
+                        if (it.associationKey != actualAccounts[it.email]) {
+                            it.copy(associationKey = null)
+                        } else {
+                            it
+                        }
+                    }
+
+                keyriProfiles.copy(profiles = mappedProfiles)
+            }
 
             data
                 ?.toString()
@@ -52,9 +69,11 @@ class MainActivityViewModel(
                                             }
 
                                             is VerifyingState.EmailPhone -> {
-                                                // Be careful with phoneVerified = true, need more testing this
                                                 val newState =
-                                                    it.verifyState.copy(emailVerified = true, phoneVerified = true)
+                                                    it.verifyState.copy(
+                                                        emailVerified = true,
+                                                        phoneVerified = true,
+                                                    )
 
                                                 screenToOpen =
                                                     if (newState.isVerificationDone()) {
