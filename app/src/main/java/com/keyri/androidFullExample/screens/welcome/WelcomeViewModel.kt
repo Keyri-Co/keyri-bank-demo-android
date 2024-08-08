@@ -12,6 +12,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.concurrent.timer
@@ -39,29 +40,52 @@ class WelcomeViewModel(
             }
         }
 
-    fun cryptoLogin(
-        currentProfile: String,
-        onResult: () -> Unit,
-    ) {
+    fun cryptoLogin(currentProfile: String, onResult: () -> Unit) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
-            val data = System.currentTimeMillis().toString()
-            val signature = keyri.generateUserSignature(currentProfile, data).getOrThrow()
+            val profile = dataStore.data.first().profiles.firstOrNull { it.email == currentProfile }
+            var associationKey = keyri.getAssociationKey(currentProfile).getOrNull()
 
-            repository.cryptoLogin(currentProfile, data, signature)
+            if (profile?.associationKey == null || profile.associationKey != associationKey) {
+                if (associationKey == null) {
+                    associationKey = keyri.generateAssociationKey(currentProfile).getOrThrow()
+                }
 
-            dataStore.updateData { keyriProfiles ->
-                val mappedProfiles =
-                    keyriProfiles.profiles.map {
-                        if (it.email == currentProfile) {
-                            it.copy(isVerify = false)
-                        } else {
-                            it
+                repository.cryptoRegister(currentProfile, associationKey)
+
+                dataStore.updateData { keyriProfiles ->
+                    val mappedProfiles =
+                        keyriProfiles.profiles.map {
+                            if (it.email == currentProfile) {
+                                it.copy(isVerify = false, associationKey = associationKey)
+                            } else {
+                                it
+                            }
                         }
-                    }
 
-                _blockBiometricPrompt.value = true
+                    _blockBiometricPrompt.value = true
 
-                keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
+                    keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
+                }
+            } else {
+                val data = System.currentTimeMillis().toString()
+                val signature = keyri.generateUserSignature(currentProfile, data).getOrThrow()
+
+                repository.cryptoLogin(currentProfile, data, signature)
+
+                dataStore.updateData { keyriProfiles ->
+                    val mappedProfiles =
+                        keyriProfiles.profiles.map {
+                            if (it.email == currentProfile) {
+                                it.copy(isVerify = false)
+                            } else {
+                                it
+                            }
+                        }
+
+                    _blockBiometricPrompt.value = true
+
+                    keyriProfiles.copy(currentProfile = currentProfile, profiles = mappedProfiles)
+                }
             }
 
             withContext(Dispatchers.Main) {
