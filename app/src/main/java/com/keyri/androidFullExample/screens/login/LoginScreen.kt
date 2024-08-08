@@ -12,6 +12,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +20,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -36,12 +39,20 @@ import org.koin.androidx.compose.koinViewModel
 fun LoginScreen(
     viewModel: LoginViewModel = koinViewModel(),
     navController: NavController,
+    recoveredEmail: String? = null,
     onShowSnackbar: (String) -> Unit,
 ) {
-    var email by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf(recoveredEmail ?: "") }
     val error = viewModel.errorMessage.collectAsState()
     val loading = viewModel.loading.collectAsState()
     val context = LocalContext.current
+    val textFieldFocusRequester = FocusRequester()
+
+    LaunchedEffect(key1 = recoveredEmail) {
+        if (recoveredEmail != null) {
+            textFieldFocusRequester.requestFocus()
+        }
+    }
 
     if (error.value != null) {
         error.value?.let {
@@ -53,10 +64,10 @@ fun LoginScreen(
     Column {
         Text(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 80.dp)
-                    .align(Alignment.CenterHorizontally),
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 80.dp)
+                .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Enter email address to log in",
             style = MaterialTheme.typography.headlineSmall,
@@ -66,10 +77,10 @@ fun LoginScreen(
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
             Text(
                 modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 20.dp)
-                        .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp)
+                    .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "We’ll send you an email magic link. It expires 15 minutes after you request it.",
                 style = MaterialTheme.typography.bodySmall,
@@ -77,7 +88,9 @@ fun LoginScreen(
             )
 
             KeyriTextField(
-                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp).focusRequester(textFieldFocusRequester),
                 value = email,
                 placeholder = {
                     Text(
@@ -91,7 +104,9 @@ fun LoginScreen(
         }
 
         KeyriButton(
-            modifier = Modifier.padding(top = 28.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 28.dp),
             enabled = email.isValidEmail(),
             disabledTextColor = primaryDisabled,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
@@ -124,16 +139,16 @@ fun LoginScreen(
 
         Text(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 28.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .clickable {
-                        navController.popBackStack()
-                    },
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 28.dp)
+                .align(Alignment.CenterHorizontally)
+                .clickable {
+                    navController.popBackStack()
+                },
             textAlign = TextAlign.Center,
             text = "Cancel",
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary,
         )
     }

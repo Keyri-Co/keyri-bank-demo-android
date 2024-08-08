@@ -163,7 +163,7 @@ fun WelcomeScreen(
                 } else if (filteredAccounts.size > 1) {
                     showAccountsList = true
                 } else {
-                    navController.navigate("${Routes.VerifyScreen.name}?name=null?email=null&number=null&isVerify=false")
+                    navController.navigate("${Routes.VerifyScreen.name}?name=null&email=null&number=null&isVerify=false")
                 }
             },
         )
@@ -186,26 +186,30 @@ fun WelcomeScreen(
         }
 
     if (showBiometricPrompt) {
-        BiometricAuth(
-            context,
-            promptInfo.first,
-            promptInfo.second,
-            {},
-            { showBiometricPrompt = false },
-        ) {
-            val currentAccount =
-                keyriAccounts.value.currentProfile
-                    ?: clickedAccount
-                    ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
-                    ?: filteredAccounts.firstOrNull()?.email
+        val currentAccount =
+            keyriAccounts.value.currentProfile
+                ?: clickedAccount
+                ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
+                ?: filteredAccounts.firstOrNull()?.email
 
-            viewModel.cryptoLogin(requireNotNull(currentAccount)) {
-                showBiometricPrompt = false
+        if (filteredAccounts.firstOrNull { it.email == currentAccount }?.associationKey == null) {
+            navController.navigate("${Routes.LoginScreen.name}?email=$currentAccount")
+        } else {
+            BiometricAuth(
+                context,
+                promptInfo.first,
+                promptInfo.second,
+                {},
+                { showBiometricPrompt = false },
+            ) {
+                viewModel.cryptoLogin(requireNotNull(currentAccount)) {
+                    showBiometricPrompt = false
 
-                navController.navigateWithPopUp(
-                    Routes.MainScreen.name,
-                    Routes.WelcomeScreen.name,
-                )
+                    navController.navigateWithPopUp(
+                        Routes.MainScreen.name,
+                        Routes.WelcomeScreen.name,
+                    )
+                }
             }
         }
     }

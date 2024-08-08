@@ -1,7 +1,6 @@
 package com.keyri.androidFullExample
 
 import android.net.Uri
-import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -28,10 +27,6 @@ class MainActivityViewModel(
 
             dataStore.updateData { keyriProfiles ->
                 val actualAccounts = keyri.listUniqueAccounts().getOrThrow()
-
-                // TODO: Remove this logs
-                Log.e("KEYRI", actualAccounts.toString())
-                Log.e("DATA_STORE", keyriProfiles.toString())
 
                 val mappedProfiles =
                     keyriProfiles.profiles.map {

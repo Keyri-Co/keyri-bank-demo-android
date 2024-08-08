@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -22,6 +23,7 @@ fun KeyriButton(
     enabled: Boolean = true,
     progress: Boolean = false,
     textColor: Color = MaterialTheme.colorScheme.primary,
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge,
     disabledTextColor: Color = Color.Companion.Unspecified,
     containerColor: Color = Color.Companion.Unspecified,
     disabledContainerColor: Color = Color.Companion.Unspecified,
@@ -66,6 +68,7 @@ fun KeyriButton(
                         .align(Alignment.CenterVertically),
                 text = text,
                 color = if (enabled) textColor else disabledTextColor,
+                style = textStyle
             )
         }
     }

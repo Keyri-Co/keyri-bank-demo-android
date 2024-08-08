@@ -163,7 +163,7 @@ fun MakePayment(
                     },
             textAlign = TextAlign.Center,
             text = "Cancel",
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary,
             fontSize = 14.sp,
         )
