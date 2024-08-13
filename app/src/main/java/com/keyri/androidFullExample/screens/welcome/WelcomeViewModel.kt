@@ -40,9 +40,16 @@ class WelcomeViewModel(
             }
         }
 
-    fun cryptoLogin(currentProfile: String, onResult: () -> Unit) {
+    fun cryptoLogin(
+        currentProfile: String,
+        onResult: () -> Unit,
+    ) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
-            val profile = dataStore.data.first().profiles.firstOrNull { it.email == currentProfile }
+            val profile =
+                dataStore.data
+                    .first()
+                    .profiles
+                    .firstOrNull { it.email == currentProfile }
             var associationKey = keyri.getAssociationKey(currentProfile).getOrNull()
 
             if (profile?.associationKey == null || profile.associationKey != associationKey) {

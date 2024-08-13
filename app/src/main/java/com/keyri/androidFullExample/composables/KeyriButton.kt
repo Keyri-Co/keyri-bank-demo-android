@@ -68,7 +68,7 @@ fun KeyriButton(
                         .align(Alignment.CenterVertically),
                 text = text,
                 color = if (enabled) textColor else disabledTextColor,
-                style = textStyle
+                style = textStyle,
             )
         }
     }

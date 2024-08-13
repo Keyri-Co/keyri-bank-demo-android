@@ -64,10 +64,10 @@ fun LoginScreen(
     Column {
         Text(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 80.dp)
-                .align(Alignment.CenterHorizontally),
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 80.dp)
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = "Enter email address to log in",
             style = MaterialTheme.typography.headlineSmall,
@@ -77,10 +77,10 @@ fun LoginScreen(
         Column(modifier = Modifier.weight(1F), verticalArrangement = Arrangement.Center) {
             Text(
                 modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 20.dp)
-                    .align(Alignment.CenterHorizontally),
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp)
+                        .align(Alignment.CenterHorizontally),
                 textAlign = TextAlign.Center,
                 text = "We’ll send you an email magic link. It expires 15 minutes after you request it.",
                 style = MaterialTheme.typography.bodySmall,
@@ -88,9 +88,11 @@ fun LoginScreen(
             )
 
             KeyriTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp).focusRequester(textFieldFocusRequester),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                        .focusRequester(textFieldFocusRequester),
                 value = email,
                 placeholder = {
                     Text(
@@ -104,9 +106,10 @@ fun LoginScreen(
         }
 
         KeyriButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 28.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 28.dp),
             enabled = email.isValidEmail(),
             disabledTextColor = primaryDisabled,
             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.04F),
@@ -139,13 +142,13 @@ fun LoginScreen(
 
         Text(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(top = 28.dp)
-                .align(Alignment.CenterHorizontally)
-                .clickable {
-                    navController.popBackStack()
-                },
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 28.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .clickable {
+                        navController.popBackStack()
+                    },
             textAlign = TextAlign.Center,
             text = "Cancel",
             style = MaterialTheme.typography.bodyLarge,
