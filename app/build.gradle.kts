@@ -15,8 +15,8 @@ android {
         applicationId = "com.keyri.androidFullExample"
         minSdk = 24
         targetSdk = 34
-        versionCode = 41
-        versionName = "1.41"
+        versionCode = 42
+        versionName = "1.42"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -54,6 +54,9 @@ android {
 }
 
 dependencies {
+    // TODO: Undo
+    api(projects.keyrisdk)
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -75,7 +78,7 @@ dependencies {
     implementation(libs.koin.compose)
     implementation(libs.koin.androidx.compose)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.keyrisdk)
+//    implementation(libs.keyrisdk)
     implementation(libs.firebase.messaging)
     implementation(libs.squareup.okhttp3.okhttp)
     implementation(libs.squareup.okhttp3.logging.interceptor)

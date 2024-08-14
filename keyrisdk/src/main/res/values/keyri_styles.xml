@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="KeyriBottomSheetDialogTheme" parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="keyriBackgroundColor">@color/keyri_color_background_light</item>
+        <item name="keyriTextColor">@color/keyri_color_text_light</item>
+        <item name="bottomSheetStyle">@style/Keyri.ModalStyle</item>
+    </style>
+
+    <style name="Keyri.ModalStyle" parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/bg_keyri_rounded_dialog</item>
+    </style>
+
+    <style name="KeyriTextViewRegular">
+        <item name="android:textColor">@color/keyri_color_text_light</item>
+        <item name="android:fontFamily">@font/rubik_regular</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="KeyriTextViewWarning" parent="Widget.AppCompat.TextView">
+        <item name="android:textColor">@color/keyri_color_light_orange</item>
+        <item name="android:fontFamily">@font/rubik_regular</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:drawablePadding">6dp</item>
+        <item name="drawableEndCompat">@drawable/ic_keyri_alert</item>
+        <item name="drawableTint">@color/keyri_color_light_orange</item>
+    </style>
+
+    <style name="KeyriTextViewTitle" parent="KeyriTextViewRegular">
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="KeyriConfirmationButton" parent="Widget.MaterialComponents.Button.OutlinedButton.Icon">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">50dp</item>
+        <item name="android:fontFamily">@font/rubik_regular</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:theme">@style/Theme.MaterialComponents</item>
+        <item name="cornerRadius">4dp</item>
+        <item name="iconGravity">textStart</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconSize">16sp</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="KeyriNegativeConfirmationButton" parent="KeyriConfirmationButton">
+        <item name="android:backgroundTint">@color/keyri_color_faded_red</item>
+        <item name="android:text">@string/keyri_confirmation_screen_no</item>
+        <item name="android:textColor">@color/keyri_color_red</item>
+        <item name="icon">@drawable/ic_keyri_close</item>
+        <item name="iconTint">@color/keyri_color_red</item>
+        <item name="strokeColor">@color/keyri_color_red</item>
+    </style>
+
+    <style name="KeyriPositiveConfirmationButton" parent="KeyriConfirmationButton">
+        <item name="android:backgroundTint">@color/keyri_color_faded_green</item>
+        <item name="android:text">@string/keyri_confirmation_screen_yes</item>
+        <item name="android:textColor">@color/keyri_color_green</item>
+        <item name="icon">@drawable/ic_keyri_accept</item>
+        <item name="iconTint">@color/keyri_color_green</item>
+        <item name="strokeColor">@color/keyri_color_green</item>
+    </style>
+
+</resources>

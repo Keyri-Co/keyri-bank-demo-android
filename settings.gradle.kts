@@ -20,4 +20,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "KeyriDemo"
-include(":app")
+include(":app", "keyrisdk")
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")

@@ -29,9 +29,9 @@ private fun getKeyri(context: Context): Keyri =
         "QjBbOrlRALdlebpAuhjtNIJJzgL4vkIF",
         "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEEzteySVilYBihc6V67mN084ajGYlBOqXr6JmZ2A26Z6iW/9G8EYxPxfPRgzADrcZUHAcCuXfnv3alDvwYoGaFg==",
         KeyriDetectionsConfig(
-            blockEmulatorDetection = false,
+            blockEmulatorDetection = true, // TODO: Undo
             blockRootDetection = false,
-            blockDangerousAppsDetection = false,
+            blockDangerousAppsDetection = true, // TODO: Undo
             blockTamperDetection = false,
             blockSwizzleDetection = false,
         ),
