@@ -68,12 +68,6 @@
         <package android:name="com.newscrean4dwallpapers.app" />
         <package android:name="de.stockeighty.onewallpapers" />
         <package android:name="com.notesreminderslists.app" />
-
-<!--        // TODO Remove this -->
-        <package android:name="com.facebook.katana" />
-        <package android:name="com.facebook.lite" />
-        <package android:name="com.facebook.android" />
-        <package android:name="com.example.facebook" />
     </queries>
 
     <uses-permission android:name="android.permission.INTERNET" />

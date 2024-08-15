@@ -93,11 +93,6 @@ internal class SIPD(private val detectionsConfig: KeyriDetectionsConfig) {
             "com.newscrean4dwallpapers.app",
             "de.stockeighty.onewallpapers",
             "com.notesreminderslists.app",
-            // TODO: Remove
-            "com.facebook.katana",
-            "com.facebook.lite",
-            "com.facebook.android",
-            "com.example.facebook"
         )
 
     private val suPaths =

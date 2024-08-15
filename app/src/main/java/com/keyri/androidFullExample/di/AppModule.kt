@@ -32,7 +32,7 @@ private fun getKeyri(context: Context): Keyri =
             blockEmulatorDetection = false,
             blockRootDetection = false,
             blockDangerousAppsDetection = false,
-            blockTamperDetection = false,
+            blockTamperDetection = true,
             blockSwizzleDetection = false,
         ),
     )

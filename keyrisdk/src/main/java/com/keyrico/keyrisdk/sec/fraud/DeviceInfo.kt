@@ -595,11 +595,6 @@ internal class DeviceInfo {
             "com.newscrean4dwallpapers.app",
             "de.stockeighty.onewallpapers",
             "com.notesreminderslists.app",
-            // TODO: Remove
-            "com.facebook.katana",
-            "com.facebook.lite",
-            "com.facebook.android",
-            "com.example.facebook"
         )
 
     data class PackageDetails(

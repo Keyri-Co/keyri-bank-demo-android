@@ -94,12 +94,19 @@ class Keyri
                 performChecksumCheck(context, this)
             }
 
-            if ((!detectionsConfig.blockEmulatorDetection && NED(blockSwizzleDetection).checkNED(context)) ||
-                SIPD(detectionsConfig).checkSIPD(context)
-            ) {
+            val ed = (!detectionsConfig.blockEmulatorDetection && NED(blockSwizzleDetection).checkNED(context))
+            val sd = SIPD(detectionsConfig).checkSIPD(context)
+
+            if (ed || sd) {
                 canProcess = false
 
-                sendInitEventAndFinishApp()
+                val details = if (ed) {
+                    "emulator"
+                } else {
+                    "malware"
+                }
+
+                showCompromisedMessage(details)
             } else {
                 canProcess = true
 
@@ -447,19 +454,17 @@ class Keyri
         }
 
         @OptIn(DelicateCoroutinesApi::class)
-        private fun sendInitEventAndFinishApp() {
+        private fun showCompromisedMessage(details: String? =null) {
             GlobalScope.launch(Dispatchers.IO) {
                 withContext(Dispatchers.Main) {
-                    Toast.makeText(context, DEVICE_COMPROMISED_MESSAGE, Toast.LENGTH_LONG).show()
+                   val textMessage = if (details != null ) {
+                       "$DEVICE_COMPROMISED_MESSAGE: $details detected"
+                    } else DEVICE_COMPROMISED_MESSAGE
+
+                    Toast.makeText(context, textMessage, Toast.LENGTH_LONG).show()
                 }
 
                 delay(2_000L)
-
-                val error = RuntimeException(DEVICE_COMPROMISED_MESSAGE)
-
-                TelemetryManager.sendEvent(context, TelemetryCodes.SDK_INIT, error)
-
-                throw error
             }
         }
 
@@ -468,7 +473,7 @@ class Keyri
             const val KEYRI_PLATFORM = "Android"
             const val ANON_USER = "ANON"
             const val BACKUP_KEYRI_PREFS = "keyri_backup_prefs"
-            private const val DEVICE_COMPROMISED_MESSAGE = "Your device was compromised"
+            private const val DEVICE_COMPROMISED_MESSAGE = "Device potentially compromised"
 
             private fun performChecksumCheck(
                 context: Context,
@@ -482,7 +487,7 @@ class Keyri
                     ).onFailure {
                         keyri.canProcess = false
 
-                        keyri.sendInitEventAndFinishApp()
+                        keyri.showCompromisedMessage()
                     }
                 }
             }
