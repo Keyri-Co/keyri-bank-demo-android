@@ -47,6 +47,7 @@ class MessagingService : FirebaseMessagingService() {
                                         val newState = VerifyingState.Phone(isVerified = true)
 
                                         newState.isVerifying = false
+                                        newState.initTimestamp = null
 
                                         newState
                                     }
@@ -56,6 +57,7 @@ class MessagingService : FirebaseMessagingService() {
 
                                         if (newState.isVerificationDone()) {
                                             newState.isVerifying = false
+                                            newState.initTimestamp = null
                                         }
 
                                         newState

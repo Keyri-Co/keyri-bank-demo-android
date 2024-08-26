@@ -29,7 +29,6 @@ internal fun Context.getDeviceId(blockSwizzleDetection: Boolean): String? {
 
 internal fun getTimestampSeconds() = System.currentTimeMillis() / 1_000L
 
-// TODO: Add to Keyri, add docs, check AUTO_TIME_ZONE
 suspend fun getCorrectedTimestampSeconds(context: Context): Long {
     return if (Settings.Global.getInt(context.contentResolver, Settings.Global.AUTO_TIME) == 0) {
         SNTPUtil.requestTimeMilliseconds().getOrNull()?.time?.div(1_000L) ?: getTimestampSeconds()

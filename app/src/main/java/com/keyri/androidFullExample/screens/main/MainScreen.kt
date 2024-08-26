@@ -1,5 +1,6 @@
 package com.keyri.androidFullExample.screens.main
 
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +44,8 @@ fun MainScreen(
     val loading = viewModel.loading.collectAsState()
     val error = viewModel.errorMessage.collectAsState()
     val riskResponse = viewModel.riskResponse.collectAsState()
+
+    val context = LocalContext.current
 
     if (error.value != null) {
         error.value?.let {
@@ -147,7 +151,7 @@ fun MainScreen(
                             }
 
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                                append("Device id: ${riskResponse.value?.fingerprintId}\n")
+                                append("Device id: ${Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)}\n")
                             }
 
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {

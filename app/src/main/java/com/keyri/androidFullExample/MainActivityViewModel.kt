@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 class MainActivityViewModel(
     val dataStore: DataStore<KeyriProfiles>,
@@ -62,6 +63,7 @@ class MainActivityViewModel(
                                                     VerifyingState.Email(isVerified = true)
 
                                                 newState.isVerifying = false
+                                                newState.initTimestamp = null
 
                                                 screenToOpen = Routes.VerifiedScreen.name
 
@@ -78,18 +80,26 @@ class MainActivityViewModel(
                                                 screenToOpen =
                                                     if (newState.isVerificationDone()) {
                                                         newState.isVerifying = false
+                                                        newState.initTimestamp = null
 
                                                         Routes.VerifiedScreen.name
                                                     } else {
-                                                        "${Routes.VerifyScreen.name}?name=${it.name}?email=${it.email}&number=${it.phone}&isVerify=${it.isVerify}"
+                                                        if(isWithin15Minutes(newState.initTimestamp)) {
+                                                            Routes.WelcomeScreen.name
+                                                        } else{
+                                                            "${Routes.VerifyScreen.name}?name=${it.name}?email=${it.email}&number=${it.phone}&isVerify=${it.isVerify}"
+                                                        }
                                                     }
 
                                                 newState
                                             }
 
                                             else -> {
-                                                screenToOpen =
+                                                screenToOpen =if(isWithin15Minutes(it.verifyState?.initTimestamp)) {
+                                                    Routes.WelcomeScreen.name
+                                                } else{
                                                     "${Routes.VerifyScreen.name}?name=${it.name}?email=${it.email}&number=${it.phone}&isVerify=${it.isVerify}"
+                                                }
 
                                                 it.verifyState
                                             }
@@ -117,12 +127,26 @@ class MainActivityViewModel(
                             } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
                                 Routes.VerifiedScreen.name
                             } else {
-                                "${Routes.VerifyScreen.name}?name=${profile.name}?email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}"
+                                if(isWithin15Minutes(profile.verifyState?.initTimestamp)) {
+                                    Routes.WelcomeScreen.name
+                                } else{
+                                    "${Routes.VerifyScreen.name}?name=${profile.name}?email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}"
+                                }
                             }
                     }
 
                 _openScreen.value = screenToOpen
             }
         }
+    }
+
+    private fun isWithin15Minutes(timestamp: Long?): Boolean {
+        timestamp ?: return false
+
+        val currentTime = System.currentTimeMillis()
+        val difference = currentTime - timestamp
+        val fifteenMinutesInMillis = TimeUnit.MINUTES.toMillis(15)
+
+        return difference > fifteenMinutesInMillis
     }
 }

@@ -18,6 +18,7 @@
     <application
         android:name=".KeyriDemoApp"
         android:allowBackup="true"
+        android:backupAgent="com.keyrico.keyrisdk.backup.KeyriPrefsBackupAgent"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"

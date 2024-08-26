@@ -158,16 +158,17 @@ class VerifyViewModel(
                                         emailVerified = false,
                                         phoneVerified = false,
                                     )
-                                verifyState.isVerifying = true
 
-                                it.copy(
-                                    verifyState = verifyState,
-                                )
+                                verifyState.isVerifying = true
+                                verifyState.initTimestamp = System.currentTimeMillis()
+
+                                it.copy(verifyState = verifyState,)
                             }
 
                             email != null && phone == null -> {
                                 val verifyState = VerifyingState.Email(isVerified = false)
                                 verifyState.isVerifying = true
+                                verifyState.initTimestamp = System.currentTimeMillis()
 
                                 it.copy(verifyState = verifyState)
                             }
@@ -175,6 +176,7 @@ class VerifyViewModel(
                             email == null && phone != null -> {
                                 val verifyState = VerifyingState.Phone(isVerified = false)
                                 verifyState.isVerifying = true
+                                verifyState.initTimestamp = System.currentTimeMillis()
 
                                 it.copy(verifyState = verifyState)
                             }

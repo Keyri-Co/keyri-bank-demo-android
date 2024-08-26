@@ -72,6 +72,7 @@ class LoginViewModel(
                         val verifyState = VerifyingState.Email(isVerified = false)
 
                         verifyState.isVerifying = true
+                        verifyState.initTimestamp = System.currentTimeMillis()
 
                         it.copy(verifyState = verifyState)
                     } else {

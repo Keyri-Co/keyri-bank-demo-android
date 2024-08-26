@@ -1,5 +1,6 @@
 package com.keyri.androidFullExample.screens.paymentresult
 
+import android.provider.Settings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +41,7 @@ fun PaymentResult(
     }
 
     val riskResponse = viewModel.riskResponse.collectAsState()
+    val context = LocalContext.current
 
     Column {
         val mainText =
@@ -144,7 +147,7 @@ fun PaymentResult(
                         }
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                            append("Device id: ${riskResponse.value?.fingerprintId}\n")
+                            append("Device id: ${Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)}\n")
                         }
 
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
