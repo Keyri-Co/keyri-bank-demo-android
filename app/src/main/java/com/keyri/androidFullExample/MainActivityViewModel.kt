@@ -72,7 +72,6 @@ class MainActivityViewModel(
                                                 val newState =
                                                     it.verifyState.copy(
                                                         emailVerified = true,
-                                                        phoneVerified = true,
                                                     )
 
                                                 screenToOpen =
@@ -115,7 +114,9 @@ class MainActivityViewModel(
                                 Routes.WelcomeScreen.name
                             } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
                                 Routes.VerifiedScreen.name
-                            } else {
+                            } else if (profile.verifyState?.isVerificationDone() != true && profile.verifyState is VerifyingState.Phone) {
+                                Routes.VerifyScreen.name
+                            }else {
                                 Routes.WelcomeScreen.name
                             }
                     }

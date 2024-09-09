@@ -196,8 +196,7 @@ fun WelcomeScreen(
 
     if (showBiometricPrompt) {
         val currentAccount =
-            keyriAccounts.value.currentProfile
-                ?: clickedAccount
+            clickedAccount ?: keyriAccounts.value.currentProfile
                 ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
                 ?: filteredAccounts.firstOrNull()?.email
 
