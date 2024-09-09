@@ -39,7 +39,7 @@ internal class CryptoService(
     appKey: String,
     blockSwizzleDetection: Boolean,
 ) : BackupCallbacks {
-    private val backupService = BackupService(context, appKey, this, blockSwizzleDetection)
+    private val backupService = BackupService(context, this, blockSwizzleDetection)
 
     init {
         createAnonymousECDSAKeypair()
@@ -161,7 +161,7 @@ internal class CryptoService(
                 keyStore.deleteEntry(alias)
             }
 
-            backupService.removeKey(alias, key)
+            backupService.removeKey(alias)
 
             TelemetryManager.sendEvent(context, TelemetryCodes.ASSOCIATION_KEY_REMOVED, alias)
         }

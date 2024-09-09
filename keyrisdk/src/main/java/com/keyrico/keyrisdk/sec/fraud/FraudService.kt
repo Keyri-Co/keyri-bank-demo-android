@@ -15,6 +15,10 @@ import com.keyrico.keyrisdk.utils.provideFraudApiService
 import org.json.JSONObject
 
 internal class FraudService(private val detectionsConfig: KeyriDetectionsConfig) {
+    suspend fun getDeviceInfoJson(context: Context):String {
+        return DeviceInfo().getDeviceInfoJson(context)
+    }
+
     suspend fun getFingerprintEventPayload(
         context: Context,
         cryptoService: CryptoService,

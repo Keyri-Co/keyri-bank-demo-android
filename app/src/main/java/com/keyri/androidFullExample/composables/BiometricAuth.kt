@@ -57,7 +57,6 @@ fun BiometricAuth(
                         showBiometricPrompt = false
 
                         Log.e("KeyriDemo", "Biometric authentication cancelled")
-                        onShowSnackbar("Biometric authentication cancelled")
                         onBiometricAuthenticationCancelled()
                     }
 
@@ -72,7 +71,6 @@ fun BiometricAuth(
                         showBiometricPrompt = false
 
                         Log.e("KeyriDemo", "Biometric authentication failed")
-                        onShowSnackbar("Biometric authentication failed")
                         onBiometricAuthenticationCancelled()
                     }
                 },

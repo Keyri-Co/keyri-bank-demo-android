@@ -118,4 +118,14 @@ class WelcomeViewModel(
             }
         }
     }
+
+    fun getDeviceInfoJson(callback: (String) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO + throwableScope) {
+            val json = keyri.getDeviceInfoJson()
+
+            withContext(Dispatchers.Main) {
+                callback(json)
+            }
+        }
+    }
 }

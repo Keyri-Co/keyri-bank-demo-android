@@ -71,6 +71,69 @@ import kotlin.math.tan
 import kotlin.math.tanh
 
 internal class DeviceInfo {
+
+    suspend fun getDeviceInfoJson(context: Context): String {
+        val installationSource = checkInstallationSource(context)
+        val carrierInfo = getCarrierInfo(context)
+        val packageDetails = getPackageDetails(context)
+        val resolutionInfo = getResolutionInfo(context)
+        val totalRAMMemory = getTotalRAMMemory(context)
+        val totalStorageMemory = getTotalStorageMemory()
+        val cpuName = getCPUName()
+        val kernelVersion = getKernelVersion()
+        val supportedCodecs = getSupportedCodecs()
+        val availableLocales = getAvailableLocales()
+        val systemApps = getSystemApps(context)
+        val sensorsList = getSensorsList(context)
+        val camerasList = getCameraList(context)
+        val supportedABIs = getSupportedABIs()
+        val deviceName = getDeviceName(context)
+        val userAgent = getUserAgent(context)
+        val isHighTextContrastEnabled = isHighTextContrastEnabled(context)
+        val screenColorDepth = getScreenColorDepth(context)
+        val hardwareConcurrency = getHardwareConcurrency()
+        val maxTouchPoints = getMaxTouchPoints(context)
+        val isHdr = isHdr(context)
+        val isInversionModeEnabled = isInversionModeEnabled(context)
+        val mathFingerprint = getMathFingerprint()
+        val resolution = "${resolutionInfo.widthPixels} x ${resolutionInfo.heightPixels}"
+        val uniqueDeviceHash = context.getDeviceId(true)?.encodeToByteArray()?.toSha1Base64()
+
+        val deviceInfo =
+            DeviceInfoRequest(
+                platform = KEYRI_PLATFORM,
+                deviceType = "Mobile",
+                uniqueDeviceHash = uniqueDeviceHash,
+                deviceName = deviceName,
+                installationSource = installationSource,
+                appId = context.packageName,
+                appSignature = packageDetails?.appSignatures ?: listOf(),
+                cpuInformation = cpuName,
+                kernelVersion = kernelVersion,
+                supportedCodecs = supportedCodecs,
+                availableLocales = availableLocales,
+                systemApps = systemApps,
+                sensors = sensorsList,
+                cameras = camerasList,
+                supportedABIs = supportedABIs,
+                screenResolution = resolution,
+                availableResolution = resolution,
+                totalRAMMemory = totalRAMMemory,
+                totalStorageMemory = totalStorageMemory,
+                carrierInformation = carrierInfo,
+                userAgent = userAgent,
+                isHighTextContrastEnabled = isHighTextContrastEnabled,
+                screenColorDepth = screenColorDepth,
+                hardwareConcurrency = hardwareConcurrency,
+                maxTouchPoints = maxTouchPoints,
+                isHdr = isHdr,
+                isInversionModeEnabled = isInversionModeEnabled,
+                mathFingerprint = mathFingerprint,
+            )
+
+        return JSONObject(Gson().toJson(deviceInfo)).toString(4)
+    }
+
     suspend fun getDeviceInfoHash(context: Context): String {
         val installationSource = checkInstallationSource(context)
         val carrierInfo = getCarrierInfo(context)
@@ -159,13 +222,13 @@ internal class DeviceInfo {
         val dangerousApps = checkDangerousPackages(context)
 
         return JSONObject().apply {
-            put("rootStatus", SIPD(config).checkSIPD(context))
-            put("swizzleDetection", swizzleDetection)
+            put("rooted", SIPD(config).checkSIPD(context))
+            put("swizzle", swizzleDetection)
             put("isDebuggable", checkDebuggable(context))
             put("maliciousPackages", dangerousApps)
             put("dangerousApps", dangerousApps)
             put("tamperDetection", tamperDetected)
-            put("emulatorDetection", NED(config.blockSwizzleDetection).checkNED(context))
+            put("emulator", NED(config.blockSwizzleDetection).checkNED(context))
         }
     }
 

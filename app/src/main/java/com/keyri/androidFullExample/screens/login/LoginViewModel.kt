@@ -48,7 +48,7 @@ class LoginViewModel(
 
             userRegister(email.split("@").first().toString(), email)
             repository.emailLogin(email)
-            updateVerifyState()
+            updateVerifyState(email)
 
             withContext(Dispatchers.Main) {
                 onSuccess()
@@ -64,15 +64,14 @@ class LoginViewModel(
         createEmptyKeyriAccount(name, email)
     }
 
-    private suspend fun updateVerifyState() {
+    private suspend fun updateVerifyState(email: String) {
         dataStore.updateData { keyriProfiles ->
             val mappedProfiles =
                 keyriProfiles.profiles.map {
-                    if (keyriProfiles.currentProfile == it.email) {
+                    if (email == it.email) {
                         val verifyState = VerifyingState.Email(isVerified = false)
 
                         verifyState.isVerifying = true
-                        verifyState.initTimestamp = System.currentTimeMillis()
 
                         it.copy(verifyState = verifyState)
                     } else {
@@ -80,7 +79,7 @@ class LoginViewModel(
                     }
                 }
 
-            keyriProfiles.copy(profiles = mappedProfiles)
+            keyriProfiles.copy(currentProfile = email, profiles = mappedProfiles)
         }
     }
 

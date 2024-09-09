@@ -35,7 +35,7 @@ fun Context.getActivity(): FragmentActivity? {
 }
 
 val Context.keyriProfilesDataStore: DataStore<KeyriProfiles> by dataStore(
-    fileName = "keyri_profiles_2.pb",
+    fileName = "keyri_profiles_3.pb",
     serializer = KeyriProfilesSerializer,
 )
 

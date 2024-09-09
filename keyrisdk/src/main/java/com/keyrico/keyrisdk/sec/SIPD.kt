@@ -1,5 +1,3 @@
-@file:Suppress("Deprecation")
-
 package com.keyrico.keyrisdk.sec
 
 import android.content.Context

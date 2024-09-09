@@ -1,10 +1,13 @@
 package com.keyri.androidFullExample.screens.welcome
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -46,6 +49,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun WelcomeScreen(
@@ -85,10 +89,10 @@ fun WelcomeScreen(
     Column {
         Text(
             modifier =
-                Modifier
-                    .padding(top = 80.dp)
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally),
+            Modifier
+                .padding(top = 80.dp)
+                .fillMaxWidth()
+                .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = if (filteredAccounts.isEmpty()) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
             style = MaterialTheme.typography.headlineLarge,
@@ -97,46 +101,58 @@ fun WelcomeScreen(
 
         Box(
             modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1F),
+            Modifier
+                .fillMaxWidth()
+                .weight(1F),
         ) {
             Image(
                 modifier =
-                    Modifier
-                        .size(130.dp, 62.dp)
-                        .align(Alignment.Center)
-                        .combinedClickable(
-                            onClick = {},
-                            onLongClick = {
-                                viewModel.removeAllAccounts {
+                Modifier
+                    .size(130.dp, 62.dp)
+                    .align(Alignment.Center)
+                    .combinedClickable(
+                        onClick = {},
+                        onDoubleClick = {
+                            viewModel.getDeviceInfoJson {
+                                Toast
+                                    .makeText(context, "Copied!", Toast.LENGTH_SHORT)
+                                    .show()
+
+                                val clipboard: ClipboardManager? =
+                                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                                val clip = ClipData.newPlainText("Device id values", it)
+                                clipboard?.setPrimaryClip(clip)
+                            }
+                        },
+                        onLongClick = {
+                            viewModel.removeAllAccounts {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    val effect =
+                                        VibrationEffect.createOneShot(
+                                            100,
+                                            VibrationEffect.DEFAULT_AMPLITUDE,
+                                        )
+
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        val effect =
-                                            VibrationEffect.createOneShot(
-                                                100,
-                                                VibrationEffect.DEFAULT_AMPLITUDE,
-                                            )
-
-                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                            val vibratorManager =
-                                                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-                                            val vibrator = vibratorManager?.defaultVibrator
-
-                                            vibrator?.cancel()
-                                            vibrator?.vibrate(effect)
-                                        }
-                                    } else {
-                                        @Suppress("Deprecation")
-                                        val vibrator =
-                                            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+                                        val vibratorManager =
+                                            context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                                        val vibrator = vibratorManager?.defaultVibrator
 
                                         vibrator?.cancel()
-                                        @Suppress("Deprecation")
-                                        vibrator?.vibrate(100)
+                                        vibrator?.vibrate(effect)
                                     }
+                                } else {
+                                    @Suppress("Deprecation")
+                                    val vibrator =
+                                        context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
+
+                                    vibrator?.cancel()
+                                    @Suppress("Deprecation")
+                                    vibrator?.vibrate(100)
                                 }
-                            },
-                        ),
+                            }
+                        },
+                    ),
                 contentScale = ContentScale.Fit,
                 painter = painterResource(id = R.drawable.ic_keyri_icon_full),
                 contentDescription = null,
@@ -159,7 +175,7 @@ fun WelcomeScreen(
             containerColor = containerColors.first,
             onClick = {
                 if (filteredAccounts.size == 1) {
-                    showBiometricPrompt = true
+                    navController.navigate("${Routes.LoginScreen.name}?email=${filteredAccounts.first().email}")
                 } else if (filteredAccounts.size > 1) {
                     showAccountsList = true
                 } else {
@@ -178,13 +194,6 @@ fun WelcomeScreen(
         )
     }
 
-    val promptInfo =
-        if (filteredAccounts.size == 1) {
-            "Use Biometric to login as" to filteredAccounts.firstOrNull()?.email
-        } else {
-            "Use Biometric to login" to null
-        }
-
     if (showBiometricPrompt) {
         val currentAccount =
             keyriAccounts.value.currentProfile
@@ -192,13 +201,11 @@ fun WelcomeScreen(
                 ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
                 ?: filteredAccounts.firstOrNull()?.email
 
-        if (filteredAccounts.firstOrNull { it.email == currentAccount }?.associationKey == null) {
-            navController.navigate("${Routes.LoginScreen.name}?email=$currentAccount")
-        } else {
+        if (filteredAccounts.firstOrNull { it.email == currentAccount }?.associationKey != null) {
             BiometricAuth(
                 context,
-                promptInfo.first,
-                promptInfo.second,
+                "Use Biometric to login as",
+                currentAccount ?: filteredAccounts.firstOrNull()?.email,
                 {},
                 { showBiometricPrompt = false },
             ) {

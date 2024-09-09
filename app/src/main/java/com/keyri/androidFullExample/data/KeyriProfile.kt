@@ -16,7 +16,6 @@ data class KeyriProfile(
 
 @Serializable
 sealed class VerifyingState {
-    var initTimestamp: Long? = null
     var isVerifying: Boolean = false
 
     fun isVerificationDone(): Boolean =

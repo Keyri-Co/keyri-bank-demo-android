@@ -10,7 +10,6 @@
 com.keyrico.keyrisdk.config.KeyriDetectionsConfig,
  com.keyrico.keyrisdk.confirmation.BaseConfirmationBottomDialog,
   com.keyrico.keyrisdk.confirmation.ConfirmationBottomDialog,
-   com.keyrico.keyrisdk.backup.KeyriPrefsBackupAgent,
     com.keyrico.keyrisdk.entity.fingerprint.request.FingerprintEventRequest,
     com.keyrico.keyrisdk.entity.fingerprint.response.FingerprintEventResponse,
     com.keyrico.keyrisdk.entity.session.**,

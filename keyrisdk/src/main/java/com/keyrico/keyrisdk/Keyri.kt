@@ -82,9 +82,6 @@ class Keyri
             KeyriDetectionsConfig(blockEmulatorDetection = blockEmulatorDetection),
         )
 
-        @Volatile
-        private var canProcess: Boolean
-
         init {
             val blockSwizzleDetection = detectionsConfig.blockSwizzleDetection
 
@@ -98,8 +95,6 @@ class Keyri
             val sd = SIPD(detectionsConfig).checkSIPD(context)
 
             if (ed || sd) {
-                canProcess = false
-
                 val details = if (ed) {
                     "emulator"
                 } else {
@@ -108,8 +103,6 @@ class Keyri
 
                 showCompromisedMessage(details)
             } else {
-                canProcess = true
-
                 TelemetryManager.sendEvent(context, TelemetryCodes.SDK_INIT)
             }
 
@@ -271,6 +264,11 @@ class Keyri
             }
         }
 
+    suspend fun getDeviceInfoJson(): String {
+        return FraudService(detectionsConfig).getDeviceInfoJson(context)
+    }
+
+
         /**
          * Call it after obtaining the sessionId from QR code or deep link.
          * Returns Session object with Risk attributes (needed to show confirmation screen) or Exception.
@@ -380,10 +378,6 @@ class Keyri
 
             checkFakeInvocation(blockSwizzleDetection)
 
-            if (!canProcess) {
-                return Result.failure(IllegalStateException("Can't perform initializeDefaultConfirmationScreen action. SDK check failed."))
-            }
-
             return callbackFlow {
                 var callback: ((Result<Unit>) -> Unit)? = { trySend(it) }
 
@@ -437,10 +431,6 @@ class Keyri
             actionBlock: suspend () -> T,
         ): Result<T> {
             return try {
-                if (!canProcess) {
-                    throw IllegalStateException("Can't perform ${code.codeName} action. SDK check failed.")
-                }
-
                 cryptoService.waitForRestoring()
 
                 val actionResult = actionBlock()
@@ -485,8 +475,6 @@ class Keyri
                         context,
                         keyri.appKey,
                     ).onFailure {
-                        keyri.canProcess = false
-
                         keyri.showCompromisedMessage()
                     }
                 }
