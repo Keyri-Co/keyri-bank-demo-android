@@ -162,9 +162,9 @@ fun WelcomeScreen(
         val containerColors =
             if (filteredAccounts.isEmpty()) {
                 MaterialTheme.colorScheme.onPrimary to
-                    MaterialTheme.colorScheme.primary.copy(
-                        alpha = 0.04F,
-                    )
+                        MaterialTheme.colorScheme.primary.copy(
+                            alpha = 0.04F,
+                        )
             } else {
                 MaterialTheme.colorScheme.primary.copy(alpha = 0.04F) to MaterialTheme.colorScheme.onPrimary
             }
@@ -197,8 +197,8 @@ fun WelcomeScreen(
     if (showBiometricPrompt) {
         val currentAccount =
             clickedAccount ?: keyriAccounts.value.currentProfile
-                ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
-                ?: filteredAccounts.firstOrNull()?.email
+            ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
+            ?: filteredAccounts.firstOrNull()?.email
 
         if (filteredAccounts.firstOrNull { it.email == currentAccount }?.associationKey != null) {
             BiometricAuth(
@@ -232,8 +232,13 @@ fun WelcomeScreen(
             },
             onListItemClicked = {
                 clickedAccount = it.text
-                showBiometricPrompt = true
-                showAccountsList = false
+
+                if (filteredAccounts.firstOrNull { a -> a.email == clickedAccount }?.associationKey != null) {
+                    showBiometricPrompt = true
+                    showAccountsList = false
+                } else {
+                    navController.navigate("${Routes.LoginScreen.name}?email=$clickedAccount")
+                }
 
                 coroutineScope.launch(Dispatchers.IO) {
                     sheetState.hide()

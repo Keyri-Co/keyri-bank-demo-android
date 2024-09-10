@@ -115,7 +115,7 @@ class MainActivityViewModel(
                             } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
                                 Routes.VerifiedScreen.name
                             } else if (profile.verifyState?.isVerificationDone() != true && profile.verifyState is VerifyingState.Phone) {
-                                Routes.VerifyScreen.name
+                                "${Routes.VerifyScreen.name}?name=${profile.name}&email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}"
                             }else {
                                 Routes.WelcomeScreen.name
                             }
