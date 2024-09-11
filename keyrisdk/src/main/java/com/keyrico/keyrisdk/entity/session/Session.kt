@@ -56,9 +56,7 @@ data class Session(
         payload: String,
         context: Context,
         trustNewBrowser: Boolean = false,
-    ): Result<Unit> {
-        return finishSession(payload, true, context, trustNewBrowser)
-    }
+    ): Result<Unit> = finishSession(payload, true, context, trustNewBrowser)
 
     /**
      * Call if the user denied the dialog. Returns Boolean denial result.
@@ -77,17 +75,18 @@ data class Session(
         isConfirmed: Boolean,
         context: Context,
         trustNewBrowser: Boolean = false,
-    ): Result<Unit> {
-        return try {
+    ): Result<Unit> =
+        try {
             if (riskAnalytics?.isDeny() == true) {
                 throw RiskException(message)
             }
 
             val custom =
-                JSONObject().apply {
-                    put("payload", payload)
-                    put("deviceId", context.getDeviceId(blockSwizzleDetection))
-                }.toString()
+                JSONObject()
+                    .apply {
+                        put("payload", payload)
+                        put("deviceId", context.getDeviceId(blockSwizzleDetection))
+                    }.toString()
 
             val cryptoService = CryptoService(context, appKey, blockSwizzleDetection)
             val cipher = cryptoService.encryptHkdf(browserPublicKey, custom)
@@ -141,5 +140,4 @@ data class Session(
         }.apply {
             TelemetryManager.lastSessionId = null
         }
-    }
 }

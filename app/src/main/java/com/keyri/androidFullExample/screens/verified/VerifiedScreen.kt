@@ -42,8 +42,8 @@ fun VerifiedScreen(
 ) {
     val error = viewModel.errorMessage.collectAsState()
     val keyriProfiles = viewModel.dataStore.data.collectAsState(KeyriProfiles(null, emptyList()))
-    val currentProfile =
-        keyriProfiles.value.profiles.firstOrNull { it.email == keyriProfiles.value.currentProfile }
+    val currentProfileEmail = keyriProfiles.value.currentProfile
+    val currentProfile = keyriProfiles.value.profiles.firstOrNull { it.email == currentProfileEmail }
     val loading = viewModel.loading.collectAsState()
 
     if (error.value != null) {
@@ -52,7 +52,7 @@ fun VerifiedScreen(
         }
     }
 
-    if (loading.value) {
+    if (loading.value && currentProfile == null) {
         Box(modifier = Modifier.fillMaxSize()) {
             CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
         }

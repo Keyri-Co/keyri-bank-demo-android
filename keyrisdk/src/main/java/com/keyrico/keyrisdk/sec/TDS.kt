@@ -17,7 +17,9 @@ import java.io.InputStream
 import java.security.MessageDigest
 import java.util.jar.JarFile
 
-internal class TDS(private val blockSwizzleDetection: Boolean) {
+internal class TDS(
+    private val blockSwizzleDetection: Boolean,
+) {
     init {
         checkFakeNonKeyriInstance(blockSwizzleDetection)
     }

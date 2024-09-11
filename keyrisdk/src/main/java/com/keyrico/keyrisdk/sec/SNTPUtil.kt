@@ -16,8 +16,8 @@ internal object SNTPUtil {
         timeZone: TimeZone = TimeZone.getDefault(),
         host: String? = "time.google.com",
         timeout: Int = 3_000,
-    ): Result<Date?> {
-        return withContext(Dispatchers.IO) {
+    ): Result<Date?> =
+        withContext(Dispatchers.IO) {
             try {
                 DatagramSocket().use { socket ->
                     socket.soTimeout = timeout
@@ -65,7 +65,6 @@ internal object SNTPUtil {
                 }
             }
         }
-    }
 
     private fun read32(
         buffer: ByteArray,

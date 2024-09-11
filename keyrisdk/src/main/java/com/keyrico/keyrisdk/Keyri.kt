@@ -95,11 +95,12 @@ class Keyri
             val sd = SIPD(detectionsConfig).checkSIPD(context)
 
             if (ed || sd) {
-                val details = if (ed) {
-                    "emulator"
-                } else {
-                    "malware"
-                }
+                val details =
+                    if (ed) {
+                        "emulator"
+                    } else {
+                        "malware"
+                    }
 
                 showCompromisedMessage(details)
             } else {
@@ -234,15 +235,16 @@ class Keyri
 
                 val userId = publicUserId.takeIf { it.isNotEmpty() } ?: ANON_USER
 
-                FraudService(detectionsConfig).sendEvent(
-                    context,
-                    cryptoService,
-                    publicApiKey,
-                    userId,
-                    serviceEncryptionKey,
-                    eventType,
-                    success,
-                ).getOrThrow()
+                FraudService(detectionsConfig)
+                    .sendEvent(
+                        context,
+                        cryptoService,
+                        publicApiKey,
+                        userId,
+                        serviceEncryptionKey,
+                        eventType,
+                        success,
+                    ).getOrThrow()
             }
         }
 
@@ -255,19 +257,17 @@ class Keyri
             checkFakeInvocation(detectionsConfig.blockSwizzleDetection)
 
             return processResultAction(TelemetryCodes.CREATE_FINGERPRINT) {
-                FraudService(detectionsConfig).getFingerprintEventPayload(
-                    context = context,
-                    cryptoService = cryptoService,
-                    publicApiKey = publicApiKey,
-                    serviceEncryptionKey = serviceEncryptionKey,
-                ).getOrThrow()
+                FraudService(detectionsConfig)
+                    .getFingerprintEventPayload(
+                        context = context,
+                        cryptoService = cryptoService,
+                        publicApiKey = publicApiKey,
+                        serviceEncryptionKey = serviceEncryptionKey,
+                    ).getOrThrow()
             }
         }
 
-    suspend fun getDeviceInfoJson(): String {
-        return FraudService(detectionsConfig).getDeviceInfoJson(context)
-    }
-
+        suspend fun getDeviceInfoJson(): String = FraudService(detectionsConfig).getDeviceInfoJson(context)
 
         /**
          * Call it after obtaining the sessionId from QR code or deep link.
@@ -429,8 +429,8 @@ class Keyri
         private suspend fun <T> processResultAction(
             code: TelemetryCodes,
             actionBlock: suspend () -> T,
-        ): Result<T> {
-            return try {
+        ): Result<T> =
+            try {
                 cryptoService.waitForRestoring()
 
                 val actionResult = actionBlock()
@@ -441,15 +441,17 @@ class Keyri
                 TelemetryManager.sendEvent(context, e)
                 Result.failure(e)
             }
-        }
 
         @OptIn(DelicateCoroutinesApi::class)
-        private fun showCompromisedMessage(details: String? =null) {
+        private fun showCompromisedMessage(details: String? = null) {
             GlobalScope.launch(Dispatchers.IO) {
                 withContext(Dispatchers.Main) {
-                   val textMessage = if (details != null ) {
-                       "$DEVICE_COMPROMISED_MESSAGE: $details detected"
-                    } else DEVICE_COMPROMISED_MESSAGE
+                    val textMessage =
+                        if (details != null) {
+                            "$DEVICE_COMPROMISED_MESSAGE: $details detected"
+                        } else {
+                            DEVICE_COMPROMISED_MESSAGE
+                        }
 
                     Toast.makeText(context, textMessage, Toast.LENGTH_LONG).show()
                 }
@@ -471,12 +473,13 @@ class Keyri
             ) {
                 @OptIn(DelicateCoroutinesApi::class)
                 GlobalScope.launch(Dispatchers.IO) {
-                    TDS(keyri.detectionsConfig.blockSwizzleDetection).checksumCheck(
-                        context,
-                        keyri.appKey,
-                    ).onFailure {
-                        keyri.showCompromisedMessage()
-                    }
+                    TDS(keyri.detectionsConfig.blockSwizzleDetection)
+                        .checksumCheck(
+                            context,
+                            keyri.appKey,
+                        ).onFailure {
+                            keyri.showCompromisedMessage()
+                        }
                 }
             }
         }

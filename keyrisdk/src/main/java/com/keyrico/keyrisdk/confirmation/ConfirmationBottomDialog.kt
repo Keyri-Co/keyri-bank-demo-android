@@ -136,15 +136,14 @@ class ConfirmationBottomDialog(
         }
     }
 
-    private fun getItemColors(hasIssue: Boolean): Pair<Int, Int>? {
-        return if (authenticationDenied) {
+    private fun getItemColors(hasIssue: Boolean): Pair<Int, Int>? =
+        if (authenticationDenied) {
             getColor(R.color.keyri_color_red) to getColor(R.color.keyri_color_vpn_red)
         } else if (hasIssue) {
             getColor(R.color.keyri_color_orange) to getColor(R.color.keyri_color_light_orange)
         } else {
             null
         }
-    }
 
     private fun TextView.setDrawableColor(color: Int) {
         this.compoundDrawables.filterNotNull().forEach {
@@ -152,7 +151,5 @@ class ConfirmationBottomDialog(
         }
     }
 
-    private fun getColor(resId: Int): Int {
-        return ContextCompat.getColor(requireContext(), resId)
-    }
+    private fun getColor(resId: Int): Int = ContextCompat.getColor(requireContext(), resId)
 }

@@ -49,7 +49,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun WelcomeScreen(
@@ -89,10 +88,10 @@ fun WelcomeScreen(
     Column {
         Text(
             modifier =
-            Modifier
-                .padding(top = 80.dp)
-                .fillMaxWidth()
-                .align(Alignment.CenterHorizontally),
+                Modifier
+                    .padding(top = 80.dp)
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
             textAlign = TextAlign.Center,
             text = if (filteredAccounts.isEmpty()) "Welcome to\nKeyri Bank" else "Welcome back\nto Keyri Bank",
             style = MaterialTheme.typography.headlineLarge,
@@ -101,58 +100,58 @@ fun WelcomeScreen(
 
         Box(
             modifier =
-            Modifier
-                .fillMaxWidth()
-                .weight(1F),
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1F),
         ) {
             Image(
                 modifier =
-                Modifier
-                    .size(130.dp, 62.dp)
-                    .align(Alignment.Center)
-                    .combinedClickable(
-                        onClick = {},
-                        onDoubleClick = {
-                            viewModel.getDeviceInfoJson {
-                                Toast
-                                    .makeText(context, "Copied!", Toast.LENGTH_SHORT)
-                                    .show()
+                    Modifier
+                        .size(130.dp, 62.dp)
+                        .align(Alignment.Center)
+                        .combinedClickable(
+                            onClick = {},
+                            onDoubleClick = {
+                                viewModel.getDeviceInfoJson {
+                                    Toast
+                                        .makeText(context, "Copied!", Toast.LENGTH_SHORT)
+                                        .show()
 
-                                val clipboard: ClipboardManager? =
-                                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
-                                val clip = ClipData.newPlainText("Device id values", it)
-                                clipboard?.setPrimaryClip(clip)
-                            }
-                        },
-                        onLongClick = {
-                            viewModel.removeAllAccounts {
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    val effect =
-                                        VibrationEffect.createOneShot(
-                                            100,
-                                            VibrationEffect.DEFAULT_AMPLITUDE,
-                                        )
-
+                                    val clipboard: ClipboardManager? =
+                                        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager?
+                                    val clip = ClipData.newPlainText("Device id values", it)
+                                    clipboard?.setPrimaryClip(clip)
+                                }
+                            },
+                            onLongClick = {
+                                viewModel.removeAllAccounts {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                        val vibratorManager =
-                                            context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
-                                        val vibrator = vibratorManager?.defaultVibrator
+                                        val effect =
+                                            VibrationEffect.createOneShot(
+                                                100,
+                                                VibrationEffect.DEFAULT_AMPLITUDE,
+                                            )
+
+                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                            val vibratorManager =
+                                                context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager
+                                            val vibrator = vibratorManager?.defaultVibrator
+
+                                            vibrator?.cancel()
+                                            vibrator?.vibrate(effect)
+                                        }
+                                    } else {
+                                        @Suppress("Deprecation")
+                                        val vibrator =
+                                            context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
 
                                         vibrator?.cancel()
-                                        vibrator?.vibrate(effect)
+                                        @Suppress("Deprecation")
+                                        vibrator?.vibrate(100)
                                     }
-                                } else {
-                                    @Suppress("Deprecation")
-                                    val vibrator =
-                                        context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator
-
-                                    vibrator?.cancel()
-                                    @Suppress("Deprecation")
-                                    vibrator?.vibrate(100)
                                 }
-                            }
-                        },
-                    ),
+                            },
+                        ),
                 contentScale = ContentScale.Fit,
                 painter = painterResource(id = R.drawable.ic_keyri_icon_full),
                 contentDescription = null,
@@ -162,9 +161,9 @@ fun WelcomeScreen(
         val containerColors =
             if (filteredAccounts.isEmpty()) {
                 MaterialTheme.colorScheme.onPrimary to
-                        MaterialTheme.colorScheme.primary.copy(
-                            alpha = 0.04F,
-                        )
+                    MaterialTheme.colorScheme.primary.copy(
+                        alpha = 0.04F,
+                    )
             } else {
                 MaterialTheme.colorScheme.primary.copy(alpha = 0.04F) to MaterialTheme.colorScheme.onPrimary
             }
@@ -175,11 +174,15 @@ fun WelcomeScreen(
             containerColor = containerColors.first,
             onClick = {
                 if (filteredAccounts.size == 1) {
-                    navController.navigate("${Routes.LoginScreen.name}?email=${filteredAccounts.first().email}")
+                    if (filteredAccounts.first().associationKey != null) {
+                        showBiometricPrompt = true
+                    } else {
+                        navController.navigate("${Routes.LoginScreen.name}?email=${filteredAccounts.first().email}")
+                    }
                 } else if (filteredAccounts.size > 1) {
                     showAccountsList = true
                 } else {
-                    navController.navigate("${Routes.VerifyScreen.name}?name=null&email=null&number=null&isVerify=false")
+                    navController.navigate("${Routes.LoginScreen.name}?email=null")
                 }
             },
         )
@@ -197,8 +200,8 @@ fun WelcomeScreen(
     if (showBiometricPrompt) {
         val currentAccount =
             clickedAccount ?: keyriAccounts.value.currentProfile
-            ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
-            ?: filteredAccounts.firstOrNull()?.email
+                ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
+                ?: filteredAccounts.firstOrNull()?.email
 
         if (filteredAccounts.firstOrNull { it.email == currentAccount }?.associationKey != null) {
             BiometricAuth(

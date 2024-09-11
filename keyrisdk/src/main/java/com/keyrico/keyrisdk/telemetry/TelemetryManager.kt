@@ -75,8 +75,8 @@ internal object TelemetryManager {
         eventCode: TelemetryCodes?,
         error: Throwable?,
         payload: String?,
-    ): JsonObject {
-        return JsonObject().apply {
+    ): JsonObject =
+        JsonObject().apply {
             addProperty("platform", KEYRI_PLATFORM)
             addProperty("sdkVersion", BuildConfig.VERSION)
             addProperty("packageName", context.packageName)
@@ -98,7 +98,6 @@ internal object TelemetryManager {
                 addProperty("stacktrace", it.stackTraceToString())
             }
         }
-    }
 
     private fun getDeviceName(): String {
         val manufacturer = Build.MANUFACTURER
@@ -114,10 +113,12 @@ internal object TelemetryManager {
     private fun provideTelemetryService(): TelemetryService {
         val okHttpClientBuilder = OkHttpClient.Builder()
 
-        okHttpClientBuilder.connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+        okHttpClientBuilder
+            .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
             .readTimeout(TIMEOUT, TimeUnit.SECONDS)
 
-        return Retrofit.Builder()
+        return Retrofit
+            .Builder()
             .baseUrl("https://prod.api.keyri.com")
             .addConverterFactory(ConverterFactory())
             .client(okHttpClientBuilder.build())

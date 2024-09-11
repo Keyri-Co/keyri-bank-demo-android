@@ -71,7 +71,6 @@ import kotlin.math.tan
 import kotlin.math.tanh
 
 internal class DeviceInfo {
-
     suspend fun getDeviceInfoJson(context: Context): String {
         val installationSource = checkInstallationSource(context)
         val carrierInfo = getCarrierInfo(context)
@@ -248,13 +247,12 @@ internal class DeviceInfo {
             }
     }
 
-    private fun isHighTextContrastEnabled(context: Context): Boolean {
-        return try {
+    private fun isHighTextContrastEnabled(context: Context): Boolean =
+        try {
             Settings.Secure.getInt(context.contentResolver, "high_text_contrast_enabled", 0) == 1
         } catch (e: Exception) {
             false
         }
-    }
 
     private fun getScreenColorDepth(context: Context): Int {
         val info = PixelFormat()
@@ -265,9 +263,7 @@ internal class DeviceInfo {
         return info.bitsPerPixel
     }
 
-    private fun getHardwareConcurrency(): Int {
-        return Runtime.getRuntime().availableProcessors() * 2
-    }
+    private fun getHardwareConcurrency(): Int = Runtime.getRuntime().availableProcessors() * 2
 
     private fun getMaxTouchPoints(context: Context): Int {
         var points = 0
@@ -305,17 +301,14 @@ internal class DeviceInfo {
         }
     }
 
-    private fun getSupportedABIs(): List<String> {
-        return Build.SUPPORTED_ABIS.toList()
-    }
+    private fun getSupportedABIs(): List<String> = Build.SUPPORTED_ABIS.toList()
 
-    private fun isHdr(context: Context): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+    private fun isHdr(context: Context): Boolean =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             (context as? Activity)?.window?.colorMode == COLOR_MODE_HDR
         } else {
             false
         }
-    }
 
     private fun isInversionModeEnabled(context: Context): Boolean {
         val accessibilityEnabled =
@@ -331,41 +324,44 @@ internal class DeviceInfo {
         return accessibilityEnabled == 1
     }
 
-    private fun getMathFingerprint(): String {
-        return JSONObject().apply {
-            put("acos", acos(0.12312423423423424))
-            put("acosh", acosh(1e308))
-            put("asin", asin(0.12312423423423424))
-            put("asinh", asinh(1.0))
-            put("atan", atan(0.5))
-            put("atanh", atanh(0.5))
-            put("sin", sin(-1e300))
-            put("sinh", sinh(1.0))
-            put("cos", cos(10.000000000123))
-            put("cosh", cosh(1.0))
-            put("tan", tan(-1e300))
-            put("tanh", tanh(1.0))
-            put("exp", exp(1.0))
-            put("expm1", expm1(1.0))
-            put("log1p", ln1p(10.0))
-            put("powPI", (PI).pow(-100.0))
-        }.toString().encodeToByteArray().toSha1Base64()
-    }
+    private fun getMathFingerprint(): String =
+        JSONObject()
+            .apply {
+                put("acos", acos(0.12312423423423424))
+                put("acosh", acosh(1e308))
+                put("asin", asin(0.12312423423423424))
+                put("asinh", asinh(1.0))
+                put("atan", atan(0.5))
+                put("atanh", atanh(0.5))
+                put("sin", sin(-1e300))
+                put("sinh", sinh(1.0))
+                put("cos", cos(10.000000000123))
+                put("cosh", cosh(1.0))
+                put("tan", tan(-1e300))
+                put("tanh", tanh(1.0))
+                put("exp", exp(1.0))
+                put("expm1", expm1(1.0))
+                put("log1p", ln1p(10.0))
+                put("powPI", (PI).pow(-100.0))
+            }.toString()
+            .encodeToByteArray()
+            .toSha1Base64()
 
     private fun checkDangerousPackages(context: Context): Boolean {
         val packageManager: PackageManager = context.packageManager
 
-        return packageNames.mapNotNull {
-            try {
-                packageManager.getPackageInfo(it, PackageManager.GET_META_DATA)
-            } catch (e: PackageManager.NameNotFoundException) {
-                null
-            }
-        }.isNotEmpty()
+        return packageNames
+            .mapNotNull {
+                try {
+                    packageManager.getPackageInfo(it, PackageManager.GET_META_DATA)
+                } catch (e: PackageManager.NameNotFoundException) {
+                    null
+                }
+            }.isNotEmpty()
     }
 
-    private fun checkDebuggable(context: Context): Boolean {
-        return try {
+    private fun checkDebuggable(context: Context): Boolean =
+        try {
             val flagsCheck =
                 context.applicationContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
 
@@ -374,7 +370,6 @@ internal class DeviceInfo {
             Log.e(KEYRI_KEY, e.message, e)
             false
         }
-    }
 
     private fun checkInstallationSource(context: Context): String? {
         val packageManager = context.packageManager
@@ -386,8 +381,8 @@ internal class DeviceInfo {
         }
     }
 
-    private fun getPackageDetails(context: Context): PackageDetails? {
-        return try {
+    private fun getPackageDetails(context: Context): PackageDetails? =
+        try {
             val packageManager = context.packageManager
 
             val packageInfo =
@@ -416,7 +411,6 @@ internal class DeviceInfo {
             Log.d(KEYRI_KEY, e.message, e)
             null
         }
-    }
 
     private fun getResolutionInfo(context: Context): DisplayMetrics {
         val windowManager =
@@ -489,29 +483,25 @@ internal class DeviceInfo {
         return result
     }
 
-    private fun getSupportedCodecs(): List<String> {
-        return MediaCodecList(MediaCodecList.ALL_CODECS).codecInfos.map { it.name }
-    }
+    private fun getSupportedCodecs(): List<String> = MediaCodecList(MediaCodecList.ALL_CODECS).codecInfos.map { it.name }
 
-    private fun getAvailableLocales(): List<String> {
-        return Locale.getAvailableLocales().map { it.displayName }
-    }
+    private fun getAvailableLocales(): List<String> = Locale.getAvailableLocales().map { it.displayName }
 
-    private fun getSystemApps(context: Context): List<String> {
-        return try {
+    private fun getSystemApps(context: Context): List<String> =
+        try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 context.packageManager.getInstalledApplications(
                     PackageManager.ApplicationInfoFlags.of(PackageManager.MATCH_SYSTEM_ONLY.toLong()),
                 )
             } else {
-                context.packageManager.getInstalledApplications(PackageManager.GET_META_DATA)
+                context.packageManager
+                    .getInstalledApplications(PackageManager.GET_META_DATA)
                     .filter { it.flags and ApplicationInfo.FLAG_SYSTEM != 0 }
             }.map { it.name }
         } catch (e: Exception) {
             Log.d(KEYRI_KEY, e.message, e)
             listOf()
         }
-    }
 
     private fun getTotalRAMMemory(context: Context): String {
         val activityManager =
@@ -529,24 +519,26 @@ internal class DeviceInfo {
         return "${((stat.blockCountLong * stat.blockSizeLong) / (1024 * 1024 * 1024)).toInt()}"
     }
 
-    private fun getApplicationSignature(context: Context): List<String>? {
-        return try {
+    private fun getApplicationSignature(context: Context): List<String>? =
+        try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
                 val sig =
-                    context.packageManager.getPackageInfo(
-                        context.packageName,
-                        PackageManager.GET_SIGNING_CERTIFICATES,
-                    ).signingInfo
+                    context.packageManager
+                        .getPackageInfo(
+                            context.packageName,
+                            PackageManager.GET_SIGNING_CERTIFICATES,
+                        ).signingInfo
                 if (sig.hasMultipleSigners()) {
                     sig.apkContentsSigners
                 } else {
                     sig.signingCertificateHistory
                 }
             } else {
-                context.packageManager.getPackageInfo(
-                    context.packageName,
-                    PackageManager.GET_SIGNATURES,
-                ).signatures
+                context.packageManager
+                    .getPackageInfo(
+                        context.packageName,
+                        PackageManager.GET_SIGNATURES,
+                    ).signatures
             }.map {
                 it.toByteArray().toSha1Base64()
             }
@@ -554,10 +546,9 @@ internal class DeviceInfo {
             Log.d(KEYRI_KEY, e.message, e)
             null
         }
-    }
 
-    private fun getDeviceName(context: Context): String {
-        return try {
+    private fun getDeviceName(context: Context): String =
+        try {
             val contentResolver = context.contentResolver
 
             var userDeviceName: String? =
@@ -575,7 +566,6 @@ internal class DeviceInfo {
         } catch (e: Exception) {
             getDeviceModel()
         }
-    }
 
     private fun getDeviceModel(): String {
         val manufacturer = Build.MANUFACTURER

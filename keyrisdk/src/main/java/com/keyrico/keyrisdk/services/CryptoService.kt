@@ -13,6 +13,8 @@ import com.keyrico.keyrisdk.telemetry.TelemetryCodes
 import com.keyrico.keyrisdk.telemetry.TelemetryManager
 import com.keyrico.keyrisdk.utils.toByteArrayFromBase64String
 import com.keyrico.keyrisdk.utils.toStringBase64
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.math.BigInteger
 import java.security.AlgorithmParameters
 import java.security.KeyFactory
@@ -31,8 +33,6 @@ import javax.crypto.KeyAgreement
 import javax.crypto.Mac
 import javax.crypto.SecretKey
 import javax.crypto.spec.SecretKeySpec
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 internal class CryptoService(
     private val context: Context,
@@ -46,17 +46,11 @@ internal class CryptoService(
         backupService.checkBackupAccounts()
     }
 
-    override suspend fun onGetAssociationKey(publicUserId: String): String {
-        return getOrGenerateAssociationKey(publicUserId)
-    }
+    override suspend fun onGetAssociationKey(publicUserId: String): String = getOrGenerateAssociationKey(publicUserId)
 
-    override suspend fun onListUniqueAccounts(): Map<String, String> {
-        return listAssociationKeys().filter { it.key != ANON_USER }
-    }
+    override suspend fun onListUniqueAccounts(): Map<String, String> = listAssociationKeys().filter { it.key != ANON_USER }
 
-    override suspend fun onCreateNewKey(publicUserId: String): String {
-        return generateAssociationKey(publicUserId)
-    }
+    override suspend fun onCreateNewKey(publicUserId: String): String = generateAssociationKey(publicUserId)
 
     suspend fun generateAssociationKey(publicUserId: String): String {
         TelemetryManager.sendEvent(context, TelemetryCodes.ASSOCIATION_KEY_SAVED)
@@ -72,7 +66,9 @@ internal class CryptoService(
                 getKeyStore().aliases()
             }
 
-        return aliases.toList().filter { it.contains(ECDSA_KEYPAIR) }
+        return aliases
+            .toList()
+            .filter { it.contains(ECDSA_KEYPAIR) }
             .map { it.removePrefix(ECDSA_KEYPAIR) }
             .associateWith { getOrGenerateAssociationKey(it) }
     }
@@ -87,7 +83,10 @@ internal class CryptoService(
                 return@withContext null
             }
 
-            keyStore.getCertificate(alias).publicKey.encoded.toStringBase64()
+            keyStore
+                .getCertificate(alias)
+                .publicKey.encoded
+                .toStringBase64()
         }
     }
 
@@ -101,7 +100,8 @@ internal class CryptoService(
             if (publicBytes.size <= 65) {
                 generateP256PublicKeyFromUncompressedW(publicBytes)
             } else {
-                KeyFactory.getInstance(KeyProperties.KEY_ALGORITHM_EC)
+                KeyFactory
+                    .getInstance(KeyProperties.KEY_ALGORITHM_EC)
                     .generatePublic(X509EncodedKeySpec(publicBytes)) as ECPublicKey
             }
 
@@ -172,15 +172,18 @@ internal class CryptoService(
         TelemetryManager.deviceID = getAssociationKey(ANON_USER)
     }
 
-    private suspend fun getOrGenerateAssociationKey(publicUserId: String): String {
-        return getAssociationKey(publicUserId) ?: generateAssociationKey(publicUserId)
-    }
+    private suspend fun getOrGenerateAssociationKey(publicUserId: String): String =
+        getAssociationKey(publicUserId) ?: generateAssociationKey(publicUserId)
 
     private fun createECDSAKeypair(alias: String): String {
         val keyStore = getKeyStore()
 
         if (keyStore.containsAlias(alias)) {
-            val associationKey = keyStore.getCertificate(alias).publicKey.encoded.toStringBase64()
+            val associationKey =
+                keyStore
+                    .getCertificate(alias)
+                    .publicKey.encoded
+                    .toStringBase64()
 
             if (alias == ECDSA_KEYPAIR + ANON_USER) {
                 TelemetryManager.deviceID = associationKey
@@ -193,13 +196,19 @@ internal class CryptoService(
             KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, ANDROID_KEYSTORE)
 
         val keyGenParameterSpec =
-            KeyGenParameterSpec.Builder(alias, KeyProperties.PURPOSE_SIGN)
+            KeyGenParameterSpec
+                .Builder(alias, KeyProperties.PURPOSE_SIGN)
                 .setAlgorithmParameterSpec(ECGenParameterSpec(EC_CURVE))
-                .setDigests(KeyProperties.DIGEST_SHA256).build()
+                .setDigests(KeyProperties.DIGEST_SHA256)
+                .build()
 
         keyPairGenerator.initialize(keyGenParameterSpec)
 
-        val associationKey = keyPairGenerator.generateKeyPair().public.encoded.toStringBase64()
+        val associationKey =
+            keyPairGenerator
+                .generateKeyPair()
+                .public.encoded
+                .toStringBase64()
 
         backupService.addKey(alias, associationKey)
 
@@ -212,9 +221,7 @@ internal class CryptoService(
         return associationKey
     }
 
-    private fun createAnonymousECDSAKeypair(): String {
-        return createECDSAKeypair(ECDSA_KEYPAIR + ANON_USER)
-    }
+    private fun createAnonymousECDSAKeypair(): String = createECDSAKeypair(ECDSA_KEYPAIR + ANON_USER)
 
     private fun computeHkdf(
         data: String,
@@ -300,9 +307,7 @@ internal class CryptoService(
         )
     }
 
-    private fun getKeyStore(): KeyStore {
-        return KeyStore.getInstance(ANDROID_KEYSTORE).also { it.load(null) }
-    }
+    private fun getKeyStore(): KeyStore = KeyStore.getInstance(ANDROID_KEYSTORE).also { it.load(null) }
 
     private fun generateP256PublicKeyFromFlatW(w: ByteArray): ECPublicKey {
         val head = Base64.decode(HEAD_256, Base64.NO_WRAP)

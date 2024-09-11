@@ -7,7 +7,10 @@ import org.json.JSONObject
  * The `EventType` class allows to select event type for fingerprinting and provide metadata.
  */
 @Suppress("unused")
-class EventType private constructor(val name: String, var metadata: JSONObject? = null) {
+class EventType private constructor(
+    val name: String,
+    var metadata: JSONObject? = null,
+) {
     @Keep
     companion object {
         @JvmOverloads

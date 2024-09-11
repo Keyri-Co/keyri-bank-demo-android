@@ -25,7 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.util.Consumer
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -61,17 +62,19 @@ class MainActivity : FragmentActivity() {
                 DisposableEffect(Unit) {
                     val listener =
                         Consumer<Intent> {
-                            viewModel.checkStartScreen(it.data)
+                            if (openScreen.value != null && it.data != null) {
+                                viewModel.checkStartScreen(it.data)
+                            }
                         }
 
                     addOnNewIntentListener(listener)
                     onDispose { removeOnNewIntentListener(listener) }
                 }
 
-                LifecycleStartEffect(Unit) {
-                    viewModel.checkStartScreen(intent?.data)
-
-                    onStopOrDispose {}
+                LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
+                    if (openScreen.value == null) {
+                        viewModel.checkStartScreen(intent?.data)
+                    }
                 }
 
                 if (openScreen.value == null) {

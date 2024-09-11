@@ -33,8 +33,8 @@ internal data class InternalSession(
         appKey: String,
         publicApiKey: String?,
         blockSwizzleDetection: Boolean,
-    ): Session {
-        return Session(
+    ): Session =
+        Session(
             widgetOrigin = requireNotNull(widgetOrigin),
             sessionId = requireNotNull(sessionId),
             widgetUserAgent = widgetUserAgent,
@@ -52,5 +52,4 @@ internal data class InternalSession(
             publicApiKey = publicApiKey,
             blockSwizzleDetection = blockSwizzleDetection,
         )
-    }
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.keyri.androidFullExample.composables.KeyriButton
 import com.keyri.androidFullExample.composables.KeyriTextField
+import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.primaryDisabled
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.theme.textFieldUnfocusedColor
@@ -45,12 +46,31 @@ fun LoginScreen(
     var email by remember { mutableStateOf(recoveredEmail ?: "") }
     val error = viewModel.errorMessage.collectAsState()
     val loading = viewModel.loading.collectAsState()
+    val profiles = viewModel.dataStore.data.collectAsState(null)
     val context = LocalContext.current
     val textFieldFocusRequester = FocusRequester()
 
     LaunchedEffect(key1 = recoveredEmail) {
         if (recoveredEmail != null) {
             textFieldFocusRequester.requestFocus()
+        }
+    }
+
+    LaunchedEffect(key1 = profiles.value) {
+        val isVerificationDone =
+            profiles.value
+                ?.profiles
+                ?.firstOrNull {
+                    it.email == profiles.value?.currentProfile
+                }?.verifyState
+                ?.isVerificationDone()
+
+        if (isVerificationDone == true) {
+            navController.navigate(Routes.VerifiedScreen.name) {
+                popUpTo(Routes.LoginScreen.name) {
+                    inclusive = true
+                }
+            }
         }
     }
 

@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 import kotlin.concurrent.timer
 
 class LoginViewModel(
-    private val dataStore: DataStore<KeyriProfiles>,
+    val dataStore: DataStore<KeyriProfiles>,
     private val repository: KeyriDemoRepository,
 ) : ViewModel() {
     private val _loading = MutableStateFlow(false)
@@ -91,14 +91,11 @@ class LoginViewModel(
             val mappedProfiles =
                 if (keyriProfiles.profiles.any { it.email == email }) {
                     keyriProfiles.profiles.map {
-                        if (keyriProfiles.currentProfile == email) {
+                        if (it.email == email) {
                             it.copy(
-                                name = name,
                                 email = email,
-                                phone = null,
                                 isVerify = false,
                                 verifyState = null,
-                                customToken = null,
                                 biometricsSet = false,
                             )
                         } else {

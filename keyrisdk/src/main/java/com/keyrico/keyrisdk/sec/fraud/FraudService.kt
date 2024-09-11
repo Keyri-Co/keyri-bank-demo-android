@@ -14,10 +14,10 @@ import com.keyrico.keyrisdk.utils.makeApiCall
 import com.keyrico.keyrisdk.utils.provideFraudApiService
 import org.json.JSONObject
 
-internal class FraudService(private val detectionsConfig: KeyriDetectionsConfig) {
-    suspend fun getDeviceInfoJson(context: Context):String {
-        return DeviceInfo().getDeviceInfoJson(context)
-    }
+internal class FraudService(
+    private val detectionsConfig: KeyriDetectionsConfig,
+) {
+    suspend fun getDeviceInfoJson(context: Context): String = DeviceInfo().getDeviceInfoJson(context)
 
     suspend fun getFingerprintEventPayload(
         context: Context,
@@ -59,22 +59,23 @@ internal class FraudService(private val detectionsConfig: KeyriDetectionsConfig)
         val deviceInfoJson = deviceInfo.getSignalsObject(context, false)
 
         val plainTextPayload =
-            JSONObject().apply {
-                put("apiKey", publicApiKey)
-                eventType?.name?.let { put("eventType", it) } ?: put(
-                    "eventType",
-                    EventType.visits().name,
-                )
-                eventType?.metadata?.let { put("eventMetadata", it) }
-                success?.let { put("success", it) }
-                publicUserId?.let { put("userId", it) }
-                put("timestamp", timestamp)
-                put("timestampSignature", timestampSignature)
-                put("deviceHash", deviceInfoHash)
-                put("deviceInfo", deviceInfoJson)
-                put("cryptoCookie", associationKey)
-                put("serviceEncryptionKey", serviceEncryptionKey)
-            }.toString()
+            JSONObject()
+                .apply {
+                    put("apiKey", publicApiKey)
+                    eventType?.name?.let { put("eventType", it) } ?: put(
+                        "eventType",
+                        EventType.visits().name,
+                    )
+                    eventType?.metadata?.let { put("eventMetadata", it) }
+                    success?.let { put("success", it) }
+                    publicUserId?.let { put("userId", it) }
+                    put("timestamp", timestamp)
+                    put("timestampSignature", timestampSignature)
+                    put("deviceHash", deviceInfoHash)
+                    put("deviceInfo", deviceInfoJson)
+                    put("cryptoCookie", associationKey)
+                    put("serviceEncryptionKey", serviceEncryptionKey)
+                }.toString()
 
         val encryptionResult = cryptoService.encryptHkdf(BACKEND_PUBLIC_KEY, plainTextPayload)
 

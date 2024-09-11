@@ -46,7 +46,7 @@ internal class BackupService(
         }
     }
 
-    fun removeKey(alias: String, ) {
+    fun removeKey(alias: String) {
         checkFakeNonKeyriInvocation(blockSwizzleDetection)
 
         sharedPreferences.edit(commit = true) {
@@ -66,16 +66,16 @@ internal class BackupService(
             val restoredKeys = getAllPreferencesKeys()
 
             if (restoredKeys.isNotEmpty()) {
-                    restoredKeys.mapNotNull { (username, oldKey) ->
-                        val usernameWithoutPrefix = username.removePrefix(ECDSA_KEYPAIR)
-                        val newKey = backupCallbacks.onGetAssociationKey(usernameWithoutPrefix)
+                restoredKeys.mapNotNull { (username, oldKey) ->
+                    val usernameWithoutPrefix = username.removePrefix(ECDSA_KEYPAIR)
+                    val newKey = backupCallbacks.onGetAssociationKey(usernameWithoutPrefix)
 
-                        if (newKey != oldKey) {
-                            NewAssociationKey(usernameWithoutPrefix, oldKey, newKey)
-                        } else {
-                            null
-                        }
+                    if (newKey != oldKey) {
+                        NewAssociationKey(usernameWithoutPrefix, oldKey, newKey)
+                    } else {
+                        null
                     }
+                }
             }
         } else {
             val keystoreKeysDigestString = getKeystoreKeysDigestString()
@@ -88,17 +88,14 @@ internal class BackupService(
         }
     }
 
-    private fun synchronizeDeviceAccounts(
-        keystoreKeysDigestString: String,
-    ) {
+    private fun synchronizeDeviceAccounts(keystoreKeysDigestString: String) {
         TelemetryManager.sendEvent(context, TelemetryCodes.UPDATE_BACKEND_ACCOUNTS)
 
         setNewSnapshotHash(keystoreKeysDigestString)
     }
 
-    private fun isSnapshotHashActual(actualSnapshotHash: String): Boolean {
-        return sharedPreferences.getString(LAST_SNAPSHOT_HASH, null) == actualSnapshotHash
-    }
+    private fun isSnapshotHashActual(actualSnapshotHash: String): Boolean =
+        sharedPreferences.getString(LAST_SNAPSHOT_HASH, null) == actualSnapshotHash
 
     private fun setNewSnapshotHash(hash: String) {
         sharedPreferences.edit(commit = true) {
@@ -108,7 +105,8 @@ internal class BackupService(
 
     private suspend fun getKeystoreKeysDigestString(): String {
         val keysString =
-            backupCallbacks.onListUniqueAccounts()
+            backupCallbacks
+                .onListUniqueAccounts()
                 .toSortedMap()
                 .map { "${it.key}.${it.value}" }
                 .joinToString()
@@ -117,13 +115,12 @@ internal class BackupService(
         return keysString.toSha1Base64()
     }
 
-    private fun getAllPreferencesKeys(): Map<String, String?> {
-        return sharedPreferences.all
+    private fun getAllPreferencesKeys(): Map<String, String?> =
+        sharedPreferences.all
             ?.filter { it.key.contains(ECDSA_KEYPAIR) }
             ?.map { it.key to it.value.toString() }
             ?.associate { it.first to it.second }
             ?: mapOf()
-    }
 
     private fun triggerDataChanged() {
         try {

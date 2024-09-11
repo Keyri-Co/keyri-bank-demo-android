@@ -12,7 +12,7 @@ android {
         compileSdk = 34
 
         val version =
-            loadProperties("${rootDir}/keyrisdk/keyri.properties").getProperty("keyri.version")
+            loadProperties("$rootDir/keyrisdk/keyri.properties").getProperty("keyri.version")
 
         buildConfigField("String", "VERSION", "\"${version ?: ""}\"")
     }

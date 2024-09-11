@@ -1,6 +1,8 @@
 package com.keyrico.keyrisdk.telemetry
 
-internal enum class TelemetryCodes(val codeName: String) {
+internal enum class TelemetryCodes(
+    val codeName: String,
+) {
     SDK_INIT("sdkInit"),
     GET_TRIGGERED("getTriggered"),
     GET_RESPONSE_HANDLED("getResponseHandled"),

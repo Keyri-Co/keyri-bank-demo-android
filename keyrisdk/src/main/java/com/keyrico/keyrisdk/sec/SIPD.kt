@@ -11,7 +11,9 @@ import java.io.File
 import java.io.InputStreamReader
 import java.util.Scanner
 
-internal class SIPD(private val detectionsConfig: KeyriDetectionsConfig) {
+internal class SIPD(
+    private val detectionsConfig: KeyriDetectionsConfig,
+) {
     private val blockSwizzleDetection: Boolean = detectionsConfig.blockSwizzleDetection
 
     init {
@@ -144,19 +146,18 @@ internal class SIPD(private val detectionsConfig: KeyriDetectionsConfig) {
             val blockRootDetection = detectionsConfig.blockRootDetection
 
             (!blockDangerousAppsDetection and checkDangerousApps(context)) or
-                    (!blockEmulatorDetection and checkBinaries()) or
-                    (!blockEmulatorDetection and checkForDangerousProps()) or
-                    (!blockRootDetection and checkForRWPaths()) or
-                    (!blockEmulatorDetection and detectTestKeys()) or
-                    (!blockRootDetection and (checkSuExists() or checkForMagiskBinary()))
+                (!blockEmulatorDetection and checkBinaries()) or
+                (!blockEmulatorDetection and checkForDangerousProps()) or
+                (!blockRootDetection and checkForRWPaths()) or
+                (!blockEmulatorDetection and detectTestKeys()) or
+                (!blockRootDetection and (checkSuExists() or checkForMagiskBinary()))
         }
     }
 
-    private fun checkDangerousApps(context: Context): Boolean {
-        return returnWithLog("checkDangerousApps") {
+    private fun checkDangerousApps(context: Context): Boolean =
+        returnWithLog("checkDangerousApps") {
             detectRootManagementApps(context) or detectPotentiallyDangerousApps(context)
         }
-    }
 
     private fun checkBinaries(): Boolean {
         checkFakeNonKeyriInvocation(blockSwizzleDetection)

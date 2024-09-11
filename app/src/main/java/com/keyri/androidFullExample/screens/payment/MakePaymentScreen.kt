@@ -124,7 +124,7 @@ fun MakePayment(
         }
 
         if (showBiometricPrompt) {
-            BiometricAuth(context, "Set up Biometric authentication", null, {
+            BiometricAuth(context, "Use biometric to confirm", null, {
                 onShowSnackbar(it)
             }, { showBiometricPrompt = false }) {
                 showBiometricPrompt = false

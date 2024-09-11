@@ -95,37 +95,33 @@ internal suspend fun <T : Any> makeApiCall(
     }
 }
 
-internal fun provideApiService(blockSwizzleDetection: Boolean): ApiService {
-    return provideApiService(
+internal fun provideApiService(blockSwizzleDetection: Boolean): ApiService =
+    provideApiService(
         "https://prod.api.keyri.com",
         blockSwizzleDetection,
         ApiService::class.java,
     )
-}
 
-internal fun provideAssociationKeysApiService(blockSwizzleDetection: Boolean): AssociationKeysApiService {
-    return provideApiService(
+internal fun provideAssociationKeysApiService(blockSwizzleDetection: Boolean): AssociationKeysApiService =
+    provideApiService(
         "https://api.keyri.co",
         blockSwizzleDetection,
         AssociationKeysApiService::class.java,
     )
-}
 
-internal fun provideFraudApiService(blockSwizzleDetection: Boolean): FraudApiService {
-    return provideApiService(
+internal fun provideFraudApiService(blockSwizzleDetection: Boolean): FraudApiService =
+    provideApiService(
         "https://fp.keyri.com",
         blockSwizzleDetection,
         FraudApiService::class.java,
     )
-}
 
-internal fun provideChecksumApiService(blockSwizzleDetection: Boolean): ChecksumApiService {
-    return provideApiService(
+internal fun provideChecksumApiService(blockSwizzleDetection: Boolean): ChecksumApiService =
+    provideApiService(
         "https://td.api.keyri.com",
         blockSwizzleDetection,
         ChecksumApiService::class.java,
     )
-}
 
 private fun <T> provideApiService(
     baseUrl: String,
@@ -136,14 +132,17 @@ private fun <T> provideApiService(
 
     val okHttpClientBuilder = OkHttpClient.Builder()
 
-    okHttpClientBuilder.connectTimeout(TIMEOUT, TimeUnit.SECONDS)
+    okHttpClientBuilder
+        .connectTimeout(TIMEOUT, TimeUnit.SECONDS)
         .readTimeout(TIMEOUT, TimeUnit.SECONDS)
 
-    HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }.let(okHttpClientBuilder::addInterceptor)
+    HttpLoggingInterceptor()
+        .apply {
+            level = HttpLoggingInterceptor.Level.BODY
+        }.let(okHttpClientBuilder::addInterceptor)
 
-    return Retrofit.Builder()
+    return Retrofit
+        .Builder()
         .baseUrl(baseUrl)
         .addConverterFactory(ConverterFactory())
         .client(okHttpClientBuilder.build())

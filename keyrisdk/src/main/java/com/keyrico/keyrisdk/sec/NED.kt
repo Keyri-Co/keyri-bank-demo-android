@@ -19,7 +19,9 @@ import java.io.InputStream
 import java.lang.reflect.Method
 import java.util.Locale
 
-internal class NED(private val blockSwizzleDetection: Boolean) {
+internal class NED(
+    private val blockSwizzleDetection: Boolean,
+) {
     init {
         checkFakeNonKeyriInstance(blockSwizzleDetection)
     }
@@ -97,9 +99,15 @@ internal class NED(private val blockSwizzleDetection: Boolean) {
         checkFakeNonKeyriInvocation(blockSwizzleDetection)
 
         return returnWithLog("checkAdvanced") {
-            checkTelephony(context) || checkFiles(GENY_FILES) || checkFiles(ANDY_FILES) ||
-                checkFiles(NOX_FILES) || checkQEmuDrivers() || checkFiles(PIPES) ||
-                checkIp(context) || checkQEmuProps(context) && checkFiles(X86_FILES)
+            checkTelephony(context) ||
+                checkFiles(GENY_FILES) ||
+                checkFiles(ANDY_FILES) ||
+                checkFiles(NOX_FILES) ||
+                checkQEmuDrivers() ||
+                checkFiles(PIPES) ||
+                checkIp(context) ||
+                checkQEmuProps(context) &&
+                checkFiles(X86_FILES)
         }
     }
 
@@ -152,7 +160,8 @@ internal class NED(private val blockSwizzleDetection: Boolean) {
                                 Manifest.permission.READ_PHONE_STATE,
                             )
                                 == PackageManager.PERMISSION_GRANTED
-                        ) && isSupportTelePhony(context)
+                        ) &&
+                        isSupportTelePhony(context)
                     ) {
                         checkPhoneNumber(context) ||
                             checkDeviceId(context) ||
@@ -495,6 +504,9 @@ internal class NED(private val blockSwizzleDetection: Boolean) {
 
         private const val MIN_PROPERTIES_THRESHOLD = 0x5
 
-        class Property(var name: String, var seekValue: String?)
+        class Property(
+            var name: String,
+            var seekValue: String?,
+        )
     }
 }
