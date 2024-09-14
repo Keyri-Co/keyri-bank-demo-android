@@ -49,7 +49,7 @@ class VerifyViewModel(
             userRegister(isVerify, name, email, number)
             repository.emailLogin(email)
 
-            updateVerifyState(email, null)
+            updateVerifyState(email, VerifyingState.Email(isVerified = false))
 
             withContext(Dispatchers.Main) {
                 onSuccess()
@@ -68,8 +68,7 @@ class VerifyViewModel(
             userRegister(isVerify, name, email, phone)
 
             val result = repository.smsLogin(phone)
-
-            updateVerifyState(null, phone)
+            updateVerifyState(email, VerifyingState.Phone(isVerified = false))
 
             withContext(Dispatchers.Main) {
                 onSuccess(result)
@@ -90,7 +89,13 @@ class VerifyViewModel(
 
             val result = repository.smsLogin(phone)
 
-            updateVerifyState(email, phone)
+            updateVerifyState(
+                email,
+                VerifyingState.EmailPhone(
+                    emailVerified = false,
+                    phoneVerified = false,
+                ),
+            )
 
             withContext(Dispatchers.Main) {
                 onSuccess(result)
@@ -144,42 +149,14 @@ class VerifyViewModel(
     }
 
     private suspend fun updateVerifyState(
-        email: String?,
-        phone: String?,
+        email: String,
+        verifyingState: VerifyingState,
     ) {
         dataStore.updateData { keyriProfiles ->
             val mappedProfiles =
                 keyriProfiles.profiles.map {
-                    if (keyriProfiles.currentProfile == it.email) {
-                        when {
-                            email != null && phone != null -> {
-                                val verifyState =
-                                    VerifyingState.EmailPhone(
-                                        emailVerified = false,
-                                        phoneVerified = false,
-                                    )
-
-                                verifyState.isVerifying = true
-
-                                it.copy(verifyState = verifyState)
-                            }
-
-                            email != null && phone == null -> {
-                                val verifyState = VerifyingState.Email(isVerified = false)
-                                verifyState.isVerifying = true
-
-                                it.copy(verifyState = verifyState)
-                            }
-
-                            email == null && phone != null -> {
-                                val verifyState = VerifyingState.Phone(isVerified = false)
-                                verifyState.isVerifying = true
-
-                                it.copy(verifyState = verifyState)
-                            }
-
-                            else -> it
-                        }
+                    if (email == it.email) {
+                        it.copy(verifyState = verifyingState)
                     } else {
                         it
                     }
@@ -199,7 +176,7 @@ class VerifyViewModel(
             val mappedProfiles =
                 if (keyriProfiles.profiles.any { it.email == email }) {
                     keyriProfiles.profiles.map {
-                        if (keyriProfiles.currentProfile == email) {
+                        if (it.email == email) {
                             it.copy(
                                 name = name,
                                 email = email,

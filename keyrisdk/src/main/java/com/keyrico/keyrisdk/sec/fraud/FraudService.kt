@@ -17,7 +17,7 @@ import org.json.JSONObject
 internal class FraudService(
     private val detectionsConfig: KeyriDetectionsConfig,
 ) {
-    suspend fun getDeviceInfoJson(context: Context): String = DeviceInfo().getDeviceInfoJson(context)
+    fun getDeviceInfoJson(context: Context): String = DeviceInfo().getDeviceInfoJson(context)
 
     suspend fun getFingerprintEventPayload(
         context: Context,

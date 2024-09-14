@@ -43,24 +43,8 @@ class MessagingService : FirebaseMessagingService() {
                         if (it.email == profiles.currentProfile) {
                             val newVerifyState =
                                 when (it.verifyState) {
-                                    is VerifyingState.Phone -> {
-                                        val newState = VerifyingState.Phone(isVerified = true)
-
-                                        newState.isVerifying = false
-
-                                        newState
-                                    }
-
-                                    is VerifyingState.EmailPhone -> {
-                                        val newState = it.verifyState.copy(phoneVerified = true)
-
-                                        if (newState.isVerificationDone()) {
-                                            newState.isVerifying = false
-                                        }
-
-                                        newState
-                                    }
-
+                                    is VerifyingState.Phone -> it.verifyState.copy(isVerified = true)
+                                    is VerifyingState.EmailPhone -> it.verifyState.copy(phoneVerified = true)
                                     else -> it.verifyState
                                 }
 

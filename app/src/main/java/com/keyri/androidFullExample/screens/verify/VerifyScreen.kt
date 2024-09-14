@@ -16,7 +16,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -73,16 +72,6 @@ fun VerifyScreen(
     if (error.value != null) {
         error.value?.let {
             onShowSnackbar(it)
-        }
-    }
-
-    SideEffect {
-        if (profile?.verifyState?.isVerificationDone() == true) {
-            navController.navigate(Routes.VerifiedScreen.name) {
-                popUpTo(Routes.VerifyScreen.name) {
-                    inclusive = true
-                }
-            }
         }
     }
 
@@ -318,7 +307,6 @@ fun VerifyScreen(
                                     )
 
                                 openSmsApp(response, context)
-                                openEmailApp(context)
                             } else {
                                 openPhoneEmailVerify = true
                                 showVerificationChooser = true
@@ -352,10 +340,6 @@ fun VerifyScreen(
                                 ?.let { launchIntent ->
                                     context.startActivity(launchIntent)
 
-                                    if (openPhoneEmailVerify) {
-                                        openEmailApp(context)
-                                    }
-
                                     openPhoneEmailVerify = false
                                     showVerificationChooser = false
 
@@ -370,10 +354,6 @@ fun VerifyScreen(
                             requireNotNull(number ?: profile?.phone),
                         ) { response ->
                             openSmsApp(response, context)
-
-                            if (openPhoneEmailVerify) {
-                                openEmailApp(context)
-                            }
 
                             openPhoneEmailVerify = false
                             showVerificationChooser = false

@@ -3,16 +3,14 @@ package com.keyri.androidFullExample
 import android.net.Uri
 import androidx.datastore.core.DataStore
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
+import com.keyri.androidFullExample.utils.CUSTOM_TOKEN_PARAM
 import com.keyrico.keyrisdk.Keyri
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 
 class MainActivityViewModel(
     val dataStore: DataStore<KeyriProfiles>,
@@ -21,108 +19,120 @@ class MainActivityViewModel(
     private val _openScreen = MutableStateFlow<String?>(null)
     val openScreen = _openScreen.asStateFlow()
 
-    fun checkStartScreen(data: Uri?) {
-        viewModelScope.launch(Dispatchers.IO) {
-            var screenToOpen = Routes.WelcomeScreen.name
-            val keyriProfiles = dataStore.data.first()
-            val actualAccounts = keyri.listUniqueAccounts().getOrThrow()
+    suspend fun restoreAccounts() {
+        val keyriProfiles = dataStore.data.first()
+        val actualAccounts = keyri.listUniqueAccounts().getOrThrow()
 
-            dataStore.updateData {
-                val mappedProfiles =
-                    keyriProfiles.profiles.map {
-                        if (it.associationKey != actualAccounts[it.email]) {
-                            it.copy(associationKey = null)
-                        } else {
-                            it
-                        }
+        dataStore.updateData {
+            val mappedProfiles =
+                keyriProfiles.profiles.map {
+                    if (it.associationKey != actualAccounts[it.email]) {
+                        it.copy(associationKey = null)
+                    } else {
+                        it
                     }
+                }
 
-                keyriProfiles.copy(profiles = mappedProfiles)
+            keyriProfiles.copy(profiles = mappedProfiles)
+        }
+    }
+
+    suspend fun checkPhoneVerifyState() {
+        val profiles = dataStore.data.first()
+
+        profiles.profiles
+            .firstOrNull { it.email == profiles.currentProfile }
+            ?.let {
+                if (it.isVerify && it.verifyState?.isVerificationDone() == true && !it.biometricsSet && it.phone != null) {
+                    _openScreen.value = Routes.VerifiedScreen.name
+                }
+            }
+    }
+
+    suspend fun getInitialScreen(data: Uri?) {
+        if (data != null) {
+            _openScreen.value = getScreenByLink(data)
+
+            return
+        }
+
+        val profiles = dataStore.data.first()
+        var screenToOpen = Routes.WelcomeScreen.name
+
+        profiles.profiles
+            .firstOrNull { it.email == profiles.currentProfile }
+            ?.let { profile ->
+                screenToOpen =
+                    if (profile.verifyState?.isVerificationDone() == true) {
+                        Routes.VerifiedScreen.name
+                    } else {
+                        Routes.WelcomeScreen.name
+                    }
             }
 
+        _openScreen.value = screenToOpen
+    }
+
+    suspend fun getScreenByLink(data: Uri): String {
+        var screenToOpen = Routes.WelcomeScreen.name
+
+        val customToken =
             data
-                ?.toString()
-                ?.replaceBefore("customToken=", "")
-                ?.replace("customToken=", "")
-                ?.let { customToken ->
-                    dataStore.updateData { profiles ->
-                        val mappedProfiles =
-                            profiles.profiles.map {
-                                if (it.email == profiles.currentProfile) {
-                                    if (it.verifyState?.isVerificationDone() == true && it.biometricsSet) {
-                                        screenToOpen = Routes.WelcomeScreen.name
-                                    } else if (it.verifyState?.isVerificationDone() == true) {
+                .toString()
+                .replaceBefore(CUSTOM_TOKEN_PARAM, "")
+                .replace(CUSTOM_TOKEN_PARAM, "")
+
+        dataStore.updateData { profiles ->
+            val mappedProfiles =
+                profiles.profiles.map {
+                    if (it.email == profiles.currentProfile) {
+                        if (it.verifyState?.isVerificationDone() == true && it.biometricsSet) {
+                            screenToOpen = Routes.WelcomeScreen.name
+
+                            it
+                        } else if (it.verifyState?.isVerificationDone() == true) {
+                            screenToOpen = Routes.VerifiedScreen.name
+
+                            it
+                        } else {
+                            val newVerifyState =
+                                when (it.verifyState) {
+                                    is VerifyingState.Email -> {
                                         screenToOpen = Routes.VerifiedScreen.name
+
+                                        it.verifyState.copy(isVerified = true)
                                     }
 
-                                    val newVerifyState =
-                                        when (it.verifyState) {
-                                            is VerifyingState.Email -> {
-                                                val newState =
-                                                    VerifyingState.Email(isVerified = true)
+                                    is VerifyingState.EmailPhone -> {
+                                        val newState = it.verifyState.copy(emailVerified = true)
 
-                                                newState.isVerifying = false
-
-                                                screenToOpen = Routes.VerifiedScreen.name
-
-                                                newState
+                                        screenToOpen =
+                                            if (newState.isVerificationDone()) {
+                                                Routes.VerifiedScreen.name
+                                            } else {
+                                                Routes.WelcomeScreen.name
                                             }
 
-                                            is VerifyingState.EmailPhone -> {
-                                                val newState =
-                                                    it.verifyState.copy(
-                                                        emailVerified = true,
-                                                    )
+                                        newState
+                                    }
 
-                                                screenToOpen =
-                                                    if (newState.isVerificationDone()) {
-                                                        newState.isVerifying = false
+                                    else -> {
+                                        screenToOpen = Routes.WelcomeScreen.name
 
-                                                        Routes.VerifiedScreen.name
-                                                    } else {
-                                                        Routes.WelcomeScreen.name
-                                                    }
-
-                                                newState
-                                            }
-
-                                            else -> {
-                                                screenToOpen = Routes.WelcomeScreen.name
-
-                                                it.verifyState
-                                            }
-                                        }
-
-                                    it.copy(verifyState = newVerifyState, customToken = customToken)
-                                } else {
-                                    it
+                                        it.verifyState
+                                    }
                                 }
-                            }
 
-                        profiles.copy(profiles = mappedProfiles).apply {
-                            _openScreen.value = screenToOpen
+                            it.copy(verifyState = newVerifyState, customToken = customToken)
                         }
+                    } else {
+                        it
                     }
-                } ?: let {
-                val profiles = dataStore.data.first()
+                }
 
-                profiles.profiles
-                    .firstOrNull { it.email == profiles.currentProfile }
-                    ?.let { profile ->
-                        screenToOpen =
-                            if (profile.verifyState?.isVerificationDone() == true && profile.biometricsSet) {
-                                Routes.WelcomeScreen.name
-                            } else if (profile.verifyState?.isVerificationDone() == true && profile.customToken != null) {
-                                Routes.VerifiedScreen.name
-                            } else if (profile.verifyState?.isVerificationDone() != true && profile.verifyState is VerifyingState.Phone) {
-                                "${Routes.VerifyScreen.name}?name=${profile.name}&email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}"
-                            } else {
-                                Routes.WelcomeScreen.name
-                            }
-                    }
-
-                _openScreen.value = screenToOpen
-            }
+            profiles.copy(profiles = mappedProfiles)
         }
+
+        return screenToOpen
     }
 }

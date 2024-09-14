@@ -69,11 +69,7 @@ class LoginViewModel(
             val mappedProfiles =
                 keyriProfiles.profiles.map {
                     if (email == it.email) {
-                        val verifyState = VerifyingState.Email(isVerified = false)
-
-                        verifyState.isVerifying = true
-
-                        it.copy(verifyState = verifyState)
+                        it.copy(verifyState = VerifyingState.Email(isVerified = false))
                     } else {
                         it
                     }

@@ -267,7 +267,7 @@ class Keyri
             }
         }
 
-        suspend fun getDeviceInfoJson(): String = FraudService(detectionsConfig).getDeviceInfoJson(context)
+        fun getDeviceInfoJson(): String = FraudService(detectionsConfig).getDeviceInfoJson(context)
 
         /**
          * Call it after obtaining the sessionId from QR code or deep link.

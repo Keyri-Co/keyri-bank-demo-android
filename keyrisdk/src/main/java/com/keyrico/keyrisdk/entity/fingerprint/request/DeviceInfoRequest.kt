@@ -43,8 +43,6 @@ internal data class DeviceInfoRequest(
     val totalStorageMemory: String?,
     @SerializedName("carrierInformation")
     val carrierInformation: String?,
-    @SerializedName("userAgent")
-    val userAgent: String?,
     @SerializedName("isHighTextContrastEnabled")
     val isHighTextContrastEnabled: Boolean?,
     @SerializedName("screenColorDepth")

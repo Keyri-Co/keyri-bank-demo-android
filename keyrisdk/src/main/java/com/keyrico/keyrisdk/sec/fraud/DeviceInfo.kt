@@ -26,12 +26,9 @@ import android.telephony.TelephonyManager
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.WindowManager
-import android.webkit.WebView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.edit
 import com.google.gson.Gson
 import com.keyrico.keyrisdk.BuildConfig
-import com.keyrico.keyrisdk.Keyri
 import com.keyrico.keyrisdk.Keyri.Companion.KEYRI_KEY
 import com.keyrico.keyrisdk.Keyri.Companion.KEYRI_PLATFORM
 import com.keyrico.keyrisdk.config.KeyriDetectionsConfig
@@ -42,8 +39,6 @@ import com.keyrico.keyrisdk.sec.checkFakeNonKeyriInvocation
 import com.keyrico.keyrisdk.utils.getDeviceId
 import com.keyrico.keyrisdk.utils.toSha1Base64
 import com.keyrico.keyrisdk.utils.toStringBase64
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.io.BufferedReader
 import java.io.File
@@ -71,7 +66,7 @@ import kotlin.math.tan
 import kotlin.math.tanh
 
 internal class DeviceInfo {
-    suspend fun getDeviceInfoJson(context: Context): String {
+    fun getDeviceInfoJson(context: Context): String {
         val installationSource = checkInstallationSource(context)
         val carrierInfo = getCarrierInfo(context)
         val packageDetails = getPackageDetails(context)
@@ -87,7 +82,6 @@ internal class DeviceInfo {
         val camerasList = getCameraList(context)
         val supportedABIs = getSupportedABIs()
         val deviceName = getDeviceName(context)
-        val userAgent = getUserAgent(context)
         val isHighTextContrastEnabled = isHighTextContrastEnabled(context)
         val screenColorDepth = getScreenColorDepth(context)
         val hardwareConcurrency = getHardwareConcurrency()
@@ -120,7 +114,6 @@ internal class DeviceInfo {
                 totalRAMMemory = totalRAMMemory,
                 totalStorageMemory = totalStorageMemory,
                 carrierInformation = carrierInfo,
-                userAgent = userAgent,
                 isHighTextContrastEnabled = isHighTextContrastEnabled,
                 screenColorDepth = screenColorDepth,
                 hardwareConcurrency = hardwareConcurrency,
@@ -133,7 +126,7 @@ internal class DeviceInfo {
         return JSONObject(Gson().toJson(deviceInfo)).toString(4)
     }
 
-    suspend fun getDeviceInfoHash(context: Context): String {
+    fun getDeviceInfoHash(context: Context): String {
         val installationSource = checkInstallationSource(context)
         val carrierInfo = getCarrierInfo(context)
         val packageDetails = getPackageDetails(context)
@@ -149,7 +142,6 @@ internal class DeviceInfo {
         val camerasList = getCameraList(context)
         val supportedABIs = getSupportedABIs()
         val deviceName = getDeviceName(context)
-        val userAgent = getUserAgent(context)
         val isHighTextContrastEnabled = isHighTextContrastEnabled(context)
         val screenColorDepth = getScreenColorDepth(context)
         val hardwareConcurrency = getHardwareConcurrency()
@@ -182,7 +174,6 @@ internal class DeviceInfo {
                 totalRAMMemory = totalRAMMemory,
                 totalStorageMemory = totalStorageMemory,
                 carrierInformation = carrierInfo,
-                userAgent = userAgent,
                 isHighTextContrastEnabled = isHighTextContrastEnabled,
                 screenColorDepth = screenColorDepth,
                 hardwareConcurrency = hardwareConcurrency,
@@ -229,22 +220,6 @@ internal class DeviceInfo {
             put("tamperDetection", tamperDetected)
             put("emulator", NED(config.blockSwizzleDetection).checkNED(context))
         }
-    }
-
-    private suspend fun getUserAgent(context: Context): String {
-        val sharedPreferences =
-            context.getSharedPreferences(Keyri.BACKUP_KEYRI_PREFS, AppCompatActivity.MODE_PRIVATE)
-
-        return sharedPreferences.getString(USER_AGENT_STRING_KEY, null)
-            ?: withContext(Dispatchers.Main) {
-                val userAgentString = WebView(context).settings.userAgentString
-
-                sharedPreferences.edit(commit = true) {
-                    putString(USER_AGENT_STRING_KEY, userAgentString)
-                }
-
-                userAgentString
-            }
     }
 
     private fun isHighTextContrastEnabled(context: Context): Boolean =
@@ -655,8 +630,4 @@ internal class DeviceInfo {
         val appVersionCode: Long?,
         val appSignatures: List<String>?,
     )
-
-    companion object {
-        private const val USER_AGENT_STRING_KEY = "USER_AGENT_STRING_KEY"
-    }
 }

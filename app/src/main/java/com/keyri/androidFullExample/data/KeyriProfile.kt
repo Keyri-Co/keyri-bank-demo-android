@@ -16,8 +16,6 @@ data class KeyriProfile(
 
 @Serializable
 sealed class VerifyingState {
-    var isVerifying: Boolean = false
-
     fun isVerificationDone(): Boolean =
         when (this) {
             is Email -> isVerified

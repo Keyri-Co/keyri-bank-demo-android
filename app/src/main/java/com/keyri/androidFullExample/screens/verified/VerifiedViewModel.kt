@@ -63,10 +63,10 @@ class VerifiedViewModel(
                         if (currentProfileEmail == it.email) {
                             val newVerifyState =
                                 when (it.verifyState) {
-                                    is VerifyingState.Email -> VerifyingState.Email(isVerified = true)
-                                    is VerifyingState.Phone -> VerifyingState.Phone(isVerified = true)
+                                    is VerifyingState.Email -> it.verifyState.copy(isVerified = true)
+                                    is VerifyingState.Phone -> it.verifyState.copy(isVerified = true)
                                     is VerifyingState.EmailPhone ->
-                                        VerifyingState.EmailPhone(
+                                        it.verifyState.copy(
                                             emailVerified = true,
                                             phoneVerified = true,
                                         )

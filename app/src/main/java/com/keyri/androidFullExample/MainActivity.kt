@@ -27,6 +27,8 @@ import androidx.core.util.Consumer
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.LifecycleStartEffect
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -42,7 +44,9 @@ import com.keyri.androidFullExample.screens.verified.VerifiedScreen
 import com.keyri.androidFullExample.screens.verify.VerifyScreen
 import com.keyri.androidFullExample.screens.welcome.WelcomeScreen
 import com.keyri.androidFullExample.theme.KeyriDemoTheme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : FragmentActivity() {
@@ -58,12 +62,22 @@ class MainActivity : FragmentActivity() {
                 val snackbarHostState = remember { SnackbarHostState() }
                 val viewModel: MainActivityViewModel = koinViewModel()
                 val openScreen = viewModel.openScreen.collectAsState()
+                val profiles = viewModel.dataStore.data.collectAsState(null)
+                val lifecycleOwner = LocalLifecycleOwner.current
 
                 DisposableEffect(Unit) {
                     val listener =
                         Consumer<Intent> {
-                            if (openScreen.value != null && it.data != null) {
-                                viewModel.checkStartScreen(it.data)
+                            val link = it.data
+
+                            if (openScreen.value != null && link != null) {
+                                scope.launch(Dispatchers.IO) {
+                                    val route = viewModel.getScreenByLink(link)
+
+                                    withContext(Dispatchers.Main) {
+                                        navController.navigate(route)
+                                    }
+                                }
                             }
                         }
 
@@ -72,9 +86,24 @@ class MainActivity : FragmentActivity() {
                 }
 
                 LifecycleEventEffect(Lifecycle.Event.ON_CREATE) {
-                    if (openScreen.value == null) {
-                        viewModel.checkStartScreen(intent?.data)
+                    scope.launch(Dispatchers.IO) {
+                        viewModel.restoreAccounts()
+
+                        if (openScreen.value == null) {
+                            viewModel.getInitialScreen(intent?.data)
+                        }
                     }
+                }
+
+                LifecycleStartEffect(key1 = profiles, lifecycleOwner = lifecycleOwner) {
+                    val job =
+                        scope.launch(Dispatchers.IO) {
+                            if (profiles.value != null) {
+                                viewModel.checkPhoneVerifyState()
+                            }
+                        }
+
+                    onStopOrDispose { job.cancel() }
                 }
 
                 if (openScreen.value == null) {
