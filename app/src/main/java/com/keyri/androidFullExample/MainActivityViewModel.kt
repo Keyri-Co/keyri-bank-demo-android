@@ -65,6 +65,8 @@ class MainActivityViewModel(
                 screenToOpen =
                     if (profile.verifyState?.isVerificationDone() == true) {
                         Routes.VerifiedScreen.name
+                    } else if (profile.verifyState is VerifyingState.EmailPhone) {
+                        "${Routes.VerifyScreen.name}?name=${profile.name}&email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}"
                     } else {
                         Routes.WelcomeScreen.name
                     }
@@ -104,16 +106,9 @@ class MainActivityViewModel(
                                     }
 
                                     is VerifyingState.EmailPhone -> {
-                                        val newState = it.verifyState.copy(emailVerified = true)
+                                        screenToOpen = Routes.VerifiedScreen.name
 
-                                        screenToOpen =
-                                            if (newState.isVerificationDone()) {
-                                                Routes.VerifiedScreen.name
-                                            } else {
-                                                Routes.WelcomeScreen.name
-                                            }
-
-                                        newState
+                                        it.verifyState.copy(emailVerified = true)
                                     }
 
                                     else -> {

@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,7 +64,6 @@ fun VerifyScreen(
         keyriProfiles.value.profiles.firstOrNull { it.email == keyriProfiles.value.currentProfile }
     val error = viewModel.errorMessage.collectAsState()
     val verifyState = remember { mutableStateOf<VerifyingState?>(null) }
-    var openPhoneEmailVerify by remember { mutableStateOf(false) }
     var showVerificationChooser by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var installedApps by remember { mutableStateOf<List<Triple<String, Int, List<String>>>>(listOf()) }
@@ -72,6 +72,20 @@ fun VerifyScreen(
     if (error.value != null) {
         error.value?.let {
             onShowSnackbar(it)
+        }
+    }
+
+    LaunchedEffect(profile?.verifyState) {
+        if (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.phoneVerified && !profile.verifyState.emailVerified) {
+            viewModel.smsAndEmailLogin(
+                profile.isVerify,
+                requireNotNull(name ?: profile.name),
+                requireNotNull(email ?: profile.email),
+                requireNotNull(number ?: profile.phone),
+                profile,
+                onEmailVerify = {
+                openEmailApp(context)
+            })
         }
     }
 
@@ -230,7 +244,7 @@ fun VerifyScreen(
                                 openSmsApp(response, context)
                             }
                         } else {
-                            openPhoneEmailVerify = false
+                            verifyState.value = VerifyingState.Phone(isVerified = false)
                             showVerificationChooser = true
                         }
                     }
@@ -269,25 +283,25 @@ fun VerifyScreen(
                 text = "${if (profile?.isVerify ?: isVerify) "Verify" else "Confirm"} email + phone number",
                 onClick = {
                     if (profile?.verifyState == null) {
-                        viewModel.smsAndEmailLogin(
-                            profile?.isVerify ?: isVerify,
-                            requireNotNull(name ?: profile?.name),
-                            requireNotNull(email ?: profile?.email),
-                            requireNotNull(number ?: profile?.phone),
-                        ) { response ->
-                            val packages =
-                                listOf(
-                                    Triple(
-                                        "Verify with Telegram",
-                                        R.drawable.ic_telegram,
-                                        listOf("org.telegram.messenger"),
-                                    ),
-                                    Triple(
-                                        "Verify with Whatsapp",
-                                        R.drawable.ic_whatsapp,
-                                        listOf("com.whatsapp", "com.whatsapp.w4b"),
-                                    ),
-                                )
+                        verifyState.value =
+                            VerifyingState.EmailPhone(
+                                emailVerified = false,
+                                phoneVerified = false,
+                            )
+
+                        val packages =
+                            listOf(
+                                Triple(
+                                    "Verify with Telegram",
+                                    R.drawable.ic_telegram,
+                                    listOf("org.telegram.messenger"),
+                                ),
+                                Triple(
+                                    "Verify with Whatsapp",
+                                    R.drawable.ic_whatsapp,
+                                    listOf("com.whatsapp", "com.whatsapp.w4b"),
+                                ),
+                            )
 
                             installedApps =
                                 packages.mapNotNull { entity ->
@@ -300,18 +314,18 @@ fun VerifyScreen(
                                 }
 
                             if (installedApps.isEmpty()) {
-                                verifyState.value =
-                                    VerifyingState.EmailPhone(
-                                        emailVerified = false,
-                                        phoneVerified = false,
-                                    )
-
-                                openSmsApp(response, context)
+                                viewModel.smsAndEmailLogin(
+                                    profile?.isVerify ?: isVerify,
+                                    requireNotNull(name ?: profile?.name),
+                                    requireNotNull(email ?: profile?.email),
+                                    requireNotNull(number ?: profile?.phone),
+                                    profile,
+                                    onPhoneVerify = { response ->
+                                    openSmsApp(response, context)
+                                })
                             } else {
-                                openPhoneEmailVerify = true
                                 showVerificationChooser = true
                             }
-                        }
                     }
                 },
             )
@@ -327,44 +341,49 @@ fun VerifyScreen(
                         )
                     } + ModalListItem(iconRes = R.drawable.ic_sms, text = "Verify with SMS"),
                     onListItemClicked = {
-                        verifyState.value =
-                            if (openPhoneEmailVerify) {
-                                VerifyingState.EmailPhone(emailVerified = false, phoneVerified = false)
-                            } else {
-                                VerifyingState.Phone(isVerified = false)
-                            }
-
                         installedApps.firstOrNull { item -> item.first == it.text }?.let { item ->
                             context.packageManager
                                 .getLaunchIntentForPackage(item.third.first())
                                 ?.let { launchIntent ->
                                     context.startActivity(launchIntent)
 
-                                    openPhoneEmailVerify = false
                                     showVerificationChooser = false
 
                                     coroutineScope.launch(Dispatchers.IO) {
                                         sheetState.hide()
                                     }
                                 }
-                        } ?: viewModel.smsLogin(
-                            profile?.isVerify ?: isVerify,
-                            requireNotNull(name ?: profile?.name),
-                            requireNotNull(email ?: profile?.email),
-                            requireNotNull(number ?: profile?.phone),
-                        ) { response ->
-                            openSmsApp(response, context)
+                        } ?: let {
+                            if (verifyState.value is VerifyingState.Phone) {
+                                viewModel.smsLogin(
+                                    profile?.isVerify ?: isVerify,
+                                    requireNotNull(name ?: profile?.name),
+                                    requireNotNull(email ?: profile?.email),
+                                    requireNotNull(number ?: profile?.phone),
+                                ) { response ->
+                                    openSmsApp(response, context)
 
-                            openPhoneEmailVerify = false
-                            showVerificationChooser = false
+                                    showVerificationChooser = false
 
-                            coroutineScope.launch(Dispatchers.IO) {
-                                sheetState.hide()
+                                    coroutineScope.launch(Dispatchers.IO) {
+                                        sheetState.hide()
+                                    }
+                                }
+                            } else if (verifyState.value is VerifyingState.EmailPhone) {
+                                viewModel.smsAndEmailLogin(
+                                    profile?.isVerify ?: isVerify,
+                                    requireNotNull(name ?: profile?.name),
+                                    requireNotNull(email ?: profile?.email),
+                                    requireNotNull(number ?: profile?.phone),
+                                    profile,
+                                    onPhoneVerify = { response ->
+                                    openSmsApp(response, context)
+                                })
                             }
                         }
                     },
                     onDismissRequest = {
-                        openPhoneEmailVerify = false
+                        verifyState.value = null
                         showVerificationChooser = false
 
                         coroutineScope.launch(Dispatchers.IO) {

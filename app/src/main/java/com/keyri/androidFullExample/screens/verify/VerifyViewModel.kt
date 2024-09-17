@@ -81,24 +81,45 @@ class VerifyViewModel(
         name: String,
         email: String,
         phone: String,
-        onSuccess: (SmsLoginResponse) -> Unit,
+        profile: KeyriProfile?,
+        onPhoneVerify: (SmsLoginResponse) -> Unit = {},
+        onEmailVerify: () -> Unit = {},
     ) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
-            userRegister(isVerify, name, email, phone)
-            repository.emailLogin(email)
+            if (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.phoneVerified && !profile.verifyState.emailVerified) {
+                if (isVerify) {
+                    try {
+                        repository.userRegister(name, email, phone)
+                    } catch (e: Exception) {
+                        if (e.message?.contains("The email address is already in use by another account") == true) {
+                            repository.authWithFirebase(email)
+                        }
+                    }
+                } else {
+                    repository.authWithFirebase(email)
+                }
 
-            val result = repository.smsLogin(phone)
+                repository.emailLogin(email)
 
-            updateVerifyState(
-                email,
-                VerifyingState.EmailPhone(
-                    emailVerified = false,
-                    phoneVerified = false,
-                ),
-            )
+                withContext(Dispatchers.Main) {
+                    onEmailVerify()
+                }
+            } else {
+                userRegister(isVerify, name, email, phone)
 
-            withContext(Dispatchers.Main) {
-                onSuccess(result)
+                val result = repository.smsLogin(phone)
+
+                updateVerifyState(
+                    email,
+                    VerifyingState.EmailPhone(
+                        emailVerified = false,
+                        phoneVerified = false,
+                    ),
+                )
+
+                withContext(Dispatchers.Main) {
+                    onPhoneVerify(result)
+                }
             }
         }
     }
