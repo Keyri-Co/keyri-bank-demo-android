@@ -208,6 +208,8 @@ fun VerifyScreen(
                     },
                 onClick = {
                     if (profile?.verifyState == null) {
+                        verifyState.value = VerifyingState.Phone(isVerified = false)
+
                         val packages =
                             listOf(
                                 Triple(
@@ -233,8 +235,6 @@ fun VerifyScreen(
                             }
 
                         if (installedApps.isEmpty()) {
-                            verifyState.value = VerifyingState.Phone(isVerified = false)
-
                             viewModel.smsLogin(
                                 profile?.isVerify ?: isVerify,
                                 requireNotNull(name ?: profile?.name),
@@ -244,7 +244,6 @@ fun VerifyScreen(
                                 openSmsApp(response, context)
                             }
                         } else {
-                            verifyState.value = VerifyingState.Phone(isVerified = false)
                             showVerificationChooser = true
                         }
                     }
