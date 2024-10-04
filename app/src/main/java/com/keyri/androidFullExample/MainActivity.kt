@@ -39,6 +39,7 @@ import com.keyri.androidFullExample.screens.login.LoginScreen
 import com.keyri.androidFullExample.screens.main.MainScreen
 import com.keyri.androidFullExample.screens.payment.MakePayment
 import com.keyri.androidFullExample.screens.paymentresult.PaymentResult
+import com.keyri.androidFullExample.screens.requestsent.RequestSentScreen
 import com.keyri.androidFullExample.screens.signup.SignupScreen
 import com.keyri.androidFullExample.screens.verified.VerifiedScreen
 import com.keyri.androidFullExample.screens.verify.VerifyScreen
@@ -129,9 +130,19 @@ class MainActivity : FragmentActivity() {
                                 navController = navController,
                                 startDestination = openScreen.value ?: Routes.WelcomeScreen.name,
                             ) {
-                                composable(Routes.WelcomeScreen.name) {
+                                composable(
+                                    "${Routes.WelcomeScreen.name}?sessionId={sessionId}",
+                                    arguments =
+                                        listOf(
+                                            navArgument("sessionId") {
+                                                type = NavType.StringType
+                                                nullable = true
+                                            },
+                                        ),
+                                ) { backStackEntry ->
                                     WelcomeScreen(
                                         navController = navController,
+                                        sessionId = backStackEntry.arguments?.getString("sessionId"),
                                         onShowSnackbar = {
                                             scope.launch {
                                                 snackbarHostState.showSnackbar(
@@ -286,6 +297,22 @@ class MainActivity : FragmentActivity() {
                                         navController = navController,
                                         riskResult = riskResult,
                                     )
+                                }
+
+                                composable(
+                                    "${Routes.RequestSentScreen.name}?email={email}",
+                                    arguments =
+                                        listOf(
+                                            navArgument("email") {
+                                                type = NavType.StringType
+                                            },
+                                        ),
+                                ) { backStackEntry ->
+                                    val email =
+                                        backStackEntry.arguments?.getString("email")
+                                            ?: throw IllegalArgumentException("email shouldn't be null")
+
+                                    RequestSentScreen(email = email, navController = navController)
                                 }
                             }
                         }

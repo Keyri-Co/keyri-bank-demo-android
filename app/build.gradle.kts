@@ -15,8 +15,8 @@ android {
         applicationId = "com.keyri.androidFullExample"
         minSdk = 24
         targetSdk = 35
-        versionCode = 69
-        versionName = "1.69"
+        versionCode = 71
+        versionName = "1.71"
 
         vectorDrawables {
             useSupportLibrary = true
@@ -55,6 +55,7 @@ android {
 
 dependencies {
     api(projects.keyrisdk)
+    api(projects.scanner)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

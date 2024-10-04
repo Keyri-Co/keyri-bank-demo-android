@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="keyri_close_border">#D9D9D9</color>
+    <color name="keyri_close_background">#8C8C8C</color>
+    <color name="keyri_color_background_dark">#000000</color>
+    <color name="keyri_color_text_dark">#F5F5F5</color>
+</resources>

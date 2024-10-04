@@ -1,14 +1,23 @@
 package com.keyri.androidFullExample.screens.main
 
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,7 +25,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -24,15 +36,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.keyri.androidFullExample.R
 import com.keyri.androidFullExample.composables.KeyriAlertDialog
 import com.keyri.androidFullExample.composables.KeyriButton
+import com.keyri.androidFullExample.data.KeyriCredentials
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.denyTextColor
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.theme.verifiedTextColor
 import com.keyri.androidFullExample.theme.warningTextColor
+import com.keyrico.scanner.easyKeyriAuth
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
+@SuppressLint("HardwareIds")
 @Composable
 fun MainScreen(
     viewModel: MainScreenViewModel = koinViewModel(),
@@ -44,6 +61,17 @@ fun MainScreen(
     val loading = viewModel.loading.collectAsState()
     val error = viewModel.errorMessage.collectAsState()
     val riskResponse = viewModel.riskResponse.collectAsState()
+
+    val keyriCredentials = koinInject<KeyriCredentials>()
+
+    val launcher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                navController.navigate("${Routes.RequestSentScreen.name}?email=${currentProfile.value}")
+            } else {
+                onShowSnackbar("Failed to authenticate")
+            }
+        }
 
     val context = LocalContext.current
 
@@ -59,6 +87,44 @@ fun MainScreen(
         }
     } else {
         Column {
+            OutlinedIconButton(
+                modifier =
+                    Modifier
+                        .align(Alignment.End)
+                        .size(48.dp),
+                colors =
+                    IconButtonDefaults.outlinedIconButtonColors().copy(
+                        contentColor = Color(0xFF8C8C8C),
+                        containerColor = MaterialTheme.colorScheme.onPrimary,
+                    ),
+                shape = RoundedCornerShape(20),
+                border =
+                    IconButtonDefaults
+                        .outlinedIconButtonBorder(true)
+                        .copy(brush = SolidColor(Color(0xFF8C8C8C).copy(alpha = 0.4f))),
+                onClick = {
+                    currentProfile.value?.let { email ->
+                        viewModel.generatePayload(email) {
+                            easyKeyriAuth(
+                                context,
+                                launcher,
+                                keyriCredentials.appKey,
+                                keyriCredentials.publicApiKey,
+                                keyriCredentials.serviceEncryptionKey,
+                                it,
+                                email,
+                            )
+                        }
+                    }
+                },
+            ) {
+                Icon(
+                    modifier = Modifier.fillMaxSize(0.4f),
+                    painter = painterResource(R.drawable.ic_photo),
+                    contentDescription = null,
+                )
+            }
+
             Text(
                 modifier =
                     Modifier
@@ -151,7 +217,14 @@ fun MainScreen(
                             }
 
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {
-                                append("Device id: ${Settings.Secure.getString(context.contentResolver, Settings.Secure.ANDROID_ID)}\n")
+                                append(
+                                    "Device id: ${
+                                        Settings.Secure.getString(
+                                            context.contentResolver,
+                                            Settings.Secure.ANDROID_ID,
+                                        )
+                                    }\n",
+                                )
                             }
 
                             withStyle(style = SpanStyle(fontWeight = FontWeight.Normal)) {

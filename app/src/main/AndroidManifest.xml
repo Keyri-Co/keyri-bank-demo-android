@@ -42,10 +42,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data
-                    android:host="android-full-example.keyri.com"
-                    android:scheme="https" />
+                <data android:scheme="https"/>
+                <data android:host="android-full-example.keyri.com" />
+            </intent-filter>
 
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https"/>
+                <data android:host="keyri-firebase-passkeys.vercel.app"/>
             </intent-filter>
         </activity>
 

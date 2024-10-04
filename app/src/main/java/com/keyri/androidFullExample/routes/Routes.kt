@@ -9,4 +9,5 @@ enum class Routes {
     MainScreen,
     MakePaymentScreen,
     PaymentResultScreen,
+    RequestSentScreen,
 }

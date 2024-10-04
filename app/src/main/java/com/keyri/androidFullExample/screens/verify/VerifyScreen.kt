@@ -84,8 +84,9 @@ fun VerifyScreen(
                 requireNotNull(number ?: profile.phone),
                 profile,
                 onEmailVerify = {
-                openEmailApp(context)
-            })
+                    openEmailApp(context)
+                },
+            )
         }
     }
 
@@ -302,29 +303,30 @@ fun VerifyScreen(
                                 ),
                             )
 
-                            installedApps =
-                                packages.mapNotNull { entity ->
-                                    val condition =
-                                        entity.third.any { appPackage ->
-                                            checkPackageInstalled(context, appPackage)
-                                        }
+                        installedApps =
+                            packages.mapNotNull { entity ->
+                                val condition =
+                                    entity.third.any { appPackage ->
+                                        checkPackageInstalled(context, appPackage)
+                                    }
 
-                                    if (condition) entity else null
-                                }
-
-                            if (installedApps.isEmpty()) {
-                                viewModel.smsAndEmailLogin(
-                                    profile?.isVerify ?: isVerify,
-                                    requireNotNull(name ?: profile?.name),
-                                    requireNotNull(email ?: profile?.email),
-                                    requireNotNull(number ?: profile?.phone),
-                                    profile,
-                                    onPhoneVerify = { response ->
-                                    openSmsApp(response, context)
-                                })
-                            } else {
-                                showVerificationChooser = true
+                                if (condition) entity else null
                             }
+
+                        if (installedApps.isEmpty()) {
+                            viewModel.smsAndEmailLogin(
+                                profile?.isVerify ?: isVerify,
+                                requireNotNull(name ?: profile?.name),
+                                requireNotNull(email ?: profile?.email),
+                                requireNotNull(number ?: profile?.phone),
+                                profile,
+                                onPhoneVerify = { response ->
+                                    openSmsApp(response, context)
+                                },
+                            )
+                        } else {
+                            showVerificationChooser = true
+                        }
                     }
                 },
             )
@@ -376,8 +378,9 @@ fun VerifyScreen(
                                     requireNotNull(number ?: profile?.phone),
                                     profile,
                                     onPhoneVerify = { response ->
-                                    openSmsApp(response, context)
-                                })
+                                        openSmsApp(response, context)
+                                    },
+                                )
                             }
                         }
                     },

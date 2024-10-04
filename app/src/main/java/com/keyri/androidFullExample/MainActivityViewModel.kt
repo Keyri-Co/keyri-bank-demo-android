@@ -63,9 +63,9 @@ class MainActivityViewModel(
             .firstOrNull { it.email == profiles.currentProfile }
             ?.let { profile ->
                 screenToOpen =
-                    if (profile.verifyState?.isVerificationDone() == true) {
+                    if (profile.verifyState?.isVerificationDone() == true && !profile.biometricsSet) {
                         Routes.VerifiedScreen.name
-                    } else if (profile.verifyState is VerifyingState.EmailPhone) {
+                    } else if (profile.verifyState?.isVerificationDone() != true && profile.verifyState is VerifyingState.EmailPhone) {
                         "${Routes.VerifyScreen.name}?name=${profile.name}&email=${profile.email}&number=${profile.phone}&isVerify=${profile.isVerify}"
                     } else {
                         Routes.WelcomeScreen.name
@@ -77,6 +77,12 @@ class MainActivityViewModel(
 
     suspend fun getScreenByLink(data: Uri): String {
         var screenToOpen = Routes.WelcomeScreen.name
+
+        if (data.toString().contains("keyri-firebase-passkeys.vercel.app")) {
+            data.getQueryParameter("sessionId")?.let {
+                return "${Routes.WelcomeScreen.name}?sessionId=$it"
+            }
+        }
 
         val customToken =
             data

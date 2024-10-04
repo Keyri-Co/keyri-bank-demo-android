@@ -32,6 +32,7 @@ import com.keyri.androidFullExample.data.VerifyingState
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.textColor
 import com.keyri.androidFullExample.theme.verifiedTextColor
+import com.keyri.androidFullExample.utils.navigateWithPopUp
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -144,6 +145,7 @@ fun VerifiedScreen(
                     showBiometricPrompt = false
 
                     viewModel.saveBiometricAuth {
+                        navController.navigateWithPopUp(Routes.MainScreen.name, Routes.WelcomeScreen.name)
                         navController.navigate(Routes.MainScreen.name)
                     }
                 }

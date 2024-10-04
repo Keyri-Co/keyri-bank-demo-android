@@ -67,6 +67,27 @@ class MainScreenViewModel(
         }
     }
 
+    fun generatePayload(
+        email: String,
+        result: (String) -> Unit,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val timestampNonce =
+                "${System.currentTimeMillis() / 1_000}${System.currentTimeMillis() / 1_000}"
+            val signature = keyri.generateUserSignature(email, timestampNonce)
+
+            val payloadJson = JSONObject()
+
+            payloadJson.put("timestamp_nonce", timestampNonce)
+            payloadJson.put("signature", signature)
+            payloadJson.put("email", email)
+
+            withContext(Dispatchers.Main) {
+                result(payloadJson.toString())
+            }
+        }
+    }
+
     private fun getRiskDetails() {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
             dataStore.data.collectLatest { keyriProfiles ->

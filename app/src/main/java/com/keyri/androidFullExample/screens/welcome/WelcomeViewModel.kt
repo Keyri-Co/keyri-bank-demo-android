@@ -1,6 +1,7 @@
 package com.keyri.androidFullExample.screens.welcome
 
 import androidx.datastore.core.DataStore
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.crashlytics.ktx.crashlytics
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import kotlin.concurrent.timer
 
 class WelcomeViewModel(
@@ -98,6 +100,45 @@ class WelcomeViewModel(
             withContext(Dispatchers.Main) {
                 onResult()
             }
+        }
+    }
+
+    fun initiateSession(
+        fragmentManager: FragmentManager,
+        sessionId: String,
+        email: String,
+        onSuccess: () -> Unit,
+        onFailure: (String?) -> Unit,
+    ) {
+        viewModelScope.launch(Dispatchers.IO) {
+            keyri
+                .initiateQrSession(sessionId, email)
+                .onSuccess { session ->
+                    withContext(Dispatchers.Main) {
+                        val timestampNonce =
+                            "${System.currentTimeMillis() / 1_000}${System.currentTimeMillis() / 1_000}"
+                        val signature = keyri.generateUserSignature(email, timestampNonce)
+
+                        val payloadJson = JSONObject()
+
+                        payloadJson.put("timestamp_nonce", timestampNonce)
+                        payloadJson.put("signature", signature)
+                        payloadJson.put("email", email)
+
+                        keyri
+                            .initializeDefaultConfirmationScreen(
+                                fragmentManager,
+                                session,
+                                payloadJson.toString(),
+                            ).onSuccess {
+                                onSuccess()
+                            }.onFailure {
+                                onFailure(it.message)
+                            }
+                    }
+                }.onFailure {
+                    onFailure(it.message)
+                }
         }
     }
 

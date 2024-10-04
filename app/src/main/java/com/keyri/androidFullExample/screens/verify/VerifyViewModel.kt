@@ -86,7 +86,10 @@ class VerifyViewModel(
         onEmailVerify: () -> Unit = {},
     ) {
         viewModelScope.launch(Dispatchers.IO + throwableScope) {
-            if (profile?.verifyState is VerifyingState.EmailPhone && profile.verifyState.phoneVerified && !profile.verifyState.emailVerified) {
+            if (profile?.verifyState is VerifyingState.EmailPhone &&
+                profile.verifyState.phoneVerified &&
+                !profile.verifyState.emailVerified
+            ) {
                 if (isVerify) {
                     try {
                         repository.userRegister(name, email, phone)

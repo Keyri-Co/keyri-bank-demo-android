@@ -5,6 +5,7 @@ import com.keyri.androidFullExample.screens.login.LoginViewModel
 import com.keyri.androidFullExample.screens.main.MainScreenViewModel
 import com.keyri.androidFullExample.screens.payment.MakePaymentViewModel
 import com.keyri.androidFullExample.screens.paymentresult.PaymentResultViewModel
+import com.keyri.androidFullExample.screens.requestsent.RequestSentViewModel
 import com.keyri.androidFullExample.screens.signup.SignupViewModel
 import com.keyri.androidFullExample.screens.verified.VerifiedViewModel
 import com.keyri.androidFullExample.screens.verify.VerifyViewModel
@@ -23,4 +24,5 @@ val viewModelsModule =
         viewModelOf(::SignupViewModel)
         viewModelOf(::PaymentResultViewModel)
         viewModelOf(::MainActivityViewModel)
+        viewModelOf(::RequestSentViewModel)
     }

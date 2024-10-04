@@ -8,6 +8,7 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
@@ -44,6 +45,7 @@ import com.keyri.androidFullExample.data.KeyriProfiles
 import com.keyri.androidFullExample.data.ModalListItem
 import com.keyri.androidFullExample.routes.Routes
 import com.keyri.androidFullExample.theme.textColor
+import com.keyri.androidFullExample.utils.getActivity
 import com.keyri.androidFullExample.utils.navigateWithPopUp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -53,6 +55,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun WelcomeScreen(
     viewModel: WelcomeViewModel = koinViewModel(),
+    sessionId: String? = null,
     navController: NavHostController,
     onShowSnackbar: (String) -> Unit,
 ) {
@@ -80,7 +83,28 @@ fun WelcomeScreen(
     var clickedAccount by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(key1 = filteredAccounts) {
-        if (filteredAccounts.any { it.email == keyriAccounts.value.currentProfile && it.biometricsSet } && !blockBiometricPrompt.value) {
+        if (sessionId != null && filteredAccounts.isNotEmpty()) {
+            if (filteredAccounts.size == 1) {
+                val currentAccount =
+                    clickedAccount ?: keyriAccounts.value.currentProfile
+                        ?: filteredAccounts.firstOrNull { it.biometricsSet }?.email
+                        ?: filteredAccounts.firstOrNull()?.email
+
+                if (currentAccount != null) {
+                    context.getActivity()?.supportFragmentManager?.let { fm ->
+                        viewModel.initiateSession(fm, sessionId, currentAccount, {
+                            navController.navigate("${Routes.RequestSentScreen.name}?email=$currentAccount")
+                        }) {
+                            it?.let { onShowSnackbar(it) }
+                        }
+                    }
+                }
+            } else {
+                showAccountsList = true
+            }
+        } else if (filteredAccounts.any { it.email == keyriAccounts.value.currentProfile && it.biometricsSet } &&
+            !blockBiometricPrompt.value
+        ) {
             showBiometricPrompt = true
         }
     }
@@ -236,11 +260,21 @@ fun WelcomeScreen(
             onListItemClicked = {
                 clickedAccount = it.text
 
-                if (filteredAccounts.firstOrNull { a -> a.email == clickedAccount }?.associationKey != null) {
-                    showBiometricPrompt = true
-                    showAccountsList = false
+                if (sessionId != null) {
+                    context.getActivity()?.supportFragmentManager?.let { fm ->
+                        viewModel.initiateSession(fm, sessionId, it.text, {
+                            navController.navigate("${Routes.RequestSentScreen.name}?email=${it.text}")
+                        }) {
+                            it?.let { onShowSnackbar(it) }
+                        }
+                    }
                 } else {
-                    navController.navigate("${Routes.LoginScreen.name}?email=$clickedAccount")
+                    if (filteredAccounts.firstOrNull { a -> a.email == clickedAccount }?.associationKey != null) {
+                        showBiometricPrompt = true
+                        showAccountsList = false
+                    } else {
+                        navController.navigate("${Routes.LoginScreen.name}?email=$clickedAccount")
+                    }
                 }
 
                 coroutineScope.launch(Dispatchers.IO) {
